@@ -8,6 +8,11 @@ RUN npm run build --configuration=production
 
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
-COPY --from=build /app/dist/frontend /usr/share/nginx/html
+# Remove default nginx html
+RUN rm -rf /usr/share/nginx/html/*
+# Copy Angular build output (folder name is 'frontend/browser')
+COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
+# Use custom nginx config for Angular SPA routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
+
