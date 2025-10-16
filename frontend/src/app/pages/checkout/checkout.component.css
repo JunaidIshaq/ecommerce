@@ -1,0 +1,9 @@
+.container{max-width:1000px;margin:20px auto;padding:0 20px}
+.grid{display:grid;grid-template-columns:1.4fr .6fr;gap:20px}
+.card{border:1px solid #eee;border-radius:10px;padding:16px;background:#fff}
+.card label{display:block;margin-bottom:10px}
+.card input{width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-top:6px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.place{margin-top:12px;border:0;background:#111;color:#fff;padding:10px 16px;border-radius:8px;cursor:pointer}
+.summary p{margin:6px 0}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}

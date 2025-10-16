@@ -1,0 +1,21 @@
+<section class="hero">
+  <div class="hero-inner">
+    <h1>Shop the Latest Trends</h1>
+    <p>Discover top products at unbeatable prices.</p>
+    <a class="cta" routerLink="/products">Shop Now</a>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Featured Products</h2>
+  <div *ngIf="loading">Loading...</div>
+  <div class="grid" *ngIf="!loading">
+    <div class="card" *ngFor="let p of featured">
+      <img [src]="p.image" [alt]="p.name">
+      <h3>{{p.name}}</h3>
+      <p class="price">${{p.price}}</p>
+      <button (click)="addToCart(p)">Add to Cart</button>
+      <a class="detail" [routerLink]="['/product', p.id]">View Details</a>
+    </div>
+  </div>
+</section>

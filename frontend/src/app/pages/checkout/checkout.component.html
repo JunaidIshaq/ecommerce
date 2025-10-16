@@ -1,0 +1,30 @@
+<section class="container">
+  <h1>Checkout</h1>
+  <div class="grid">
+    <form class="card" (ngSubmit)="placeOrder()">
+      <h3>Shipping Address</h3>
+      <label>Full Name <input [(ngModel)]="address.fullName" name="fullName" required></label>
+      <label>Street <input [(ngModel)]="address.street" name="street" required></label>
+      <div class="row2">
+        <label>City <input [(ngModel)]="address.city" name="city" required></label>
+        <label>State <input [(ngModel)]="address.state" name="state"></label>
+      </div>
+      <div class="row2">
+        <label>ZIP <input [(ngModel)]="address.zip" name="zip" required></label>
+        <label>Country <input [(ngModel)]="address.country" name="country" required></label>
+      </div>
+      <label>Phone <input [(ngModel)]="address.phone" name="phone"></label>
+
+      <button class="place" [disabled]="placing" type="submit">
+        {{ placing ? 'Placing...' : 'Place Order' }}
+      </button>
+    </form>
+
+    <div class="card summary">
+      <h3>Order Summary</h3>
+      <p>Total: <strong>${{ total() | number:'1.2-2' }}</strong></p>
+      <p>Shipping: <strong>FREE</strong></p>
+      <p>Estimated delivery: 3–5 days</p>
+    </div>
+  </div>
+</section>

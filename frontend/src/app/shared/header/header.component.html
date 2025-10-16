@@ -1,23 +1,26 @@
-<header class="site-header">
-  <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
-    <h1 class="logo">VENZORA</h1>
-    <nav>
-      <ul class="nav-links">
-        <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a></li>
-        <li><a routerLink="/services" routerLinkActive="active">Services</a></li>
-        <li><a routerLink="/about" routerLinkActive="active">About</a></li>
-        <li><a routerLink="/contact" routerLinkActive="active">Contact</a></li>
-
-        <!-- Show these if NOT logged in -->
-        <li *ngIf="!authService.isLoggedIn()">
-          <a routerLink="/login">Login</a>
-        </li>
-
-        <!-- Show only when logged in -->
-        <li *ngIf="authService.isLoggedIn()" class="auth-buttons">
-          <a (click)="logout()" class="btn-auth logout-btn">Logout</a>
-        </li>
-      </ul>
+<header class="header">
+  <div class="left">
+    <a class="logo" routerLink="/">🛒 MyShop</a>
+    <nav class="nav">
+      <a routerLink="/products">Products</a>
+      <a routerLink="/cart">Cart (<span>{{ (cartCount$ | async) || 0 }}</span>)</a>
+      <a routerLink="/profile">Profile</a>
     </nav>
+  </div>
+
+  <div class="search">
+    <input [(ngModel)]="query" (keyup.enter)="doSearch()" placeholder="Search products...">
+    <button (click)="doSearch()">Search</button>
+  </div>
+
+  <div class="auth">
+    <ng-container *ngIf="(user$ | async) as u; else guest">
+      <span class="hello">Hi, {{u.name}}</span>
+      <button class="link" (click)="logout()">Logout</button>
+    </ng-container>
+    <ng-template #guest>
+      <a class="link" routerLink="/login">Login</a>
+      <a class="link" routerLink="/signup">Signup</a>
+    </ng-template>
   </div>
 </header>

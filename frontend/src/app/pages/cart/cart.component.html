@@ -1,0 +1,24 @@
+<section class="container">
+  <h1>Your Cart</h1>
+  <div class="empty" *ngIf="(items$ | async)?.length === 0">
+    Cart is empty. <a routerLink="/products">Browse products</a>.
+  </div>
+
+  <div class="row" *ngFor="let i of (items$ | async)">
+    <img [src]="i.product.image" [alt]="i.product.name">
+    <div class="details">
+      <h3>{{i.product.name}}</h3>
+      <p>${{i.product.price}}</p>
+      <div class="controls">
+        <input type="number" [value]="i.qty" (change)="update(i.product.id, $any($event.target).value)" min="1">
+        <button (click)="remove(i.product.id)">Remove</button>
+      </div>
+    </div>
+    <div class="line-total">${{ (i.product.price * i.qty) | number:'1.2-2' }}</div>
+  </div>
+
+  <div class="summary" *ngIf="(items$ | async)?.length">
+    <div>Total: <strong>${{ total() | number:'1.2-2' }}</strong></div>
+    <button class="checkout" (click)="checkout()">Proceed to Checkout</button>
+  </div>
+</section>
