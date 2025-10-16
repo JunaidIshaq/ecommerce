@@ -1,52 +1,11 @@
-body {
-  font-family: 'Roboto', sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #f4f7fa;
-  color: #333;
-}
-.site-header {
-  background: linear-gradient(to right, #2c3e50, #3498db);
-  color: #fff;
-  padding: 1rem 0;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-.logo {
-  font-size: 2.5rem;
-  font-weight: 700;
-}
-.nav-links {
-  list-style: none;
-  display: flex;
-  gap: 2rem;
-  align-items: center; /* Ensure vertical alignment */
-  margin: 0;
-  padding: 0;
-}
-.nav-links a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 500;
-  position: relative;
-}
-.nav-links a::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -4px;
-  width: 0;
-  height: 2px;
-  background: #ffd700;
-  transition: width 0.3s;
-}
-.nav-links a:hover::after {
-  width: 100%;
-}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:#fff;border-bottom:1px solid #eee;position:sticky;top:0;z-index:10}
+.left{display:flex;align-items:center;gap:20px}
+.logo{font-weight:700;text-decoration:none;color:#222;font-size:20px}
+.nav a{margin-right:12px;text-decoration:none;color:#333}
+.nav a:hover{color:#000}
+.search{display:flex;border:1px solid #ddd;border-radius:20px;overflow:hidden}
+.search input{border:0;outline:none;padding:8px 12px;min-width:240px}
+.search button{border:0;background:#111;color:#fff;padding:8px 14px;cursor:pointer}
+.auth{display:flex;align-items:center;gap:10px}
+.link{background:none;border:none;color:#111;text-decoration:none;cursor:pointer}
+.hello{color:#444}

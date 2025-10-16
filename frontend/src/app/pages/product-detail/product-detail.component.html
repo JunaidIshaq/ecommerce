@@ -1,0 +1,19 @@
+<section class="container" *ngIf="product">
+  <div class="gallery">
+    <img [src]="product.image" [alt]="product.name">
+  </div>
+  <div class="info">
+    <h1>{{product.name}}</h1>
+    <p class="brand" *ngIf="product.brand">{{product.brand}}</p>
+    <p class="price">${{product.price}}</p>
+    <p class="desc">{{product.description}}</p>
+    <p class="stock" [class.low]="product.stock<10">In stock: {{product.stock}}</p>
+
+    <div class="buy">
+      <label>Qty
+        <input type="number" [(ngModel)]="qty" min="1">
+      </label>
+      <button (click)="add()">Add to Cart</button>
+    </div>
+  </div>
+</section>

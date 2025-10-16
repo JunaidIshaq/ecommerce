@@ -1,0 +1,10 @@
+<section class="center">
+  <form class="card" (ngSubmit)="submit()">
+    <h2>Login</h2>
+    <label>Email <input [(ngModel)]="email" name="email" type="email" required></label>
+    <label>Password <input [(ngModel)]="password" name="password" type="password" required></label>
+    <div class="error" *ngIf="error">{{error}}</div>
+    <button type="submit" [disabled]="loading">{{ loading ? 'Signing in...' : 'Login' }}</button>
+    <p class="small">No account? <a routerLink="/signup">Sign up</a></p>
+  </form>
+</section>

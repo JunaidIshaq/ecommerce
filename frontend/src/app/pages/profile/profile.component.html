@@ -1,0 +1,11 @@
+<section class="container">
+  <h1>Profile</h1>
+  <div class="card" *ngIf="(user$ | async) as u; else guest">
+    <p><strong>Name:</strong> {{u.name}}</p>
+    <p><strong>Email:</strong> {{u.email}}</p>
+    <button (click)="logout()">Logout</button>
+  </div>
+  <ng-template #guest>
+    <p>You’re not logged in. <a routerLink="/login">Login</a></p>
+  </ng-template>
+</section>

@@ -1,0 +1,49 @@
+<section class="wrap">
+  <aside class="filters">
+    <h3>Filters</h3>
+    <label>
+      Search
+      <input [(ngModel)]="q" (keyup.enter)="search()" placeholder="Search products">
+    </label>
+
+    <label>
+      Category
+      <select [(ngModel)]="category" (change)="search()">
+        <option value="">All</option>
+        <option *ngFor="let c of categories" [value]="c">{{c}}</option>
+      </select>
+    </label>
+
+    <label>
+      Sort by
+      <select [(ngModel)]="sort" (change)="search()">
+        <option value="">Default</option>
+        <option value="priceAsc">Price ↑</option>
+        <option value="priceDesc">Price ↓</option>
+        <option value="rating">Rating</option>
+      </select>
+    </label>
+
+    <button class="apply" (click)="search()">Apply</button>
+  </aside>
+
+  <main class="list">
+    <h2>Products</h2>
+    <div *ngIf="loading">Loading...</div>
+    <div class="grid" *ngIf="!loading">
+      <div class="card" *ngFor="let p of products">
+        <img [src]="p.image" [alt]="p.name">
+        <h3>{{p.name}}</h3>
+        <p class="desc">{{p.description}}</p>
+        <div class="row">
+          <span class="price">${{p.price}}</span>
+          <span class="rating">★ {{p.rating || '—'}}</span>
+        </div>
+        <div class="actions">
+          <button (click)="addToCart(p)">Add to Cart</button>
+          <a [routerLink]="['/product', p.id]">Details</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</section>
