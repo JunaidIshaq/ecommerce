@@ -1,0 +1,23 @@
+<header class="site-header">
+  <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+    <h1 class="logo">VENZORA</h1>
+    <nav>
+      <ul class="nav-links">
+        <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a></li>
+        <li><a routerLink="/services" routerLinkActive="active">Services</a></li>
+        <li><a routerLink="/about" routerLinkActive="active">About</a></li>
+        <li><a routerLink="/contact" routerLinkActive="active">Contact</a></li>
+
+        <!-- Show these if NOT logged in -->
+        <li *ngIf="!authService.isLoggedIn()">
+          <a routerLink="/login">Login</a>
+        </li>
+
+        <!-- Show only when logged in -->
+        <li *ngIf="authService.isLoggedIn()" class="auth-buttons">
+          <a (click)="logout()" class="btn-auth logout-btn">Logout</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>

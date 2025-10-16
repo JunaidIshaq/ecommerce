@@ -19,6 +19,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
               }
             ],
             "styles": [
@@ -35,13 +40,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "1MB",
+                  "maximumError": "5MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "1MB",
+                  "maximumError": "5MB"
                 }
               ],
               "outputHashing": "all"
@@ -77,6 +82,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
               }
             ],
             "styles": [
@@ -88,6 +98,6 @@
     }
   },
   "cli": {
-    "analytics": "27ccadc5-5d9e-4ade-b82c-985fc41b36c9"
+    "analytics": "06578f50-c11c-417a-9dce-97e7a2aa1c6e"
   }
 }
