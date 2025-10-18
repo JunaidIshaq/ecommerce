@@ -1,19 +1,64 @@
-<section class="container" *ngIf="product">
-  <div class="gallery">
-    <img [src]="product.image" [alt]="product.name">
-  </div>
-  <div class="info">
-    <h1>{{product.name}}</h1>
-    <p class="brand" *ngIf="product.brand">{{product.brand}}</p>
-    <p class="price">${{product.price}}</p>
-    <p class="desc">{{product.description}}</p>
-    <p class="stock" [class.low]="product.stock<10">In stock: {{product.stock}}</p>
 
-    <div class="buy">
-      <label>Qty
-        <input type="number" [(ngModel)]="qty" min="1">
-      </label>
-      <button (click)="add()">Add to Cart</button>
+<!-- PRODUCT DETAIL SECTION -->
+<section class="product-detail" *ngIf="product">
+  <div class="product-container">
+    <!-- Left Column: Product Image -->
+    <div class="image-section">
+      <img [src]="product.image" alt="{{ product.name }}" class="main-image" />
+    </div>
+
+    <!-- Right Column: Product Info -->
+    <div class="info-section">
+      <h2>{{ product.name }}</h2>
+      <p class="category">{{ product.category }}</p>
+
+      <p class="price">${{ product.price }}</p>
+
+      <div class="rating">
+        <span *ngFor="let star of stars">&#9733;</span>
+        <span class="rating-value">{{ product.rating?.toFixed(1) }}</span>
+      </div>
+
+      <p class="short-desc">{{ product.description }}</p>
+
+      <div class="buttons">
+        <button class="btn-primary" (click)="addToCart(product)">Add to Cart</button>
+        <button class="btn-secondary">Buy Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT INFO TABS -->
+  <div class="tabs-section">
+    <ul class="tabs">
+      <li [class.active]="activeTab === 'desc'" (click)="activeTab = 'desc'">Description</li>
+      <li [class.active]="activeTab === 'specs'" (click)="activeTab = 'specs'">Specifications</li>
+      <li [class.active]="activeTab === 'reviews'" (click)="activeTab = 'reviews'">Reviews</li>
+    </ul>
+
+    <div class="tab-content">
+      <div *ngIf="activeTab === 'desc'">
+        <p>{{ product.description }}</p>
+      </div>
+
+      <div *ngIf="activeTab === 'specs'">
+        <ul>
+          <li><strong>Category:</strong> {{ product.category }}</li>
+          <li><strong>Stock:</strong> {{ product.stock }}</li>
+          <li><strong>Price:</strong> ${{ product.price }}</li>
+        </ul>
+      </div>
+
+      <div *ngIf="activeTab === 'reviews'">
+        <p>No reviews yet. Be the first to share your experience!</p>
+      </div>
     </div>
   </div>
 </section>
+
+<!-- If product not found -->
+<div *ngIf="!product && !loading" class="error">
+  Product not found.
+</div>
+
+<div *ngIf="loading" class="loading">Loading product details...</div>

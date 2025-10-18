@@ -1,36 +1,54 @@
-<!-- HERO SECTION -->
-<!-- HERO / BANNER SECTION -->
-<section class="hero">
+<!-- PRODUCTS PAGE BANNER -->
+<section class="products-hero">
+  <div class="overlay"></div>
   <div class="hero-content">
-    <h1>Welcome to <span>ShopFast</span></h1>
-    <p>Discover exclusive deals and trending products.</p>
-    <a routerLink="/product" class="btn-primary">Shop Now</a>
+    <h1>Shop Our <span>Latest Collection</span></h1>
+    <p>Explore the best deals, trending items, and top-rated products all in one place.</p>
   </div>
 </section>
 
+<!-- FILTER + SORT SECTION -->
+<section class="filter-bar">
+  <div class="filter-left">
+    <select>
+      <option value="">All Categories</option>
+      <option>Electronics</option>
+      <option>Fashion</option>
+      <option>Accessories</option>
+      <option>Fitness</option>
+      <option>Home Appliances</option>
+    </select>
+  </div>
 
+  <div class="filter-right">
+    <select>
+      <option value="">Sort by</option>
+      <option value="priceAsc">Price: Low to High</option>
+      <option value="priceDesc">Price: High to Low</option>
+      <option value="rating">Top Rated</option>
+    </select>
+  </div>
+</section>
 
 <!-- PRODUCT GRID -->
 <section class="products-section">
-  <h2>Featured Products</h2>
-
   <div *ngIf="loading" class="loading">Loading products...</div>
-
-  <div *ngIf="errorMessage && !loading" class="error">
-    {{ errorMessage }}
-  </div>
+  <div *ngIf="errorMessage && !loading" class="error">{{ errorMessage }}</div>
 
   <div *ngIf="!loading && !errorMessage" class="product-grid">
     <div class="product-card" *ngFor="let p of paginatedProducts" (click)="goToProductDetail(p.id)">
       <div class="img-wrap">
         <img [src]="p.image" alt="{{ p.name }}" />
+        <div class="hover-overlay">
+          <button (click)="addToCart(p); $event.stopPropagation()">Add to Cart</button>
+        </div>
       </div>
       <div class="info">
         <h3>{{ p.name }}</h3>
         <p class="price">${{ p.price }}</p>
-        <button (click)="addToCart(p)">Add to Cart</button>
       </div>
     </div>
+
   </div>
 
   <!-- PAGINATION -->
@@ -43,8 +61,6 @@
       ‹ Prev
     </button>
 
-    <span *ngIf="visiblePages[0] > 1" class="dots">...</span>
-
     <button
       class="page-btn"
       *ngFor="let page of visiblePages"
@@ -54,8 +70,6 @@
       {{ page }}
     </button>
 
-    <span *ngIf="visiblePages[visiblePages.length - 1] < totalPages" class="dots">...</span>
-
     <button
       class="page-btn"
       (click)="setPage(currentPage + 1)"
@@ -64,5 +78,4 @@
       Next ›
     </button>
   </div>
-
 </section>

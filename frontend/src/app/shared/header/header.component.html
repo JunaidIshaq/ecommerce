@@ -1,26 +1,70 @@
 <header class="header">
-  <div class="left">
-    <a class="logo" routerLink="/">🛒 MyShop</a>
-    <nav class="nav">
-      <a routerLink="/products">Products</a>
-      <a routerLink="/cart">Cart (<span>{{ (cartCount$ | async) || 0 }}</span>)</a>
-      <a routerLink="/profile">Profile</a>
-    </nav>
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-left">
+      <span>🚚 Free Shipping on Orders Over $50</span>
+    </div>
+    <div class="top-right">
+      <a href="#">Help</a>
+      <a href="#">Contact</a>
+      <select>
+        <option>EN</option>
+        <option>FR</option>
+      </select>
+    </div>
   </div>
 
-  <div class="search">
-    <input [(ngModel)]="query" (keyup.enter)="doSearch()" placeholder="Search products...">
-    <button (click)="doSearch()">Search</button>
+  <!-- Main Navbar -->
+  <div class="navbar">
+    <div class="nav-left">
+      <a routerLink="/" class="logo">
+        Shop<span>Fast</span>
+      </a>
+    </div>
+
+    <div class="nav-center">
+      <div class="search-bar">
+        <input
+          type="text"
+          [(ngModel)]="query"
+          (keyup.enter)="doSearch()"
+          placeholder="Search for products, categories, brands..."
+        />
+        <button (click)="doSearch()"><i class="fa fa-search"></i></button>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <a routerLink="/product" class="nav-link">Products</a>
+      <a routerLink="/profile" class="nav-link">Profile</a>
+
+      <a routerLink="/cart" class="icon-btn cart">
+        <i class="fa fa-shopping-cart"></i>
+        <span class="cart-count">{{ (cartCount$ | async) || 0 }}</span>
+      </a>
+
+      <ng-container *ngIf="(user$ | async) as u; else guest">
+        <span class="user">Hi, {{ u.name }}</span>
+        <button (click)="logout()" class="btn-logout">Logout</button>
+      </ng-container>
+      <ng-template #guest>
+        <a routerLink="/login" class="nav-link">Login</a>
+        <a routerLink="/signup" class="btn-primary small">Sign Up</a>
+      </ng-template>
+    </div>
+
+    <!-- Mobile menu toggle -->
+    <button class="menu-toggle" (click)="toggleMenu()">
+      <i class="fa fa-bars"></i>
+    </button>
   </div>
 
-  <div class="auth">
-    <ng-container *ngIf="(user$ | async) as u; else guest">
-      <span class="hello">Hi, {{u.name}}</span>
-      <button class="link" (click)="logout()">Logout</button>
-    </ng-container>
-    <ng-template #guest>
-      <a class="link" routerLink="/login">Login</a>
-      <a class="link" routerLink="/signup">Signup</a>
-    </ng-template>
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" [class.open]="menuOpen">
+    <a routerLink="/product" (click)="closeMenu()">Products</a>
+    <a routerLink="/profile" (click)="closeMenu()">Profile</a>
+    <a routerLink="/cart" (click)="closeMenu()">Cart ({{ (cartCount$ | async) || 0 }})</a>
+    <a routerLink="/login" (click)="closeMenu()" *ngIf="!(user$ | async)">Login</a>
+    <a routerLink="/signup" (click)="closeMenu()" *ngIf="!(user$ | async)">Sign Up</a>
   </div>
 </header>
