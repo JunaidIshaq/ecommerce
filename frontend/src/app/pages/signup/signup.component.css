@@ -1,1 +1,259 @@
-@import '../login/login.component.css';
+/* ===============================
+   SIGNUP HERO
+=============================== */
+.signup-hero {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.85),
+    rgba(59, 130, 246, 0.85)
+  ),
+  url('/assets/images/banners/home-banner.jpg') center/cover no-repeat;
+  overflow: hidden;
+}
+
+.signup-hero .overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.35);
+  z-index: 1;
+}
+
+/* ===============================
+   SIGNUP CARD
+=============================== */
+.signup-wrapper {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.signup-card {
+  background: #ffffffdd;
+  backdrop-filter: blur(16px);
+  border-radius: 24px;
+  padding: 40px 36px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.8s ease;
+  transition: all 0.3s ease;
+}
+
+.signup-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* ===============================
+   BRAND HEADER
+=============================== */
+.brand {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.brand h1 {
+  font-size: 34px;
+  font-weight: 800;
+  color: #2563eb;
+  margin-bottom: 6px;
+}
+
+.brand h1 span {
+  color: #111827;
+}
+
+.brand p {
+  color: #6b7280;
+  font-size: 15px;
+}
+
+/* ===============================
+   FORM STYLING
+=============================== */
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+label {
+  font-weight: 600;
+  color: #374151;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+input {
+  width: 95%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 15px;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ===============================
+   BUTTONS
+=============================== */
+.btn {
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 15px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn.primary {
+  background: linear-gradient(to right, #2563eb, #3b82f6);
+  color: #fff;
+  width: 102%;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.btn.primary:hover {
+  background: linear-gradient(to right, #1d4ed8, #2563eb);
+  transform: translateY(-2px);
+}
+
+/* ===============================
+   DIVIDER & SOCIAL LOGIN
+=============================== */
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 24px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  position: absolute;
+  height: 1px;
+  width: 50%;
+  background: #e5e7eb;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.divider span {
+  color: #6b7280;
+  font-size: 14px;
+  background: #fff;
+  padding: 0 10px;
+}
+
+.social-login {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn.social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 15px;
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 600;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn.social.google {
+  background: #fff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.btn.social.google:hover {
+  background: #f3f4f6;
+}
+
+.btn.social.apple {
+  background: #111827;
+  color: #fff;
+}
+
+.btn.social.apple:hover {
+  background: #000;
+}
+
+/* ===============================
+   LOGIN LINK
+=============================== */
+.login-text {
+  margin-top: 20px;
+  font-size: 15px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.login-text a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-text a:hover {
+  text-decoration: underline;
+}
+
+/* ===============================
+   ANIMATIONS
+=============================== */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===============================
+   RESPONSIVE
+=============================== */
+@media (max-width: 480px) {
+  .signup-card {
+    padding: 30px 20px;
+  }
+
+  .brand h1 {
+    font-size: 28px;
+  }
+}

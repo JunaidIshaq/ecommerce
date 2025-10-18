@@ -1,11 +1,46 @@
-<section class="container">
-  <h1>Profile</h1>
-  <div class="card" *ngIf="(user$ | async) as u; else guest">
-    <p><strong>Name:</strong> {{u.name}}</p>
-    <p><strong>Email:</strong> {{u.email}}</p>
-    <button (click)="logout()">Logout</button>
+<!-- PROFILE CONTENT -->
+<section class="profile-container">
+  <div class="profile-card">
+    <!-- Profile Picture Section -->
+    <div class="profile-image">
+      <img src="/assets/images/profile/junaid.png" alt="Profile Photo" />
+      <button class="edit-btn"><i class="fas fa-camera"></i></button>
+    </div>
+
+    <!-- User Info -->
+    <div class="user-info">
+      <h2>{{ user?.name || 'John Doe' }}</h2>
+      <p class="email">{{ user?.email || 'junaidnumlcs@gmail.com' }}</p>
+      <p class="joined">Member since: {{ user?.joinedDate || 'March 2023' }}</p>
+    </div>
+
+    <!-- Divider -->
+    <hr class="divider" />
+
+    <!-- Account Details -->
+    <div class="details-grid">
+      <div class="detail">
+        <h4>Full Name</h4>
+        <p>{{ user?.name || 'John Doe' }}</p>
+      </div>
+      <div class="detail">
+        <h4>Email Address</h4>
+        <p>{{ user?.email || 'junaidnumlcs@gmail.com' }}</p>
+      </div>
+      <div class="detail">
+        <h4>Phone Number</h4>
+        <p>{{ user?.phone || '+1 234 567 890' }}</p>
+      </div>
+      <div class="detail">
+        <h4>Country</h4>
+        <p>{{ user?.country || 'Pakistan' }}</p>
+      </div>
+    </div>
+
+    <!-- Edit Button -->
+    <div class="action-buttons">
+      <button class="btn primary">Edit Profile</button>
+      <button class="btn secondary">Change Password</button>
+    </div>
   </div>
-  <ng-template #guest>
-    <p>You’re not logged in. <a routerLink="/login">Login</a></p>
-  </ng-template>
 </section>

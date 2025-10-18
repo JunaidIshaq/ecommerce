@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import {Observable} from 'rxjs';
@@ -12,12 +12,28 @@ import { CommonModule } from '@angular/common';
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
-export class ProfileComponent {
-  protected user$: Observable<User | null>;
+export class ProfileComponent implements OnInit{
+  // protected user$: Observable<User | null>;
+  user: any
 
-  constructor(private auth: AuthService, private router: Router) {
-    this.user$ = this.auth.currentUser();
+  ngOnInit(): void {
+    // Example data (replace later with real API or auth service)
+    this.user = {
+      name: 'Muhammad Junaid Ishaq',
+      email: 'junaidnumlcs@gmail.com',
+      joinedDate: 'April 2023',
+      phone: '+92 300 1234567',
+      country: 'Pakistan'
+    };
   }
 
-  logout(){ this.auth.logout(); this.router.navigate(['/']); }
+  constructor(private auth: AuthService, private router: Router) {
+  }    // this.user$ = this.auth.currentUser();
+
+
+  // logout(){ this.auth.logout(); this.router.navigate(['/']); }
+
+  logout(){
+    this.router.navigate(['/']);
+  }
 }

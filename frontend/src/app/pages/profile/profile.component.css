@@ -1,3 +1,226 @@
-.container{max-width:700px;margin:40px auto;padding:0 20px}
-.card{background:#fff;border:1px solid var(--color-border);border-radius:12px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,0.05)}
-button{background:var(--color-primary);color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;margin-top:10px}
+/* ===============================
+   PROFILE HERO SECTION
+=============================== */
+.profile-hero {
+  position: relative;
+  height: 45vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #1e3a8a);
+  background-image: url('/assets/images/banners/profile-banner.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.profile-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-content h1 {
+  font-size: 52px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.hero-content h1 span {
+  color: #facc15;
+}
+
+.hero-content p {
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+/* ===============================
+   PROFILE CONTAINER
+=============================== */
+.profile-container {
+  padding: 80px 20px;
+  display: flex;
+  justify-content: center;
+  background: #f9fafb;
+}
+
+.profile-card {
+  background: #ffffffee;
+  padding: 40px;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  max-width: 800px;
+  width: 100%;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.profile-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* ===============================
+   PROFILE IMAGE
+=============================== */
+.profile-image {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 24px;
+}
+
+.profile-image img {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border: 4px solid #fff;
+}
+
+.edit-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.4);
+  transition: background 0.3s;
+}
+
+.edit-btn:hover {
+  background: #1d4ed8;
+}
+
+/* ===============================
+   USER INFO
+=============================== */
+.user-info h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.user-info .email {
+  color: #6b7280;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.user-info .joined {
+  color: #9ca3af;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+/* ===============================
+   DETAILS GRID
+=============================== */
+.divider {
+  border: none;
+  height: 1px;
+  background: #e5e7eb;
+  margin: 30px 0;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.detail h4 {
+  color: #6b7280;
+  font-size: 14px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.detail p {
+  font-size: 16px;
+  color: #111827;
+  font-weight: 500;
+}
+
+/* ===============================
+   ACTION BUTTONS
+=============================== */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.btn {
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn.primary {
+  background: linear-gradient(to right, #2563eb, #3b82f6);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn.primary:hover {
+  background: linear-gradient(to right, #1d4ed8, #2563eb);
+  transform: translateY(-2px);
+}
+
+.btn.secondary {
+  background: #fff;
+  color: #2563eb;
+  border: 2px solid #2563eb;
+}
+
+.btn.secondary:hover {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* ===============================
+   RESPONSIVE DESIGN
+=============================== */
+@media (max-width: 768px) {
+  .hero-content h1 {
+    font-size: 36px;
+  }
+
+  .profile-card {
+    padding: 30px 20px;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+}
