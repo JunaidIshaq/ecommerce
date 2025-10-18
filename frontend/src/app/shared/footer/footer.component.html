@@ -1,10 +1,65 @@
 <footer class="footer">
-  <div class="container">
-    <div>©  MyShop. All rights reserved.</div>
-    <nav>
-      <a routerLink="/">Home</a>
-      <a routerLink="/products">Products</a>
-      <a routerLink="/profile">Profile</a>
-    </nav>
+  <!-- Upper section -->
+  <div class="footer-content">
+    <div class="footer-col brand">
+      <a routerLink="/" class="logo">Shop<span>Fast</span></a>
+      <p class="tagline">
+        Discover quality products at the best prices, delivered fast &amp; easy.
+      </p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <a routerLink="/product">All Products</a>
+      <a href="#">New Arrivals</a>
+      <a href="#">Best Sellers</a>
+      <a href="#">Gift Cards</a>
+    </div>
+
+    <div class="footer-col">
+      <h4>Support</h4>
+      <a href="#">Help Center</a>
+      <a href="#">Returns</a>
+      <a href="#">Shipping</a>
+      <a href="#">Order Tracking</a>
+    </div>
+
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="#">About Us</a>
+      <a href="#">Careers</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms &amp; Conditions</a>
+    </div>
+
+    <!-- Redesigned Social Icons Section -->
+    <div class="footer-col social">
+      <h4>Follow Us</h4>
+      <div class="social-links">
+        <a href="https://facebook.com" target="_blank" aria-label="Facebook">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+        <a href="https://instagram.com" target="_blank" aria-label="Instagram">
+          <i class="fab fa-instagram"></i>
+        </a>
+        <a href="https://twitter.com" target="_blank" aria-label="Twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+        <a href="https://youtube.com" target="_blank" aria-label="YouTube">
+          <i class="fab fa-youtube"></i>
+        </a>
+        <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lower section -->
+  <div class="footer-bottom">
+    <p>© {{ currentYear }} ShopFast. All rights reserved.</p>
+    <div class="payments">
+      <img src="/assets/images/footer/payment.png" alt="Payments" />
+    </div>
   </div>
 </footer>

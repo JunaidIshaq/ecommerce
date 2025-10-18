@@ -2,23 +2,22 @@ import {Component, Inject, NgZone, OnInit, PLATFORM_ID} from '@angular/core';
 import {isPlatformBrowser, NgForOf, NgIf} from '@angular/common';
 import {ProductService} from '../../services/product.service';
 import {CartService} from '../../services/cart.service';
-import {Router, RouterLink} from '@angular/router';
+import {Router} from '@angular/router';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
+  selector: 'app-product',
+  templateUrl: './product.component.html',
   imports: [
     NgIf,
-    NgForOf,
-    RouterLink
+    NgForOf
   ],
-  styleUrls: ['./home.component.css']
+  styleUrls: ['./product.component.css']
 })
-export class HomeComponent implements OnInit {
+export class ProductComponent implements OnInit {
   products: any[] = [];
   paginatedProducts: any[] = [];
   currentPage = 1;
-  pageSize = 10;
+  pageSize = 12;
   totalPages = 0;
   visiblePages: number[] = [];
   maxVisible = 3;
@@ -53,7 +52,6 @@ export class HomeComponent implements OnInit {
           this.loading = false;
           this.errorMessage = 'Failed to load product.';
         });
-        console.error('Product load error:', err);
       }
     });
   }
@@ -65,8 +63,6 @@ export class HomeComponent implements OnInit {
     const start = (page - 1) * this.pageSize;
     const end = start + this.pageSize;
     this.paginatedProducts = this.products.slice(start, end);
-
-    // Update visible pagination range
     this.updateVisiblePages();
 
     if (isPlatformBrowser(this.platformId)) {

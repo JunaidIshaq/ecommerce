@@ -1,24 +1,61 @@
-<section class="container">
-  <h1>Your Cart</h1>
-  <div class="empty" *ngIf="(items$ | async)?.length === 0">
-    Cart is empty. <a routerLink="/products">Browse products</a>.
-  </div>
+<!-- MAIN CART SECTION -->
+<section class="cart-wrapper" *ngIf="cartItems.length > 0; else emptyCart">
+  <div class="cart-layout">
+    <!-- LEFT: Cart Items -->
+    <div class="cart-items">
+      <div class="cart-card" *ngFor="let item of cartItems">
+        <div class="cart-img">
+          <img [src]="item.product.image" alt="{{ item.product.name }}" />
+        </div>
+        <div class="cart-details">
+          <h3>{{ item.product.name }}</h3>
+          <p class="category">{{ item.product.category }}</p>
+          <div class="price-line">
+            <p class="price">${{ item.product.price.toFixed(2) }}</p>
+            <span class="subtotal">Subtotal: ${{ (item.product.price * item.qty).toFixed(2) }}</span>
+          </div>
 
-  <div class="row" *ngFor="let i of (items$ | async)">
-    <img [src]="i.product.image" [alt]="i.product.name">
-    <div class="details">
-      <h3>{{i.product.name}}</h3>
-      <p>${{i.product.price}}</p>
-      <div class="controls">
-        <input type="number" [value]="i.qty" (change)="update(i.product.id, $any($event.target).value)" min="1">
-        <button (click)="remove(i.product.id)">Remove</button>
+          <div class="qty-control">
+            <button (click)="updateQuantity(item.product.id, item.qty - 1)" [disabled]="item.qty <= 1">−</button>
+            <input type="number" [(ngModel)]="item.qty" (change)="updateQuantity(item.product.id, item.qty)" min="1" />
+            <button (click)="updateQuantity(item.product.id, item.qty + 1)">+</button>
+          </div>
+
+          <button class="remove-btn" (click)="removeItem(item.product.id)">
+            <i class="fas fa-trash"></i> Remove
+          </button>
+        </div>
       </div>
     </div>
-    <div class="line-total">${{ (i.product.price * i.qty) | number:'1.2-2' }}</div>
-  </div>
 
-  <div class="summary" *ngIf="(items$ | async)?.length">
-    <div>Total: <strong>${{ total() | number:'1.2-2' }}</strong></div>
-    <button class="checkout" (click)="checkout()">Proceed to Checkout</button>
+    <!-- RIGHT: Order Summary -->
+    <div class="cart-summary">
+      <h2>Order Summary</h2>
+      <div class="summary-item">
+        <span>Subtotal</span>
+        <span>${{ total.toFixed(2) }}</span>
+      </div>
+      <div class="summary-item">
+        <span>Shipping</span>
+        <span class="free">Free</span>
+      </div>
+      <div class="summary-item total">
+        <strong>Total</strong>
+        <strong>${{ total.toFixed(2) }}</strong>
+      </div>
+
+      <button class="btn checkout">Proceed to Checkout</button>
+      <a routerLink="/products" class="btn secondary">Continue Shopping</a>
+    </div>
   </div>
 </section>
+
+<!-- EMPTY CART -->
+<ng-template #emptyCart>
+  <div class="empty-state">
+    <img src="/assets/images/ui/empty-cart.svg" alt="Empty Cart" />
+    <h2>Your cart feels lonely 🛒</h2>
+    <p>Discover amazing products to fill it up.</p>
+    <a routerLink="/products" class="btn primary">Explore Now</a>
+  </div>
+</ng-template>
