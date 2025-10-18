@@ -1,105 +1,61 @@
-/* =========================
-   ELEGANT CART PAGE
-========================= */
-
-/* Banner */
-.cart-hero {
-  position: relative;
-  height: 55vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  background: linear-gradient(to right, rgba(37, 99, 235, 0.9), rgba(59, 130, 246, 0.7)),
-  url('/assets/images/banners/cart-banner.jpg') center/cover no-repeat;
+/* ===============================
+   MAIN CART LAYOUT
+=============================== */
+.cart-container {
+  padding: 80px 20px;
+  background: #f9fafb;
 }
-
-.cart-hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(17, 24, 39, 0.35);
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-}
-
-.hero-content h1 {
-  font-size: 54px;
-  font-weight: 800;
-  margin-bottom: 10px;
-}
-
-.hero-content h1 span {
-  color: #facc15;
-}
-
-.hero-content p {
-  font-size: 18px;
-  opacity: 0.9;
-}
-
-/* =========================
-   CART LAYOUT
-========================= */
 
 .cart-wrapper {
-  padding: 70px 20px;
-  max-width: 1300px;
-  margin: 0 auto;
-}
-
-.cart-layout {
   display: flex;
   justify-content: space-between;
   gap: 40px;
+  max-width: 1280px;
+  margin: 0 auto;
   flex-wrap: wrap;
 }
 
-/* Cart Items */
+/* ===============================
+   CART ITEMS
+=============================== */
 .cart-items {
-  flex: 1 1 65%;
+  flex: 1 1 50%;
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.cart-card {
+.cart-item {
   display: flex;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 20px;
-  overflow: hidden;
   padding: 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
 }
 
-.cart-card:hover {
+.cart-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
 }
 
-.cart-img img {
+.cart-image img {
   width: 150px;
   height: 150px;
-  border-radius: 14px;
+  border-radius: 16px;
   object-fit: cover;
 }
 
-.cart-details {
-  margin-left: 24px;
+.cart-info {
   flex: 1;
+  margin-left: 20px;
 }
 
-.cart-details h3 {
+.cart-info h3 {
   font-size: 20px;
-  color: #111827;
   font-weight: 700;
-  margin-bottom: 4px;
+  color: #111827;
+  margin-bottom: 6px;
 }
 
 .category {
@@ -108,33 +64,24 @@
   margin-bottom: 12px;
 }
 
-.price-line {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
 .price {
-  color: #2563eb;
-  font-weight: 700;
   font-size: 18px;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 8px;
 }
 
-.subtotal {
-  color: #374151;
-  font-size: 15px;
-}
-
-/* Quantity Controls */
-.qty-control {
+/* ===============================
+   QUANTITY + SUBTOTAL
+=============================== */
+.qty-box {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-bottom: 10px;
 }
 
-.qty-control button {
+.qty-box button {
   width: 30px;
   height: 30px;
   border: none;
@@ -143,15 +90,15 @@
   border-radius: 8px;
   font-size: 18px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s;
 }
 
-.qty-control button:hover {
+.qty-box button:hover {
   background: #1d4ed8;
 }
 
-.qty-control input {
-  width: 55px;
+.qty-box input {
+  width: 60px;
   text-align: center;
   padding: 6px;
   border: 1px solid #d1d5db;
@@ -160,113 +107,126 @@
   outline: none;
 }
 
-.remove-btn {
+.subtotal {
+  font-size: 15px;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.remove {
   background: none;
   color: #ef4444;
   border: none;
   font-weight: 600;
-  margin-top: 8px;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: color 0.3s ease;
 }
 
-.remove-btn:hover {
+.remove:hover {
   color: #dc2626;
 }
 
-/* =========================
-   SUMMARY PANEL
-========================= */
-
+/* ===============================
+   ORDER SUMMARY
+=============================== */
 .cart-summary {
   flex: 1 1 30%;
-  background: linear-gradient(145deg, #ffffffb3, #f9fafb);
+  background: #ffffffcc;
   border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+  padding: 28px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(8px);
 }
 
 .cart-summary h2 {
   font-size: 24px;
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   color: #111827;
+  text-align: center;
 }
 
-.summary-item {
+.summary-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 12px;
-  font-size: 16px;
+  margin-bottom: 14px;
   color: #374151;
+  font-size: 16px;
 }
 
-.summary-item.total {
+.summary-row.total {
   font-weight: 700;
-  font-size: 18px;
   color: #111827;
   border-top: 1px solid #e5e7eb;
   padding-top: 12px;
 }
 
-.summary-item .free {
+.summary-row .free {
   color: #10b981;
   font-weight: 600;
 }
 
-/* Buttons */
+/* ===============================
+   BUTTONS
+=============================== */
 .btn {
   display: block;
   width: 100%;
   text-align: center;
-  border-radius: 12px;
   padding: 14px;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
-  text-decoration: none;
   transition: all 0.3s ease;
-  margin-top: 16px;
+  margin-top: 14px;
+  border: none;
+  text-decoration: none;
 }
 
 .btn.checkout {
-  background: #2563eb;
+  background: linear-gradient(to right, #2563eb, #3b82f6);
   color: #fff;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
 }
 
 .btn.checkout:hover {
-  background: #1d4ed8;
+  background: linear-gradient(to right, #1d4ed8, #2563eb);
   transform: translateY(-2px);
 }
 
-.btn.secondary {
+.btn.continue {
   background: #fff;
   color: #2563eb;
   border: 2px solid #2563eb;
+  width: 94%;
 }
 
-.btn.secondary:hover {
+.btn.continue:hover {
   background: #2563eb;
   color: #fff;
 }
 
-/* =========================
+/* ===============================
    EMPTY STATE
-========================= */
-
+=============================== */
 .empty-state {
   text-align: center;
   padding: 100px 20px;
 }
 
 .empty-state img {
-  width: 260px;
+  width: 240px;
+  margin-bottom: 24px;
+}
+
+.empty-state a {
+  width: 240px;
   margin-bottom: 24px;
 }
 
 .empty-state h2 {
   font-size: 28px;
+  font-weight: 700;
   color: #111827;
   margin-bottom: 8px;
 }
@@ -280,10 +240,10 @@
   display: inline-block;
   background: #2563eb;
   color: #fff;
-  padding: 12px 24px;
-  border-radius: 8px;
-  text-decoration: none;
-  transition: all 0.3s;
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .btn.primary:hover {
@@ -291,12 +251,11 @@
   transform: translateY(-2px);
 }
 
-/* =========================
+/* ===============================
    RESPONSIVE DESIGN
-========================= */
-
+=============================== */
 @media (max-width: 900px) {
-  .cart-layout {
+  .cart-wrapper {
     flex-direction: column;
   }
 
@@ -304,23 +263,21 @@
     width: 100%;
   }
 
-  .cart-card {
+  .cart-item {
     flex-direction: column;
-    align-items: center;
     text-align: center;
   }
 
-  .cart-details {
+  .cart-info {
     margin-left: 0;
-    margin-top: 16px;
+    margin-top: 12px;
   }
 
-  .price-line {
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .qty-control {
+  .qty-box {
     justify-content: center;
+  }
+
+  .summary-row {
+    font-size: 15px;
   }
 }
