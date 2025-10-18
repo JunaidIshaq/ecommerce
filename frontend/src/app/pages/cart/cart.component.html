@@ -1,61 +1,60 @@
-<!-- MAIN CART SECTION -->
-<section class="cart-wrapper" *ngIf="cartItems.length > 0; else emptyCart">
-  <div class="cart-layout">
-    <!-- LEFT: Cart Items -->
+<!-- 🛒 MAIN CART SECTION -->
+<section class="cart-container" *ngIf="cartItems.length > 0; else emptyCart">
+  <div class="cart-wrapper">
+    <!-- LEFT: Items -->
     <div class="cart-items">
-      <div class="cart-card" *ngFor="let item of cartItems">
-        <div class="cart-img">
+      <div class="cart-item" *ngFor="let item of cartItems">
+        <div class="cart-image">
           <img [src]="item.product.image" alt="{{ item.product.name }}" />
         </div>
-        <div class="cart-details">
+
+        <div class="cart-info">
           <h3>{{ item.product.name }}</h3>
           <p class="category">{{ item.product.category }}</p>
-          <div class="price-line">
-            <p class="price">${{ item.product.price.toFixed(2) }}</p>
-            <span class="subtotal">Subtotal: ${{ (item.product.price * item.qty).toFixed(2) }}</span>
-          </div>
+          <p class="price">${{ item.product.price.toFixed(2) }}</p>
 
-          <div class="qty-control">
+          <div class="qty-box">
             <button (click)="updateQuantity(item.product.id, item.qty - 1)" [disabled]="item.qty <= 1">−</button>
             <input type="number" [(ngModel)]="item.qty" (change)="updateQuantity(item.product.id, item.qty)" min="1" />
             <button (click)="updateQuantity(item.product.id, item.qty + 1)">+</button>
           </div>
 
-          <button class="remove-btn" (click)="removeItem(item.product.id)">
+          <div class="subtotal">Subtotal: ${{ (item.product.price * item.qty).toFixed(2) }}</div>
+
+          <button class="remove" (click)="removeItem(item.product.id)">
             <i class="fas fa-trash"></i> Remove
           </button>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT: Order Summary -->
+    <!-- RIGHT: Summary -->
     <div class="cart-summary">
       <h2>Order Summary</h2>
-      <div class="summary-item">
+      <div class="summary-row">
         <span>Subtotal</span>
         <span>${{ total.toFixed(2) }}</span>
       </div>
-      <div class="summary-item">
+      <div class="summary-row">
         <span>Shipping</span>
         <span class="free">Free</span>
       </div>
-      <div class="summary-item total">
+      <div class="summary-row total">
         <strong>Total</strong>
         <strong>${{ total.toFixed(2) }}</strong>
       </div>
 
       <button class="btn checkout">Proceed to Checkout</button>
-      <a routerLink="/products" class="btn secondary">Continue Shopping</a>
+      <a routerLink="/products" class="btn continue">Continue Shopping</a>
     </div>
   </div>
 </section>
 
-<!-- EMPTY CART -->
+<!-- 🕊️ EMPTY CART -->
 <ng-template #emptyCart>
   <div class="empty-state">
-    <img src="/assets/images/ui/empty-cart.svg" alt="Empty Cart" />
-    <h2>Your cart feels lonely 🛒</h2>
-    <p>Discover amazing products to fill it up.</p>
-    <a routerLink="/products" class="btn primary">Explore Now</a>
+    <img src="/assets/images/ui/empty-cart.png" alt="Empty Cart" />
+    <p>Let’s find something you’ll love.</p>
+    <a routerLink="/products" class="btn primary">Start Shopping</a>
   </div>
 </ng-template>
