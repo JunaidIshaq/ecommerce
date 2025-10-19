@@ -3,12 +3,12 @@ spring:
     name: product-service
   data:
     mongodb:
-      uri: ${MONGO_URI:mongodb://mongo:27017/product_db}
+      uri: ${MONGO_URI:mongodb://localhost:27017/product_db}
   redis:
     host: redis
     port: 6379
   elasticsearch:
-    uris: ${ELASTIC_URI:http://elasticsearch:9200}
+    uris: ${ELASTIC_URI:http://localhost:9200}
   jackson:
     serialization:
       write-dates-as-timestamps: false
@@ -25,4 +25,4 @@ logging:
 
 elastic:
   host:
-    name: elasticsearch
+    name: localhost

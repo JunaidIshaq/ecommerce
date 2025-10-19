@@ -8,11 +8,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ElasticSearchConfig {
+
+    @Value("${elastic.host.name}")
+    private String hostName;
 
     @Bean
     public ElasticsearchClient elasticsearchClient() {
@@ -25,7 +29,7 @@ public class ElasticSearchConfig {
 
         // Create low-level REST client
         RestClient restClient = RestClient.builder(
-                new HttpHost("localhost", 9200)
+                new HttpHost(hostName, 9200)
         ).build();
 
         // Build transport layer with the custom mapper
