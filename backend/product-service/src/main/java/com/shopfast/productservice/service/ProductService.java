@@ -1,10 +1,17 @@
 package com.shopfast.productservice.service;
 
+import com.shopfast.productservice.dto.PagedResponse;
 import com.shopfast.productservice.dto.ProductDto;
+import com.shopfast.productservice.dto.SearchResult;
+import com.shopfast.productservice.exception.ProductNotFoundException;
 import com.shopfast.productservice.model.Product;
 import com.shopfast.productservice.repository.ProductRepository;
 import com.shopfast.productservice.search.ElasticProductSearchService;
+import com.shopfast.productservice.util.MapperUtils;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -50,14 +57,28 @@ public class ProductService {
         return d;
     }
 
-    public Product createProduct(Product product) throws IOException {
-        Product saved = productRepository.save(product);
-        elasticProductSearchService.indexProduct(saved);
-        return saved;
+    public Product createProduct(@Valid ProductDto productDto) throws IOException {
+        Product product = MapperUtils.createProduct(productDto);
+        try {
+            Product saved = productRepository.save(product);
+            elasticProductSearchService.indexProduct(saved);
+        }catch (Exception e){
+            e.printStackTrace();  // or use log.error("Elasticsearch indexing failed", e);
+            throw new RuntimeException("Failed to index product: " + e.getMessage(), e);
+        }
+        return product;
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+    public PagedResponse<Product> getAllProducts(int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Product> productPage = productRepository.findAll(pageable);
+        
+        return new PagedResponse<>(
+                productPage.getContent(), 
+                productPage.getTotalElements(), 
+                productPage.getTotalPages(),
+                page,
+                size);
     }
 
     public Optional<Product> getProductById(String id) {
@@ -76,10 +97,10 @@ public class ProductService {
             try {
                 elasticProductSearchService.indexProduct(saved);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Failed to reindex product", e);
             }
             return saved;
-        }).orElseThrow(() -> new RuntimeException("Product not found"));
+        }).orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }
 
     public void deleteProduct(String id) {
@@ -91,7 +112,7 @@ public class ProductService {
         return productRepository.findByNameContainingIgnoreCase(title);
     }
 
-    public List<Product> searchProducts(
+    public PagedResponse<Product> searchProducts(
             String keyword,
             List<String> categoryIds,
             Double minPrice,
@@ -102,8 +123,20 @@ public class ProductService {
             int size
     ) {
         try {
-            return elasticProductSearchService.searchProducts(
-                    keyword, categoryIds, minPrice, maxPrice, sortBy, sortOrder, page, size);
+            SearchResult result = elasticProductSearchService.searchProducts(
+                    keyword, categoryIds, minPrice, maxPrice, sortBy, sortOrder, page, size
+            );
+
+            long totalItems = result.getTotalHits();
+            int totalPages = (int) Math.ceil((double) totalItems / size);
+
+            return new PagedResponse<>(
+                    result.getProducts(),
+                    totalItems,
+                    totalPages,
+                    page,
+                    size
+            );
         } catch (IOException e) {
             throw new RuntimeException("Search failed", e);
         }
