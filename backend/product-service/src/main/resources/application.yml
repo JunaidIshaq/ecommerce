@@ -1,27 +1,24 @@
-server:
-  port: 8080
-
 spring:
   application:
     name: product-service
   data:
     mongodb:
-      uri: mongodb://localhost:27017/shopfast
+      uri: ${MONGO_URI:mongodb://mongo:27017/product_db}
   redis:
     host: redis
     port: 6379
-
-
-app:
   elasticsearch:
-  host: http://elasticsearch:9200
+    uris: ${ELASTIC_URI:http://elasticsearch:9200}
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
 
+server:
+  port: ${SERVER_PORT:8080}
+
+jwt:
+  secret: ${JWT_SECRET:supersecretkeythatshouldbereplacedandstoredsecurely}
 
 logging:
   level:
     root: INFO
-    com.shopfast: DEBUG
-
-
-elasticsearch:
-  index-url: http://localhost:9200/products

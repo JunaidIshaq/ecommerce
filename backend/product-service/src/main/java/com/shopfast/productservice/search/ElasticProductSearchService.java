@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import com.shopfast.productservice.dto.SearchResult;
 import com.shopfast.productservice.model.Product;
 import org.springframework.stereotype.Service;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
@@ -36,7 +37,7 @@ public class ElasticProductSearchService {
         }
     }
 
-    public List<Product> searchProducts(
+    public SearchResult searchProducts(
             String keyword,
             List<String> categoryIds,
             Double minPrice,
@@ -107,10 +108,14 @@ public class ElasticProductSearchService {
                 , Product.class);
 
         // ✅ Map results
-        return response.hits().hits().stream()
+        List<Product> products = response.hits().hits().stream()
                 .map(Hit::source)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+
+        long totalHits = response.hits().total() != null ? response.hits().total().value() : 0L;
+
+        return new SearchResult(products, totalHits);
     }
 
 }
