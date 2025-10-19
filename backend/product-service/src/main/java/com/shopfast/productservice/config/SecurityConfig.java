@@ -23,10 +23,10 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
-                        .requestMatchers("/api/products", "/api/products/**", "/api/products/search").permitAll()
+                        .requestMatchers("/api/v1/product", "/api/v1/product/**", "/api/v1/product/search").permitAll()
 
                         // Restricted endpoints
-                        .requestMatchers("/api/products", "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/product", "/api/v1/product/**").hasRole("ADMIN")
 
                         // Everything else
                         .anyRequest().authenticated()
