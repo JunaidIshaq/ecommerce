@@ -38,7 +38,7 @@ export class ProductComponent implements OnInit {
 
   loadProducts(): void {
     this.loading = true;
-    this.productService.list().subscribe({
+    this.productService.getAllProducts(this.currentPage, this.pageSize).subscribe({
       next: (data: any[]) => {
         this.ngZone.run(() => {
           this.products = data;

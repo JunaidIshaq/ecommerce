@@ -1,58 +1,58 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Product } from '../models/product.model';
-import { faker } from '@faker-js/faker/locale/en';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  // ✅ Automatically generate a list of 1000 fake product on startup
-  private readonly products: Product[] = this.generateProducts(1000);
 
-  // ✅ Reactive observable for all product
-  private products$ = new BehaviorSubject<Product[]>(this.products);
+  private apiUrl = 'http://localhost:8080/api/v1/product'; // ✅ plural endpoint
 
-  // ✅ Featured product (example subset)
-  private featuredIds = new Set(['1', '3', '5']);
-
-  constructor() {
-    console.log(`[ProductService] Generated ${this.products.length} products`);
-  }
+  constructor(private http: HttpClient) {}
 
   /**
-   * ✅ Get all product as an observable (auto-load)
-   * Automatically emits when service is initialized
+   * ✅ Fetch products from backend with pagination
    */
-  list(): Observable<Product[]> {
-    return this.products$.asObservable();
+  getAllProducts(pageNumber: number, pageSize: number): Observable<Product[]> {
+    const params = new HttpParams()
+      .set('pageNumber', pageNumber)
+      .set('pageSize', pageSize);
+
+    return this.http.get<Product[]>(this.apiUrl, { params });
   }
 
   /**
-   * ✅ Search, filter, and sort product dynamically
+   * ✅ Get paginated + filtered product list (search, category, sort)
+   * (frontend-only filtering after fetching)
    */
   listByQuery(
     q?: string,
     category?: string,
-    sort?: 'priceAsc' | 'priceDesc' | 'rating'
+    sort?: 'priceAsc' | 'priceDesc' | 'rating',
+    pageNumber = 0,
+    pageSize = 20
   ): Observable<Product[]> {
-    return this.list().pipe(
+    return this.getAllProducts(pageNumber, pageSize).pipe(
       map((list) => {
         let filtered = [...list];
 
+        // 🔍 Search filter
         if (q?.trim()) {
           const s = q.toLowerCase();
           filtered = filtered.filter(
             (p) =>
               p.name.toLowerCase().includes(s) ||
-              p.description.toLowerCase().includes(s) ||
-              (p.tags || []).some((t) => t.toLowerCase().includes(s))
+              p.description.toLowerCase().includes(s)
           );
         }
 
+        // 🏷️ Category filter
         if (category) {
           filtered = filtered.filter((p) => p.category === category);
         }
 
+        // 🔢 Sorting
         if (sort === 'priceAsc') filtered.sort((a, b) => a.price - b.price);
         if (sort === 'priceDesc') filtered.sort((a, b) => b.price - a.price);
         if (sort === 'rating') filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
@@ -63,48 +63,26 @@ export class ProductService {
   }
 
   /**
-   * ✅ Get a single product by ID
+   * ✅ Get single product by ID from backend
    */
-  get(id: string): Observable<Product | undefined> {
-    return of(this.products.find((p) => p.id === id));
+  getProductById(id: string): Observable<Product> {
+    return this.http.get<Product>(`${this.apiUrl}/${id}`);
   }
 
   /**
-   * ✅ Get featured product
+   * ✅ Get featured products (example: first 6 or category-based)
    */
-  featured(): Observable<Product[]> {
-    return of(this.products.filter((p) => this.featuredIds.has(p.id)));
+  getFeaturedProducts(): Observable<Product[]> {
+    return this.getAllProducts(0, 6);
   }
 
   /**
-   * ✅ Get all unique categories
+   * ✅ Get all unique categories (optional helper)
+   * - Usually fetched from backend if available
    */
-  categories(): Observable<string[]> {
-    return of([...new Set(this.products.map((p) => p.category))]);
-  }
-
-  /**
-   * 🧠 Generate fake product using faker
-   */
-  private generateProducts(count: number): Product[] {
-    const categories = ['Electronics', 'Fashion', 'Accessories', 'Fitness', 'Home Appliances', 'Toys'];
-    const list: Product[] = [];
-
-    for (let i = 1; i <= count; i++) {
-      const category = faker.helpers.arrayElement(categories);
-      list.push({
-        id: i.toString(),
-        name: faker.commerce.productName(),
-        description: faker.commerce.productDescription(),
-        price: parseFloat(faker.commerce.price({ min: 10, max: 500 })),
-        category,
-        stock: faker.number.int({ min: 5, max: 100 }),
-        rating: faker.number.float({ min: 2, max: 5}),
-        tags: [category.toLowerCase(), faker.commerce.department()],
-        image: `https://picsum.photos/seed/p${i}/400/300`,
-      });
-    }
-
-    return list;
+  getCategories(): Observable<string[]> {
+    return this.http.get<Product[]>(this.apiUrl).pipe(
+      map(products => [...new Set(products.map(p => p.category))])
+    );
   }
 }
