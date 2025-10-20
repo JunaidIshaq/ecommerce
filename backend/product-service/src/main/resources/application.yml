@@ -4,9 +4,9 @@ spring:
   data:
     mongodb:
       uri: ${MONGO_URI:mongodb://mongo:27017/product_db}
-  redis:
-    host: redis
-    port: 6379
+    redis:
+      host: redis
+      port: 6379
   elasticsearch:
     uris: ${ELASTIC_URI:http://elasticsearch:9200}
   jackson:
@@ -26,3 +26,12 @@ logging:
 elastic:
   host:
     name: elasticsearch
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
