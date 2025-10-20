@@ -1,25 +1,23 @@
-import {Component, Inject, NgZone, OnInit, PLATFORM_ID} from '@angular/core';
-import {isPlatformBrowser, NgForOf, NgIf} from '@angular/common';
-import {ProductService} from '../../services/product.service';
-import {CartService} from '../../services/cart.service';
-import {Router, RouterLink} from '@angular/router';
+import { Component, Inject, NgZone, OnInit, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, NgForOf, NgIf } from '@angular/common';
+import { ProductService } from '../../services/product.service';
+import { CartService } from '../../services/cart.service';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-home',
+  standalone: true,
+  imports: [NgIf, NgForOf, RouterLink],
   templateUrl: './home.component.html',
-  imports: [
-    NgIf,
-    NgForOf,
-    RouterLink
-  ],
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
   products: any[] = [];
   paginatedProducts: any[] = [];
   currentPage = 1;
-  pageSize = 10;
+  pageSize = 12;
   totalPages = 0;
+  totalItems = 0;
   visiblePages: number[] = [];
   maxVisible = 3;
   loading = true;
@@ -34,46 +32,54 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadProducts();
+    this.loadProducts(this.currentPage);
   }
 
-  loadProducts(): void {
+  /**
+   * 🔹 Load paginated products from backend
+   */
+  loadProducts(page: number): void {
     this.loading = true;
-    this.productService.getAllProducts(this.currentPage, this.pageSize).subscribe({
-      next: (data: any[]) => {
+
+    this.productService.getAllProducts(page, this.pageSize).subscribe({
+      next: (response: any) => {
+        // Expecting backend JSON structure: { items, totalItems, totalPages, page, size }
         this.ngZone.run(() => {
-          this.products = data;
-          this.totalPages = Math.ceil(this.products.length / this.pageSize);
-          this.setPage(1);
+          this.products = response.items || [];
+          this.totalItems = response.totalItems || 0;
+          this.totalPages = response.totalPages || 0;
+          this.currentPage = response.page || 1;
+          this.paginatedProducts = this.products;
+          this.updateVisiblePages();
           this.loading = false;
         });
       },
       error: (err: any) => {
         this.ngZone.run(() => {
           this.loading = false;
-          this.errorMessage = 'Failed to load product.';
+          this.errorMessage = 'Failed to load products.';
         });
-        console.error('Product load error:', err);
+        console.error('❌ Product load error:', err);
       }
     });
   }
 
+  /**
+   * 🔹 Handle pagination click
+   */
   setPage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
-
     this.currentPage = page;
-    const start = (page - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    this.paginatedProducts = this.products.slice(start, end);
-
-    // Update visible pagination range
-    this.updateVisiblePages();
+    this.loadProducts(page);
 
     if (isPlatformBrowser(this.platformId)) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
+  /**
+   * 🔹 Update visible pagination numbers
+   */
   updateVisiblePages(): void {
     const half = Math.floor(this.maxVisible / 2);
     let startPage = Math.max(this.currentPage - half, 1);
@@ -90,10 +96,16 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  /**
+   * 🛒 Add product to cart
+   */
   addToCart(product: any): void {
     this.cart.add(product, 1);
   }
 
+  /**
+   * 🔹 Navigate to product details page
+   */
   goToProductDetail(id: string): void {
     this.router.navigate(['/product', id]);
   }
