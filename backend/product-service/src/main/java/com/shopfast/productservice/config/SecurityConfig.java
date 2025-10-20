@@ -27,30 +27,38 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers("/api/v1/**").permitAll()
-                        // Public endpoints
-                        .requestMatchers("/api/v1/product", "/api/v1/product/**", "/api/v1/product/search", "/actuator/health").permitAll()
-
-                        // Restricted endpoints
-                        .requestMatchers("/api/v1/product", "/api/v1/product/**").hasRole("ADMIN")
-
-                        // Everything else
-                        .anyRequest().authenticated()
-                )
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                .authorizeHttpRequests(auth -> auth
+                        // ✅ Public endpoints FIRST
+                        .requestMatchers(
+                                "/api/v1/product/**",
+                                "/api/v1/product/search",
+                                "/actuator/health"
+                        ).permitAll()
+
+                        // ✅ Add other public APIs if needed
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+
+                        // ✅ Admin or secured routes after that
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+
+                        // ✅ Everything else requires authentication
+                        .anyRequest().authenticated()
+                )
+
+                // ✅ JWT Filter (after rules are defined)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 
     @Bean
