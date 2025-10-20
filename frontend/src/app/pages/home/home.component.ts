@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Inject, NgZone, OnInit, PLATFORM_ID} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, Inject, NgZone, OnInit, PLATFORM_ID, ViewChild} from '@angular/core';
 import { isPlatformBrowser, NgForOf, NgIf } from '@angular/common';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
@@ -12,6 +12,8 @@ import { Router, RouterLink } from '@angular/router';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
+
+  @ViewChild('productsSection') productsSection!: ElementRef
   products: any[] = [];
   currentPage = 1;
   pageSize = 12;
@@ -72,8 +74,15 @@ export class HomeComponent implements OnInit {
     this.currentPage = page;
     this.loadProducts(page);
 
-    if (isPlatformBrowser(this.platformId)) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.scrollToProductsSection();
+  }
+
+  scrollToProductsSection(): void {
+    if (isPlatformBrowser(this.platformId) && this.productsSection) {
+      this.productsSection.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
     }
   }
 
