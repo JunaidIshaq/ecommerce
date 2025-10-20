@@ -21,7 +21,7 @@
   </div>
 
   <div *ngIf="!loading && !errorMessage" class="product-grid">
-    <div class="product-card" *ngFor="let p of paginatedProducts" (click)="goToProductDetail(p.id)">
+    <div class="product-card" *ngFor="let p of products" (click)="goToProductDetail(p.id)">
       <div class="img-wrap">
         <img [src]="p.images" alt="{{ p.name }}" />
       </div>

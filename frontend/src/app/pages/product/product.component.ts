@@ -1,4 +1,4 @@
-import { Component, Inject, NgZone, OnInit, PLATFORM_ID } from '@angular/core';
+import {ChangeDetectorRef, Component, Inject, NgZone, OnInit, PLATFORM_ID} from '@angular/core';
 import { isPlatformBrowser, NgForOf, NgIf } from '@angular/common';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
@@ -27,6 +27,7 @@ export class ProductComponent implements OnInit {
     private cart: CartService,
     private ngZone: NgZone,
     private router: Router,
+    private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -50,6 +51,7 @@ export class ProductComponent implements OnInit {
           this.currentPage = response.page || 1;
           this.updateVisiblePages();
           this.loading = false;
+          this.cdr.detectChanges();
         });
       },
       error: (err: any) => {

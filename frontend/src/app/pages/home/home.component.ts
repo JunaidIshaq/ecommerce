@@ -1,4 +1,4 @@
-import { Component, Inject, NgZone, OnInit, PLATFORM_ID } from '@angular/core';
+import {ChangeDetectorRef, Component, Inject, NgZone, OnInit, PLATFORM_ID} from '@angular/core';
 import { isPlatformBrowser, NgForOf, NgIf } from '@angular/common';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
@@ -13,7 +13,6 @@ import { Router, RouterLink } from '@angular/router';
 })
 export class HomeComponent implements OnInit {
   products: any[] = [];
-  paginatedProducts: any[] = [];
   currentPage = 1;
   pageSize = 12;
   totalPages = 0;
@@ -28,6 +27,7 @@ export class HomeComponent implements OnInit {
     private cart: CartService,
     private ngZone: NgZone,
     private router: Router,
+    private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -49,9 +49,9 @@ export class HomeComponent implements OnInit {
           this.totalItems = response.totalItems || 0;
           this.totalPages = response.totalPages || 0;
           this.currentPage = response.page || 1;
-          this.paginatedProducts = this.products;
           this.updateVisiblePages();
           this.loading = false;
+          this.cdr.detectChanges();
         });
       },
       error: (err: any) => {
