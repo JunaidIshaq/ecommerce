@@ -29,7 +29,7 @@
   <div *ngIf="!loading && !errorMessage" class="product-grid">
     <div class="product-card" *ngFor="let p of products" (click)="goToProductDetail(p.id)">
       <div class="img-wrap">
-        <img [src]="p.image" alt="{{ p.name }}" />
+        <img [src]="p.images" alt="{{ p.name }}" />
         <div class="hover-overlay">
           <button (click)="addToCart(p); $event.stopPropagation()">Add to Cart</button>
         </div>

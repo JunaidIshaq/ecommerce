@@ -40,7 +40,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("https://shopfast.live", "https://www.shopfast.live"));
+        config.setAllowedOrigins(List.of(
+                "http://localhost:4200",          // ✅ Local Angular
+                "https://shopfast.live",          // ✅ Production domain
+                "https://www.shopfast.live"       // ✅ WWW version
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
         config.setAllowCredentials(true);
