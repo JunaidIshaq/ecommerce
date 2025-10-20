@@ -40,8 +40,8 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<PagedResponse<ProductDto>> getAllProducts(
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size
+            @RequestParam(name = "pageNumber", defaultValue = "0") int page,
+            @RequestParam(name = "pageSize", defaultValue = "10") int size
     ) {
         PagedResponse<Product> pagedProducts = productService.getAllProducts(page, size);
         List<ProductDto> productDtos = pagedProducts.getItems()
