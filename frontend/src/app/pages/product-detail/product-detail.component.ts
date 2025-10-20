@@ -1,8 +1,9 @@
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {ProductService} from '../../services/product.service';
 import {CartService} from '../../services/cart.service';
 import {NgForOf, NgIf} from '@angular/common';
+import {Product} from '../../models/product.model';
 
 @Component({
   selector: 'app-product-detail',
@@ -14,7 +15,7 @@ import {NgForOf, NgIf} from '@angular/common';
   styleUrls: ['./product-detail.component.css']
 })
 export class ProductDetailComponent implements OnInit {
-  product: any;
+  product: Product | any;
   loading = true;
   errorMessage = '';
   activeTab = 'desc';
@@ -23,7 +24,8 @@ export class ProductDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private productService: ProductService,
-    private cartService: CartService
+    private cartService: CartService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -38,6 +40,7 @@ export class ProductDetailComponent implements OnInit {
             this.errorMessage = 'Product not found.';
           }
           this.loading = false;
+          this.cdr.detectChanges();
         },
         error: () => {
           this.errorMessage = 'Failed to load product details.';
