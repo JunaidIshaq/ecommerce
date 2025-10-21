@@ -24,7 +24,7 @@ jobs:
 
       # ⚙️ Step 3: Build the Spring Boot JAR
       - name: Build with Maven
-        working-directory: backend/product-service
+        working-directory: product-service
         run: mvn clean package -DskipTests
 
       # 🐳 Step 4: Log in to Docker Hub
@@ -42,6 +42,7 @@ jobs:
 
       # 🚀 Step 6: Push image to Docker Hub
       - name: Push to Docker Hub
+        working-directory: backend/product-service
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest
 
@@ -60,6 +61,6 @@ jobs:
           script: |
             cd /root/ecommerce/backend/product-service
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest
-            docker-compose down
-            docker-compose up -d
+            docker compose down
+            docker compose up -d
 
