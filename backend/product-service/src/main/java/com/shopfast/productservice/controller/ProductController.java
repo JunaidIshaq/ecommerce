@@ -36,7 +36,7 @@ public class ProductController {
 
     @Operation(summary = "Create a new product", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping
-    public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductDto productDto) throws IOException {
+    public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody ProductDto productDto) throws IOException {
         return ResponseEntity.ok(productService.createProduct(productDto));
     }
 
@@ -44,38 +44,25 @@ public class ProductController {
     @Operation(summary = "Get all products (paginated)")
     @GetMapping
     public ResponseEntity<PagedResponse<ProductDto>> getAllProducts(
-            @RequestParam(name = "pageNumber", defaultValue = "0") int page,
-            @RequestParam(name = "pageSize", defaultValue = "10") int size
+            @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
     ) {
-        PagedResponse<Product> pagedProducts = productService.getAllProducts(page, size);
-        List<ProductDto> productDtos = pagedProducts.getItems()
-                .stream()
-                .map(MapperUtils::getProductDto)
-                .toList();
-
-        PagedResponse<ProductDto> response = new PagedResponse<>(
-                productDtos,
-                pagedProducts.getTotalItems(),
-                pagedProducts.getTotalPages(),
-                page,
-                size
-        );
+        PagedResponse<ProductDto> response = productService.getAllProducts(pageNumber, pageSize);
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Get Product details based on Id")
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable("id") String id) {
-        return productService.getProductById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ProductDto> getProductById(@PathVariable("id") String id) {
+        ProductDto response = productService.getProductById(id);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Update Product based on Id")
     @PutMapping("/{id}")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable String id, @Valid @RequestBody ProductDto productDto) throws IOException {
-        Product updated = productService.updateProduct(id, MapperUtils.getProduct(productDto));
-        return ResponseEntity.ok(MapperUtils.getProductDto(updated));
+        ProductDto updated = productService.updateProduct(id, MapperUtils.getProduct(productDto));
+        return ResponseEntity.ok(updated);
     }
 
     @Operation(summary = "Delete Product based on Id")
@@ -88,7 +75,7 @@ public class ProductController {
 
     @Operation(summary = "Search products with filters")
     @GetMapping("/search")
-    public ResponseEntity<PagedResponse<ProductDto>> searchProducts(
+    public ResponseEntity<PagedResponse<Product>> searchProducts(
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "categories", required = false) List<String> categories,
             @RequestParam(name = "minPrice", required = false) Double minPrice,
@@ -102,12 +89,9 @@ public class ProductController {
                 keyword, categories, minPrice, maxPrice, sortBy, sortOrder, page, size
         );
 
-        List<ProductDto> dtoList = pagedResults.getItems().stream()
-                .map(MapperUtils::getProductDto)
-                .toList();
 
         return ResponseEntity.ok(
-                new PagedResponse<>(dtoList, pagedResults.getTotalItems(), pagedResults.getTotalPages(), page, size)
+                new PagedResponse<>(pagedResults.getItems(), pagedResults.getTotalItems(), pagedResults.getTotalPages(), page, size)
         );
     }
 

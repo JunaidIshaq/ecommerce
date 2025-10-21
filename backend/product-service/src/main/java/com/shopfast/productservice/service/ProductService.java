@@ -11,8 +11,6 @@ import com.shopfast.productservice.repository.ProductRepository;
 import com.shopfast.productservice.search.ElasticProductSearchService;
 import com.shopfast.productservice.util.MapperUtils;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -67,7 +65,7 @@ public class ProductService {
             @CacheEvict(value = "product", key = "#result.id", condition = "#result != null"),
             @CacheEvict(value = "productsPage", allEntries = true)
     })
-    public Product createProduct(@Valid ProductDto productDto) throws IOException, InvalidCategoryException {
+    public ProductDto createProduct(@Valid ProductDto productDto) throws IOException, InvalidCategoryException {
         Product product = MapperUtils.createProduct(productDto);
         if (!categoryClient.validateCategoryExists(product.getCategoryId())) {
             throw new InvalidCategoryException(product.getCategoryId());
@@ -79,32 +77,45 @@ public class ProductService {
             e.printStackTrace();  // or use log.error("Elasticsearch indexing failed", e);
             throw new RuntimeException("Failed to index product: " + e.getMessage(), e);
         }
-        return product;
+        return MapperUtils.getProductDto(product);
     }
 
-    @Cacheable(value = "productsPage", key = "{#page, #size}")
-    public PagedResponse<Product> getAllProducts(int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+    @Cacheable(
+            value = "productsPage",
+            key = "'pageNumber_' + #pageNumber + '_pageSize_' + #pageSize"
+    )
+    public PagedResponse<ProductDto> getAllProducts(int pageNumber, int pageSize) {
+        log.info("🧠 Inside getAllProducts() -> pageNumber={}, pageSize={}", pageNumber, pageSize);
+
+        PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Product> productPage = productRepository.findAll(pageable);
-        
+
+        List<ProductDto> productDtos = productPage.getContent()
+                .stream()
+                .map(MapperUtils::getProductDto)
+                .toList();
+
         return new PagedResponse<>(
-                productPage.getContent(), 
-                productPage.getTotalElements(), 
+                productDtos,
+                productPage.getTotalElements(),
                 productPage.getTotalPages(),
-                page,
-                size);
+                pageNumber,
+                pageSize
+        );
     }
+
 
     @Cacheable(value = "product", key = "#id")
-    public Optional<Product> getProductById(String id) {
-        return productRepository.findById(id);
+    public ProductDto getProductById(String id) {
+        Optional<Product> product = productRepository.findById(id);
+        return product.map(MapperUtils::getProductDto).orElseThrow(() -> new ProductNotFoundException(id));
     }
 
     @Caching(evict = {
             @CacheEvict(value = "product", key = "#id"),
             @CacheEvict(value = "productsPage", allEntries = true)
     })
-    public Product updateProduct(String id, Product updatedProduct) throws InvalidCategoryException {
+    public ProductDto updateProduct(String id, Product updatedProduct) throws InvalidCategoryException {
         if (!categoryClient.validateCategoryExists(updatedProduct.getCategoryId())) {
             throw new InvalidCategoryException(updatedProduct.getCategoryId());
         }
@@ -121,7 +132,7 @@ public class ProductService {
             } catch (IOException e) {
                 throw new RuntimeException("Failed to reindex product", e);
             }
-            return saved;
+            return MapperUtils.getProductDto(saved);
         }).orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }
 
@@ -156,13 +167,16 @@ public class ProductService {
             long totalItems = result.getTotalHits();
             int totalPages = (int) Math.ceil((double) totalItems / size);
 
-            return new PagedResponse<>(
+
+            PagedResponse<Product> pagedResults = new PagedResponse<>(
                     result.getProducts(),
                     totalItems,
                     totalPages,
                     page,
                     size
             );
+
+            return pagedResults;
         } catch (IOException e) {
             throw new RuntimeException("Search failed", e);
         }

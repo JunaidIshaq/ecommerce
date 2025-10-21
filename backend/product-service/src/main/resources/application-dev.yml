@@ -6,7 +6,7 @@ spring:
       uri: ${MONGO_URI:mongodb://localhost:27017/product_db}
 
     redis:
-      host: ${REDIS_HOST:redis}
+      host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       timeout: 6000
       connect-timeout: 6000
@@ -14,7 +14,7 @@ spring:
     type: redis
 
   elasticsearch:
-    uris: ${ELASTIC_URI:http://elasticsearch:9200}
+    uris: ${ELASTIC_URI:http://localhost:9200}
 
   jackson:
     serialization:
@@ -37,7 +37,7 @@ logging:
 
 elastic:
   host:
-    name: elasticsearch
+    name: localhost
 
 management:
   endpoints:

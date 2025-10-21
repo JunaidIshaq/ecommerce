@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -16,7 +17,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductDto {
+public class ProductDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public String id;
 
@@ -49,9 +52,9 @@ public class ProductDto {
 
     public List<String> tags;
 
-    private Instant createdAt;
+    private String createdAt;
 
-    private Instant updatedAt;
+    private String updatedAt;
 
     private String createdBy;
 
