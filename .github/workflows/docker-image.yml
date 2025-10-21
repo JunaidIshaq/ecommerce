@@ -3,7 +3,7 @@ name: Build and Deploy Product Service
 on:
   push:
     branches:
-      - develop
+      - master
   workflow_dispatch:
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       # 🧰 Step 2: Set up JDK for building Spring Boot app
-      - name: Set up Java 21
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -24,6 +24,7 @@ jobs:
 
       # ⚙️ Step 3: Build the Spring Boot JAR
       - name: Build with Maven
+        working-directory: ./product-service
         run: mvn clean package -DskipTests
 
       # 🐳 Step 4: Log in to Docker Hub
@@ -60,3 +61,4 @@ jobs:
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest
             docker-compose down
             docker-compose up -d
+
