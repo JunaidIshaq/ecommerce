@@ -39,6 +39,7 @@ services:
     build: .
     container_name: product-service
     depends_on:
+      - redis
       - mongo
       - elasticsearch
     environment:
@@ -47,6 +48,8 @@ services:
       - ELASTIC_URI=http://elasticsearch:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
       - SERVER_PORT=8080
+      - REDIS_HOST=redis
+      - REDIS_PORT-6379
     ports:
       - "8080:8080"
     networks:

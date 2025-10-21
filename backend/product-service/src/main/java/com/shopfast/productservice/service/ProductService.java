@@ -11,7 +11,11 @@ import com.shopfast.productservice.repository.ProductRepository;
 import com.shopfast.productservice.search.ElasticProductSearchService;
 import com.shopfast.productservice.util.MapperUtils;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -23,6 +27,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
     private final ElasticProductSearchService elasticProductSearchService;
@@ -30,13 +35,6 @@ public class ProductService {
     private ProductRepository productRepository;
 
     private final CategoryClient categoryClient;
-
-
-    public ProductService(ProductRepository repo, ElasticProductSearchService searchService, ProductRepository productRepository, CategoryClient categoryClient) {
-        this.elasticProductSearchService = searchService;
-        this.productRepository = productRepository;
-        this.categoryClient = categoryClient;
-    }
 
 
     public Optional<ProductDto> findBySlug(String slug) {
@@ -60,6 +58,10 @@ public class ProductService {
         return d;
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "product", key = "#result.id", condition = "#result != null"),
+            @CacheEvict(value = "productsPage", allEntries = true)
+    })
     public Product createProduct(@Valid ProductDto productDto) throws IOException, InvalidCategoryException {
         Product product = MapperUtils.createProduct(productDto);
         if (!categoryClient.validateCategoryExists(product.getCategoryId())) {
@@ -75,6 +77,7 @@ public class ProductService {
         return product;
     }
 
+    @Cacheable(value = "productsPage", key = "{#page, #size}")
     public PagedResponse<Product> getAllProducts(int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Product> productPage = productRepository.findAll(pageable);
@@ -87,10 +90,15 @@ public class ProductService {
                 size);
     }
 
+    @Cacheable(value = "product", key = "#id")
     public Optional<Product> getProductById(String id) {
         return productRepository.findById(id);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "product", key = "#id"),
+            @CacheEvict(value = "productsPage", allEntries = true)
+    })
     public Product updateProduct(String id, Product updatedProduct) throws InvalidCategoryException {
         if (!categoryClient.validateCategoryExists(updatedProduct.getCategoryId())) {
             throw new InvalidCategoryException(updatedProduct.getCategoryId());
@@ -112,6 +120,10 @@ public class ProductService {
         }).orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "product", key = "#id"),
+            @CacheEvict(value = "productsPage", allEntries = true)
+    })
     public void deleteProduct(String id) {
         productRepository.deleteById(id);
         elasticProductSearchService.deleteProductFromIndex(id);
