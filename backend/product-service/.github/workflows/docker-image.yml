@@ -36,6 +36,7 @@ jobs:
 
       # 🏗️ Step 5: Build and tag Docker image
       - name: Build Docker image
+        working-directory: backend/product-service
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest .
 
