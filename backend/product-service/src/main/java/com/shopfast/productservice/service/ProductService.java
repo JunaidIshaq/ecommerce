@@ -11,7 +11,8 @@ import com.shopfast.productservice.repository.ProductRepository;
 import com.shopfast.productservice.search.ElasticProductSearchService;
 import com.shopfast.productservice.util.MapperUtils;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -27,15 +28,19 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ProductService {
 
-    private final ElasticProductSearchService elasticProductSearchService;
+    private ElasticProductSearchService elasticProductSearchService;
 
     private ProductRepository productRepository;
 
-    private final CategoryClient categoryClient;
+    private CategoryClient categoryClient;
 
+    public ProductService(ElasticProductSearchService elasticProductSearchService, ProductRepository productRepository, CategoryClient categoryClient) {
+        this.elasticProductSearchService = elasticProductSearchService;
+        this.productRepository = productRepository;
+        this.categoryClient = categoryClient;
+    }
 
     public Optional<ProductDto> findBySlug(String slug) {
         return productRepository.findBySlug(slug).map(this::toDto);

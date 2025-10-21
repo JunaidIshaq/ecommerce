@@ -4,11 +4,18 @@ spring:
   data:
     mongodb:
       uri: ${MONGO_URI:mongodb://localhost:27017/product_db}
-  redis:
-    host: redis
-    port: 6379
+
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      timeout: 6000
+      connect-timeout: 6000
+  cache:
+    type: redis
+
   elasticsearch:
-    uris: ${ELASTIC_URI:http://localhost:9200}
+    uris: ${ELASTIC_URI:http://elasticsearch:9200}
+
   jackson:
     serialization:
       write-dates-as-timestamps: false
@@ -16,16 +23,33 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
 
+  forward-headers-strategy: framework
+
 jwt:
   secret: ${JWT_SECRET:supersecretkeythatshouldbereplacedandstoredsecurely}
 
 logging:
   level:
     root: INFO
+    org.springframework.data.redis: WARN
+    org.springframework.cache.interceptor: DEBUG
+
 
 elastic:
   host:
-    name: localhost
+    name: elasticsearch
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+app:
+  seed-products: true
 
 category:
   service:
