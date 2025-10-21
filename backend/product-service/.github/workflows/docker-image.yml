@@ -3,7 +3,7 @@ name: Build and Deploy Product Service
 on:
   push:
     branches:
-      - develop
+      - master
   workflow_dispatch:
 
 jobs:
