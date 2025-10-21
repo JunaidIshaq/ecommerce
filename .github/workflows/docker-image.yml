@@ -24,7 +24,7 @@ jobs:
 
       # ⚙️ Step 3: Build the Spring Boot JAR
       - name: Build with Maven
-        working-directory: ./product-service
+        working-directory: product-service
         run: mvn clean package -DskipTests
 
       # 🐳 Step 4: Log in to Docker Hub
