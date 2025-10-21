@@ -62,7 +62,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-
+    @Operation(summary = "Get Product details based on Id")
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable("id") String id) {
         return productService.getProductById(id)
@@ -70,12 +70,14 @@ public class ProductController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Update Product based on Id")
     @PutMapping("/{id}")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable String id, @Valid @RequestBody ProductDto productDto) throws IOException {
         Product updated = productService.updateProduct(id, MapperUtils.getProduct(productDto));
         return ResponseEntity.ok(MapperUtils.getProductDto(updated));
     }
 
+    @Operation(summary = "Delete Product based on Id")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable("id") String id) {
         productService.deleteProduct(id);
