@@ -5,7 +5,11 @@ import com.shopfast.productservice.dto.ProductDto;
 import com.shopfast.productservice.model.Product;
 import com.shopfast.productservice.service.ProductService;
 import com.shopfast.productservice.util.MapperUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,23 +25,22 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.List;
 
+@Tag(name = "Products", description = "Product CRUD and Search APIs")
 @RestController
 @RequestMapping("/api/v1/product")
+@RequiredArgsConstructor
 public class ProductController {
 
-    @Autowired
     private ProductService productService;
 
-    public ProductController(ProductService service) {
-        this.productService = service;
-    }
-
+    @Operation(summary = "Create a new product", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping
     public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductDto productDto) throws IOException {
         return ResponseEntity.ok(productService.createProduct(productDto));
     }
 
 
+    @Operation(summary = "Get all products (paginated)")
     @GetMapping
     public ResponseEntity<PagedResponse<ProductDto>> getAllProducts(
             @RequestParam(name = "pageNumber", defaultValue = "0") int page,
@@ -80,6 +83,7 @@ public class ProductController {
     }
 
 
+    @Operation(summary = "Search products with filters")
     @GetMapping("/search")
     public ResponseEntity<PagedResponse<ProductDto>> searchProducts(
             @RequestParam(name = "keyword", required = false) String keyword,
