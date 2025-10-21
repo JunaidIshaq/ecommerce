@@ -30,8 +30,8 @@ public class ProductDto {
     @Size(min = 10, max = 1000, message = "Description must be between 10 and 1000 characters")
     public String description;
 
-    @NotBlank(message = "Category is required")
-    public String category;
+    @NotBlank(message = "CategoryId is required")
+    public String categoryId;
 
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be greater than 0")

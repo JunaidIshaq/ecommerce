@@ -121,6 +121,12 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 
+        <!-- WebClient (from Spring WebFlux) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
         <!-- OpenAPI 3 (Swagger UI) -->
         <dependency>
             <groupId>org.springdoc</groupId>

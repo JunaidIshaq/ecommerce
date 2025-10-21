@@ -52,7 +52,7 @@ public class ProductDataSeeder {
             Product p = new Product();
             p.setName(faker.commerce().productName());
             p.setDescription(faker.lorem().sentence(100));
-            p.setCategory(faker.commerce().department());
+            p.setCategoryId(faker.commerce().department());
             p.setPrice(new BigDecimal(faker.commerce().price(10.0, 999.99)));
             p.setStock(random.nextInt(1000));
             p.setImages(List.of("https://picsum.photos/seed/" + i + "/600/400"));

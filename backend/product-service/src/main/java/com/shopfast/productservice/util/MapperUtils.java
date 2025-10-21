@@ -13,7 +13,7 @@ public class MapperUtils {
         product.setId(dto.getId());
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
-        product.setCategory(dto.getCategory());
+        product.setCategoryId(dto.getCategoryId());
         product.setPrice(dto.getPrice());
         product.setStock(dto.getStock());
         product.setImages(dto.getImages());
@@ -29,7 +29,7 @@ public class MapperUtils {
         dto.setId(product.getId());
         dto.setName(product.getName());
         dto.setDescription(product.getDescription());
-        dto.setCategory(product.getCategory());
+        dto.setCategoryId(product.getCategoryId());
         dto.setPrice(product.getPrice());
         dto.setStock(product.getStock());
         dto.setImages(product.getImages());
@@ -46,7 +46,7 @@ public class MapperUtils {
         product.setName(productDto.getName());
         product.setSlug(productDto.getSlug());
         product.setDescription(productDto.getDescription());
-        product.setCategory(productDto.getCategory());
+        product.setCategoryId(productDto.getCategoryId());
         product.setPrice(productDto.getPrice());
         product.setStock(productDto.getStock());
         product.setImages(productDto.getImages());

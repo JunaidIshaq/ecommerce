@@ -1,8 +1,10 @@
 package com.shopfast.productservice.service;
 
+import com.shopfast.productservice.client.CategoryClient;
 import com.shopfast.productservice.dto.PagedResponse;
 import com.shopfast.productservice.dto.ProductDto;
 import com.shopfast.productservice.dto.SearchResult;
+import com.shopfast.productservice.exception.InvalidCategoryException;
 import com.shopfast.productservice.exception.ProductNotFoundException;
 import com.shopfast.productservice.model.Product;
 import com.shopfast.productservice.repository.ProductRepository;
@@ -23,21 +25,22 @@ import java.util.Optional;
 @Service
 public class ProductService {
 
-    private final ProductRepository repo;
-
     private final ElasticProductSearchService elasticProductSearchService;
 
     private ProductRepository productRepository;
 
-    public ProductService(ProductRepository repo, ElasticProductSearchService searchService, ProductRepository productRepository) {
-        this.repo = repo;
+    private final CategoryClient categoryClient;
+
+
+    public ProductService(ProductRepository repo, ElasticProductSearchService searchService, ProductRepository productRepository, CategoryClient categoryClient) {
         this.elasticProductSearchService = searchService;
         this.productRepository = productRepository;
+        this.categoryClient = categoryClient;
     }
 
 
     public Optional<ProductDto> findBySlug(String slug) {
-        return repo.findBySlug(slug).map(this::toDto);
+        return productRepository.findBySlug(slug).map(this::toDto);
     }
 
 
@@ -47,7 +50,7 @@ public class ProductService {
         d.slug = p.getSlug();
         d.name = p.getName();
         d.description = p.getDescription();
-        d.category = p.getCategory();
+        d.categoryId = p.getCategoryId();
         d.price = p.getPrice();
         d.currency = p.getCurrency();
         d.stock = p.getStock();
@@ -57,8 +60,11 @@ public class ProductService {
         return d;
     }
 
-    public Product createProduct(@Valid ProductDto productDto) throws IOException {
+    public Product createProduct(@Valid ProductDto productDto) throws IOException, InvalidCategoryException {
         Product product = MapperUtils.createProduct(productDto);
+        if (!categoryClient.validateCategoryExists(product.getCategoryId())) {
+            throw new InvalidCategoryException(product.getCategoryId());
+        }
         try {
             Product saved = productRepository.save(product);
             elasticProductSearchService.indexProduct(saved);
@@ -85,11 +91,14 @@ public class ProductService {
         return productRepository.findById(id);
     }
 
-    public Product updateProduct(String id, Product updatedProduct) {
+    public Product updateProduct(String id, Product updatedProduct) throws InvalidCategoryException {
+        if (!categoryClient.validateCategoryExists(updatedProduct.getCategoryId())) {
+            throw new InvalidCategoryException(updatedProduct.getCategoryId());
+        }
         return productRepository.findById(id).map(existing -> {
             existing.setName(updatedProduct.getName());
             existing.setDescription(updatedProduct.getDescription());
-            existing.setCategory(updatedProduct.getCategory());
+            existing.setCategoryId(updatedProduct.getCategoryId());
             existing.setPrice(updatedProduct.getPrice());
             existing.setImages(updatedProduct.getImages());
             existing.setStock(updatedProduct.getStock());

@@ -35,7 +35,7 @@ public class Product {
 
     private String description;
 
-    private String category;
+    private String categoryId;
 
     private BigDecimal price;
 

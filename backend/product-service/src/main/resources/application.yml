@@ -41,3 +41,6 @@ management:
 app:
   seed-products: true
 
+category:
+  service:
+    url: ${CATEGORY_SERVICE_URL:http://localhost:8090/api/categories}

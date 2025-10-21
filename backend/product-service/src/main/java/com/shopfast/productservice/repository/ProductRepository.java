@@ -12,7 +12,7 @@ public interface ProductRepository extends MongoRepository<Product, String> {
 
     Optional<Product> findBySlug(String slug);
 
-    List<Product> findByCategory(String category);
+    List<Product> findByCategoryId(String category);
 
     List<Product> findByNameContainingIgnoreCase(String name);
 

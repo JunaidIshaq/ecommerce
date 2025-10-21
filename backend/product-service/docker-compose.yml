@@ -42,6 +42,7 @@ services:
       - mongo
       - elasticsearch
     environment:
+      - CATEGORY_SERVICE_URL=http://category-service:8090/api/categories
       - MONGO_URI=mongodb://mongo:27017/product_db
       - ELASTIC_URI=http://elasticsearch:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely

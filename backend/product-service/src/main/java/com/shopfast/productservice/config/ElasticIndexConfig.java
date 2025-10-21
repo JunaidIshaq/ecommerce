@@ -58,7 +58,7 @@ public class ElasticIndexConfig {
                                         .fields("keyword", f -> f.keyword(k -> k.ignoreAbove(256)))
                                 ))
                                 .properties("description", p -> p.text(t -> t.analyzer("custom_text_analyzer")))
-                                .properties("category", p -> p.keyword(k -> k))
+                                .properties("categoryId", p -> p.keyword(k -> k))
                                 .properties("price", p -> p.double_(d -> d))
                                 .properties("stock", p -> p.integer(i -> i))
                                 .properties("images", p -> p.keyword(k -> k))
