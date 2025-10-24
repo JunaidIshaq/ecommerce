@@ -15,12 +15,16 @@ import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class CategoryDataSeeder {
 
     private final CategoryRepository categoryRepository;
 
     private final ElasticCategorySearchService elasticService;
+
+    public CategoryDataSeeder(CategoryRepository categoryRepository, ElasticCategorySearchService elasticService) {
+        this.categoryRepository = categoryRepository;
+        this.elasticService = elasticService;
+    }
 
     @Value("${app.seed-categories:false}")
     private boolean seedCategories; // toggle via application.yml
