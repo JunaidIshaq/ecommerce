@@ -17,11 +17,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
-public class ElasticProductSearchService {
+public class ElasticCategorySearchService {
 
     private final ElasticsearchClient client;
 
-    public ElasticProductSearchService(ElasticsearchClient client) {
+    public ElasticCategorySearchService(ElasticsearchClient client) {
         this.client = client;
     }
 
@@ -29,7 +29,7 @@ public class ElasticProductSearchService {
         client.index(i -> i.index("category").id(category.getId()).document(category));
     }
 
-    public void deleteProductFromIndex(String id) {
+    public void deleteCategoryFromIndex(String id) {
         try {
             client.delete(d -> d.index("category").id(id));
         } catch (IOException e) {

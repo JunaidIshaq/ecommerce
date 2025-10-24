@@ -33,14 +33,14 @@ public class ElasticIndexConfig {
 
 
     @PostConstruct
-    public void createProductIndexIfNotExists() {
+    public void createCategoryIndexIfNotExists() {
         try {
-            boolean exists = client.indices().exists(e -> e.index("products")).value();
+            boolean exists = client.indices().exists(e -> e.index("category")).value();
             if (!exists) {
-                log.info("Creating Elasticsearch index: products");
+                log.info("Creating Elasticsearch index: category");
 
                 CreateIndexResponse response = client.indices().create(c -> c
-                        .index("products")
+                        .index("category")
                         .settings(s -> s
                                 .analysis(a -> a
                                         .analyzer("custom_text_analyzer", analyzer -> analyzer
@@ -58,10 +58,8 @@ public class ElasticIndexConfig {
                                         .fields("keyword", f -> f.keyword(k -> k.ignoreAbove(256)))
                                 ))
                                 .properties("description", p -> p.text(t -> t.analyzer("custom_text_analyzer")))
-                                .properties("categoryId", p -> p.keyword(k -> k))
-                                .properties("price", p -> p.double_(d -> d))
-                                .properties("stock", p -> p.integer(i -> i))
-                                .properties("images", p -> p.keyword(k -> k))
+                                .properties("parentId", p -> p.keyword(k -> k))
+                                .properties("subCategoryIds", p -> p.keyword(d -> d))
                                 .properties("createdAt", p -> p.date(d -> d))
                                 .properties("updatedAt", p -> p.date(d -> d))
                                 .properties("createdBy", p ->  p.keyword(d -> d))
@@ -70,10 +68,10 @@ public class ElasticIndexConfig {
                 );
 
                 if (response.acknowledged()) {
-                    log.info("Elasticsearch index 'products' created successfully");
+                    log.info("Elasticsearch index 'category' created successfully");
                 }
             } else {
-                log.info("Elasticsearch index 'products' already exists");
+                log.info("Elasticsearch index 'category' already exists");
             }
         } catch (IOException e) {
             log.error("Error creating Elasticsearch index mapping", e);

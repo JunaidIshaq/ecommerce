@@ -26,10 +26,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // ✅ List of endpoints to ignore for JWT validation
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/api/v1/product",
-            "/api/v1/product/",
-            "/api/v1/product/search",
-            "/api/v1/product/search/",
+            "/api/v1/category",
+            "/api/v1/category/",
+            "/api/v1/category/search",
+            "/api/v1/category/search/",
             "/actuator/health",
             "/api/v1/auth",
             "/api/v1/auth/",

@@ -2,7 +2,7 @@ package com.shopfast.categoryservice.util;
 
 import com.shopfast.categoryservice.model.Category;
 import com.shopfast.categoryservice.repository.CategoryRepository;
-import com.shopfast.categoryservice.search.ElasticProductSearchService;
+import com.shopfast.categoryservice.search.ElasticCategorySearchService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class CategoryDataSeeder {
 
     private final CategoryRepository categoryRepository;
 
-    private final ElasticProductSearchService elasticService;
+    private final ElasticCategorySearchService elasticService;
 
     @Value("${app.seed-categories:false}")
     private boolean seedCategories; // toggle via application.yml

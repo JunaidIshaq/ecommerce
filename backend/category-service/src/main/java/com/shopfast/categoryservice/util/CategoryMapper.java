@@ -6,13 +6,13 @@ import com.shopfast.categoryservice.model.Category;
 public class CategoryMapper {
 
     public static Category getCategory(CategoryDto dto) {
-        Category product = new Category();
-        product.setId(dto.getId());
-        product.setName(dto.getName());
-        product.setDescription(dto.getDescription());
-        product.setParentId(dto.getParentId());
-        product.setSubCategoryIds(dto.getSubCategoryIds());
-        return product;
+        Category category = new Category();
+        category.setId(dto.getId());
+        category.setName(dto.getName());
+        category.setDescription(dto.getDescription());
+        category.setParentId(dto.getParentId());
+        category.setSubCategoryIds(dto.getSubCategoryIds());
+        return category;
     }
 
     public static CategoryDto getCategoryDto(Category category) {

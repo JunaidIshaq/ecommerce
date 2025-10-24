@@ -45,7 +45,7 @@ public class CategoryController {
 
     @Operation(summary = "Get all categories")
     @GetMapping
-    public ResponseEntity<List<CategoryDto>> getAllProducts(
+    public ResponseEntity<List<CategoryDto>> getAllCategories(
             @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
     ) {
