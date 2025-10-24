@@ -59,7 +59,7 @@ services:
       - product-net
 
   category-service:
-    build: ./category-service
+    build: ../category-service
     container_name: category-service
     depends_on:
       - redis
