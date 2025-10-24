@@ -1,6 +1,7 @@
 package com.shopfast.categoryservice.config;
 
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -28,5 +29,10 @@ public class RedisConfig {
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
                 .build();
+    }
+
+    @Bean
+    public SimpleKeyGenerator keyGenerator() {
+        return new SimpleKeyGenerator();
     }
 }
