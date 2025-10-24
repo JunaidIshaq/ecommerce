@@ -1,5 +1,6 @@
 package com.shopfast.categoryservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -30,8 +31,10 @@ public class CategoryDto implements Serializable {
     @Size(max = 500, message = "Description must not exceed 500 characters")
     public String description;
 
+    @JsonProperty("parent_id")
     public String parentId;
 
+    @JsonProperty("subcategory_ids")
     public List<String> subCategoryIds;
 
     private String createdAt;

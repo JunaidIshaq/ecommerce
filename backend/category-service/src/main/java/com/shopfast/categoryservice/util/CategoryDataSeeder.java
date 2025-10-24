@@ -30,10 +30,10 @@ public class CategoryDataSeeder {
     @PostConstruct
     public void seed() {
         if (!seedCategories) {
-            System.out.println("🟢 Category seeding disabled (set app.seed-products=true to enable)");
+            System.out.println("🟢 Category seeding disabled (set app.seed-categories=true to enable)");
             return;
         }
-
+        categoryRepository.deleteAll();
         if (categoryRepository.count() > 0) {
             System.out.println("🟢 Category already exist, skipping seeding.");
             return;
@@ -59,8 +59,6 @@ public class CategoryDataSeeder {
                 log.info("ℹ️ Category already exists: {}", category.getName());
             }
         });
-
-        categoryRepository.saveAll(categories);
 
         // Index in Elasticsearch
         categories.forEach(category -> {

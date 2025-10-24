@@ -3,7 +3,7 @@ spring:
     name: category-service
   data:
     mongodb:
-      uri: ${MONGO_URI:mongodb://mongo:27017/product_db}
+      uri: ${MONGO_URI:mongodb://mongo:27017/category_db}
 
     redis:
       host: ${REDIS_HOST:redis}
@@ -52,8 +52,9 @@ management:
       application: category-service
 
 app:
-  seed-products: true
+  seed-categories: true
 
 product:
   service:
     url: ${PRODUCT_SERVICE_URL:http://localhost:8080/api/v1/product}
+

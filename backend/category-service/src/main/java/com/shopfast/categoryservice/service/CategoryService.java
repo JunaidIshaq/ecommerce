@@ -4,6 +4,9 @@ import com.shopfast.categoryservice.exception.CategoryNotFoundException;
 import com.shopfast.categoryservice.model.Category;
 import com.shopfast.categoryservice.repository.CategoryRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,9 +32,10 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
-    public List<Category> getAllCategories(int pageNumber, int pageSize) {
+    public Page<Category> getAllCategories(int pageNumber, int pageSize) {
         log.info("Getting all categories");
-        return categoryRepository.findAll();
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        return categoryRepository.findAll(pageable);
     }
 
     public Category getCategoryById(String id) {
