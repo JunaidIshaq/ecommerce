@@ -63,6 +63,7 @@ public class CategoryDataSeeder {
                 log.info("ℹ️ Category already exists: {}", category.getName());
             }
         });
+        // Saving Categories
         categoryRepository.saveAll(categories);
 
         // Index in Elasticsearch
