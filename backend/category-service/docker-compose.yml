@@ -36,7 +36,7 @@ services:
       - product-net
 
   product-service:
-    build: .
+    build: ../product-service
     container_name: product-service
     depends_on:
       - redis
@@ -44,12 +44,12 @@ services:
       - elasticsearch
       - logstash
     environment:
-      - CATEGORY_SERVICE_URL=http://category-service:8090/api/v1/categories
-      - MONGO_URI=mongodb://mongo:27017/product_db
-      - ELASTIC_URI=http://elasticsearch:9200
+      - CATEGORY_SERVICE_URL=http://localhost:8090/api/v1/categories
+      - MONGO_URI=mongodb://localhost:27017/product_db
+      - ELASTIC_URI=http://localhost:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
       - SERVER_PORT=8080
-      - REDIS_HOST=redis
+      - REDIS_HOST=localhost
       - REDIS_PORT=6379
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
@@ -59,7 +59,7 @@ services:
       - product-net
 
   category-service:
-    build: ./category-service
+    build: .
     container_name: category-service
     depends_on:
       - redis
@@ -67,12 +67,12 @@ services:
       - elasticsearch
       - logstash
     environment:
-      - PRODUCT_SERVICE_URL=http://product-service:8080/api/v1/product
-      - MONGO_URI=mongodb://mongo:27017/product_db
-      - ELASTIC_URI=http://elasticsearch:9200
+      - PRODUCT_SERVICE_URL=http://localhost:8080/api/v1/product
+      - MONGO_URI=mongodb://localhost:27017/product_db
+      - ELASTIC_URI=http://localhost:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
       - SERVER_PORT=8080
-      - REDIS_HOST=redis
+      - REDIS_HOST=localhost
       - REDIS_PORT=6379
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000

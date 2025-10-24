@@ -1,12 +1,12 @@
 spring:
   application:
-    name: product-service
+    name: category-service
   data:
     mongodb:
-      uri: ${MONGO_URI:mongodb://mongo:27017/product_db}
+      uri: ${MONGO_URI:mongodb://localhost:27017/product_db}
 
     redis:
-      host: ${REDIS_HOST:redis}
+      host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       timeout: 6000
       connect-timeout: 6000
@@ -14,7 +14,7 @@ spring:
     type: redis
 
   elasticsearch:
-    uris: ${ELASTIC_URI:http://elasticsearch:9200}
+    uris: ${ELASTIC_URI:http://localhost:9200}
 
   jackson:
     serialization:
@@ -37,7 +37,7 @@ logging:
 
 elastic:
   host:
-    name: elasticsearch
+    name: localhost
 
 management:
   endpoints:
@@ -49,11 +49,11 @@ management:
       show-details: always
   metrics:
     tags:
-      application: product-service
+      application: category-service
 
 app:
   seed-products: true
 
-category:
+product:
   service:
-    url: ${CATEGORY_SERVICE_URL:http://localhost:8090/api/v1/categories}
+    url: ${CATEGORY_SERVICE_URL:http://localhost:8080/api/v1/product}
