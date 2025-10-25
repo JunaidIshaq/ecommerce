@@ -1,18 +1,23 @@
 package com.shopfast.categoryservice.service;
 
+import com.shopfast.categoryservice.dto.CategoryDto;
+import com.shopfast.categoryservice.dto.PagedResponse;
 import com.shopfast.categoryservice.exception.CategoryNotFoundException;
 import com.shopfast.categoryservice.model.Category;
 import com.shopfast.categoryservice.repository.CategoryRepository;
+import com.shopfast.categoryservice.util.CategoryMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -40,10 +45,19 @@ public class CategoryService {
     }
 
     @Cacheable(value = "category")
-    public Page<Category> getAllCategories(int pageNumber, int pageSize) {
+    public PagedResponse<CategoryDto> getAllCategories(int pageNumber, int pageSize) {
         log.info("Getting all categories");
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
-        return categoryRepository.findAll(pageable);
+        Page<Category> categoryPage = categoryRepository.findAll(pageable);
+        List<CategoryDto> categoryDtos = categoryPage.stream().map(CategoryMapper::getCategoryDto).toList();
+
+        return new PagedResponse<>(
+                categoryDtos,
+                categoryPage.getTotalElements(),
+                categoryPage.getTotalPages(),
+                pageNumber,
+                pageSize
+        );
     }
 
     @Cacheable(value = "category", key = "#id")

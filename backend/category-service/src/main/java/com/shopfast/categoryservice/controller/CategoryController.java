@@ -45,14 +45,10 @@ public class CategoryController {
 
     @Operation(summary = "Get all categories")
     @GetMapping
-    public ResponseEntity<List<CategoryDto>> getAllCategories(
+    public ResponseEntity<PagedResponse<CategoryDto>> getAllCategories(
             @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
-    ) {
-        List<CategoryDto> response = categoryService.getAllCategories(pageNumber, pageSize)
-                .stream().map(CategoryMapper::getCategoryDto)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(response);
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        return ResponseEntity.ok(categoryService.getAllCategories(pageNumber, pageSize));
     }
 
     @Operation(summary = "Get category by Id")
