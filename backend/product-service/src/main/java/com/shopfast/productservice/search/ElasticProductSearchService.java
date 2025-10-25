@@ -26,12 +26,12 @@ public class ElasticProductSearchService {
     }
 
     public void indexProduct(Product product) throws IOException {
-        client.index(i -> i.index("products").id(product.getId()).document(product));
+        client.index(i -> i.index("product").id(product.getId()).document(product));
     }
 
     public void deleteProductFromIndex(String id) {
         try {
-            client.delete(d -> d.index("products").id(id));
+            client.delete(d -> d.index("product").id(id));
         } catch (IOException e) {
             throw new RuntimeException("Failed to delete product from Elasticsearch: " + id, e);
         }
@@ -100,7 +100,7 @@ public class ElasticProductSearchService {
 
         // 🔎 Execute search
         SearchResponse<Product> response = client.search(s -> s
-                        .index("products")
+                        .index("product")
                         .query(finalQuery)
                         .from(from)
                         .size(size)

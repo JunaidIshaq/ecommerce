@@ -35,12 +35,12 @@ public class ElasticIndexConfig {
     @PostConstruct
     public void createProductIndexIfNotExists() {
         try {
-            boolean exists = client.indices().exists(e -> e.index("products")).value();
+            boolean exists = client.indices().exists(e -> e.index("product")).value();
             if (!exists) {
-                log.info("Creating Elasticsearch index: products");
+                log.info("Creating Elasticsearch index: product");
 
                 CreateIndexResponse response = client.indices().create(c -> c
-                        .index("products")
+                        .index("product")
                         .settings(s -> s
                                 .analysis(a -> a
                                         .analyzer("custom_text_analyzer", analyzer -> analyzer
@@ -70,10 +70,10 @@ public class ElasticIndexConfig {
                 );
 
                 if (response.acknowledged()) {
-                    log.info("Elasticsearch index 'products' created successfully");
+                    log.info("Elasticsearch index 'product' created successfully");
                 }
             } else {
-                log.info("Elasticsearch index 'products' already exists");
+                log.info("Elasticsearch index 'product' already exists");
             }
         } catch (IOException e) {
             log.error("Error creating Elasticsearch index mapping", e);
