@@ -83,38 +83,6 @@ services:
     networks:
       - product-net
 
-  inventory-service:
-    build: ./inventory-service
-    container_name: inventory-service
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/inventory_db
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
-      - SERVER_PORT=8091
-    ports:
-      - "8091:8091"
-    depends_on:
-      - postgres
-      - redis
-    networks:
-      - product-net
-
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: inventory_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - product-net
-
   redis:
     image: redis:7
     container_name: redis
@@ -203,4 +171,3 @@ volumes:
   mongo_data:
   es_data:
   redis_data:
-  pgdata:

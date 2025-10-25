@@ -1,49 +1,56 @@
-package com.shopfast.categoryservice.model;
+package com.shopfast.inventoryservice.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(collection = "category")
+@Entity
+@Table(name = "inventory_items")
 @JsonIgnoreProperties(ignoreUnknown = true)  // Prevent unknown fields from breaking serialization
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Category {
+public class InventoryItem {
 
     @Id
-    private String id;
+    @GeneratedValue(generator = "UUID")
+    private UUID id;
 
-    private String name;
+    @Column(nullable = false, unique = true)
+    private UUID productId;
 
-    private String description;
+    @Column(nullable = false)
+    private int availableQuantity;
 
-    // For hierarchical structure
-    private String parentId;
+    @Column(nullable = false)
+    private int reservedQuantity;
 
-    // Optional: store child IDs for faster lookup
-    private List<String> subCategoryIds;
+    @Column(nullable = false)
+    private int soldQuantity;
 
-    @CreatedDate
+    @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant createdAt;
 
-    @LastModifiedDate
+    @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant updatedAt;
 
@@ -52,6 +59,5 @@ public class Category {
 
     @LastModifiedBy
     private String updatedBy;
-
 
 }

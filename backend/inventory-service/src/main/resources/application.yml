@@ -1,12 +1,20 @@
 spring:
   application:
-    name: product-service
-  data:
-    mongodb:
-      uri: ${MONGO_URI:mongodb://localhost:27017/product_db}
+    name: inventory-service
 
+  datasource:
+    url: ${POSTGRES_URI:jdbc:postgresql://postgres:5432/inventory_db}
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  data:
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:redis}
       port: ${REDIS_PORT:6379}
       timeout: 6000
       connect-timeout: 6000
@@ -21,7 +29,7 @@ spring:
       write-dates-as-timestamps: false
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT:8091}
 
   forward-headers-strategy: framework
 
@@ -37,20 +45,24 @@ logging:
 
 elastic:
   host:
-    name: localhost
+    name: elasticsearch
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: always
-
-app:
-  seed-products: true
+  metrics:
+    tags:
+      application: inventory-service
 
 category:
   service:
     url: ${CATEGORY_SERVICE_URL:http://localhost:8090/api/v1/category}
+
+product:
+  service:
+    url: ${PRODUCT_SERVICE_URL:http://localhost:8080/api/v1/project}
