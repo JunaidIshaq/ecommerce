@@ -37,12 +37,16 @@ public class CategoryDto implements Serializable {
     @JsonProperty("subcategory_ids")
     public List<String> subCategoryIds;
 
+    @JsonProperty("created_at")
     private String createdAt;
 
+    @JsonProperty("updated_at")
     private String updatedAt;
 
+    @JsonProperty("created_by")
     private String createdBy;
 
+    @JsonProperty("updated_by")
     private String updatedBy;
 
 }
