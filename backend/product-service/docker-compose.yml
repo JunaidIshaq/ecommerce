@@ -190,19 +190,17 @@ services:
 
     # optional: filebeat alternative if you prefer shipping log files instead of TCP
   filebeat:
-    image: docker.elastic.co/beats/filebeat:8.5.3
+    image: docker.elastic.co/beats/filebeat:8.10.0
     container_name: filebeat
     user: root
     volumes:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./logs:/usr/share/filebeat/logs:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./logs:/usr/share/filebeat
     depends_on:
       - logstash
-      - product-service
-      - category-service
-      - inventory-service
+      - elasticsearch
     networks:
       - product-net
 
