@@ -52,7 +52,7 @@ services:
       - kafka
 
     environment:
-      - CATEGORY_SERVICE_URL=http://category-service:8090/api/v1/categories
+      - CATEGORY_SERVICE_URL=http://category-service:8090/api/v1/category
       - MONGO_URI=mongodb://mongo:27017/product_db
       - ELASTIC_URI=http://elasticsearch:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
