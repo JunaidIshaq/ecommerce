@@ -193,6 +193,9 @@ services:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
     depends_on:
       - logstash
+      - product-service
+      - category-service
+      - inventory-service
     networks:
       - product-net
 
