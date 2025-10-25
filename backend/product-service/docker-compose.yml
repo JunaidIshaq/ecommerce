@@ -84,7 +84,7 @@ services:
       - product-net
 
   inventory-service:
-    build: ./inventory-service
+    build: ../inventory-service
     container_name: inventory-service
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/inventory_db
