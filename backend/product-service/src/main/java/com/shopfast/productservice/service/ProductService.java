@@ -182,4 +182,33 @@ public class ProductService {
         }
     }
 
+    /**
+     * Updates inStock status of a product, persists it, and reindexes in Elasticsearch.
+     */
+    public void updateStockAndAvailability(String productId, int stock) throws IOException {
+        log.info("Updating stock for product {} -> {}", productId, stock);
+
+        // 1️⃣ Find product in MongoDB
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if (optionalProduct.isEmpty()) {
+            log.warn("Product {} not found, skipping stock update", productId);
+            return;
+        }
+
+            Product product = optionalProduct.get();
+
+            product.setStock(stock);
+            productRepository.save(product);
+            elasticProductSearchService.indexProduct(product);
+
+        log.info("Updated product {} in MongoDB. New stock = {}", productId, stock);
+
+            // 3️⃣ Reindex product in Elasticsearch (try-catch to avoid breaking Kafka listener)
+            try {
+                elasticProductSearchService.indexProduct(product);
+                log.info("Reindexed product {} in Elasticsearch", productId);
+            } catch (IOException e) {
+                log.error("Failed to reindex product {} in Elasticsearch: {}", productId, e.getMessage(), e);
+            }
+    }
 }

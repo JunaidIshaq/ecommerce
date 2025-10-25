@@ -49,6 +49,7 @@ services:
       - elasticsearch
       - logstash
       - category-service
+      - kafka
 
     environment:
       - CATEGORY_SERVICE_URL=http://category-service:8090/api/v1/categories
@@ -104,8 +105,56 @@ services:
     depends_on:
       - postgres
       - redis
+      - kafka
+      - logstash
     networks:
       - product-net
+
+  order-service:
+    build: ../order-service
+    container_name: order-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/order_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - KAFKA_BOOTSTRAP=kafka:9092
+      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - SERVER_PORT=8092
+    ports:
+      - "8092:8092"
+    depends_on:
+      - redis
+      - kafka
+      - postgres
+      - logstash
+    networks:
+      - product-net
+
+  # kafka stack (add under services)
+  zookeeper:
+    image: bitnami/zookeeper:3.8
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+    networks:
+      - product-net
+
+  kafka:
+    image: bitnami/kafka:3
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    networks:
+      - product-net
+
 
   postgres:
     image: postgres:15
