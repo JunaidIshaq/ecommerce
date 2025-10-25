@@ -48,10 +48,28 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest .
 
+      - name: Build Docker image
+        working-directory: backend/category-service
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/category-service:latest .
+
+      - name: Build Docker image
+        working-directory: backend/inventory-service
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/inventory-service:latest .
+
       # 🚀 Step 6: Push image to Docker Hub
       - name: Push to Docker Hub
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest
+
+      - name: Push to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/category-service:latest
+
+      - name: Push to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/inventory-service:latest
 
   # (Optional) Deploy step — if you want automatic VPS deployment
   deploy:
@@ -70,5 +88,5 @@ jobs:
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/category-service:latest
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-service:latest
-            docker compose up -d
+            docker-compose up -d
 
