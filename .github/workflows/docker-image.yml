@@ -88,5 +88,5 @@ jobs:
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/category-service:latest
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-service:latest
-            docker-compose up -d
+            docker compose up -d
 
