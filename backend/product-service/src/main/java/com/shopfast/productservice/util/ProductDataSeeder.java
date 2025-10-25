@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -50,6 +51,7 @@ public class ProductDataSeeder {
 
         for (int i = 1; i <= PRODUCT_COUNT; i++) {
             Product p = new Product();
+            p.setId(UUID.randomUUID().toString());
             p.setName(faker.commerce().productName());
             p.setDescription(faker.lorem().sentence(100));
             p.setCategoryId(getCategoriesList(random.nextInt(30)));
