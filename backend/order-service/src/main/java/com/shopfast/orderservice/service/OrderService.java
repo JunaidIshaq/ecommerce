@@ -94,7 +94,7 @@ public class OrderService {
     }
 
     public List<Order> getOrdersForUser(String userId) {
-        return orderRepository.findByUserId(UUID.fromString(userId));
+        return orderRepository.findByUserId(userId);
     }
 
     public Optional<Order> getOrderById(UUID orderId) {

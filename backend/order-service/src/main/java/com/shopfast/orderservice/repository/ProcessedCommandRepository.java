@@ -10,6 +10,6 @@ import java.util.UUID;
 @Repository
 public interface ProcessedCommandRepository extends JpaRepository<ProcessedCommand, UUID> {
 
-    Optional<ProcessedCommand> findByCommandId(UUID commandId);
+    Optional<ProcessedCommand> findByCommandId(String commandId);
 
 }
