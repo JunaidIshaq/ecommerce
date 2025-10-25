@@ -27,6 +27,14 @@ jobs:
         working-directory: backend/product-service
         run: mvn clean package -DskipTests
 
+      - name: Build with Maven
+        working-directory: backend/category-service
+        run: mvn clean package -DskipTests
+
+      - name: Build with Maven
+        working-directory: backend/inventory-service
+        run: mvn clean package -DskipTests
+
       # 🐳 Step 4: Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -60,5 +68,7 @@ jobs:
           script: |
             cd /root/ecommerce/backend/product-service
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest
-            docker compose down
-            docker compose up -d
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/category-service:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-service:latest
+            docker-compose up -d
+
