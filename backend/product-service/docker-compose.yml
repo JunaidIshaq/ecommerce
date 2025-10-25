@@ -131,7 +131,7 @@ services:
       - product-net
 
   zookeeper:
-    image: bitnami/zookeeper:3.9.2
+    image: bitnami/zookeeper:latest
     container_name: zookeeper
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
@@ -141,7 +141,7 @@ services:
       - product-net
 
   kafka:
-    image: bitnami/kafka:3.7.0
+    image: bitnami/kafka:latest
     container_name: kafka
     environment:
       - KAFKA_BROKER_ID=1
@@ -149,13 +149,12 @@ services:
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - ALLOW_PLAINTEXT_LISTENER=yes
-    depends_on:
-      - zookeeper
     ports:
       - "9092:9092"
+    depends_on:
+      - zookeeper
     networks:
       - product-net
-
 
 
   postgres:
