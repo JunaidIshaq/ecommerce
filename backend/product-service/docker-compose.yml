@@ -21,12 +21,17 @@ services:
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
       - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     ports:
       - "9200:9200"
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:9200 || exit 1" ]
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -189,8 +194,10 @@ services:
     container_name: filebeat
     user: root
     volumes:
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./logs:/usr/share/filebeat
     depends_on:
       - logstash
       - product-service
