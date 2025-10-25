@@ -4,6 +4,15 @@ spring:
   data:
     mongodb:
       uri: ${MONGO_URI:mongodb://mongo:27017/product_db}
+
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      timeout: 6000
+      connect-timeout: 6000
+    cache:
+      type: redis
+
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
     consumer:
@@ -16,14 +25,6 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
-  redis:
-    host: ${REDIS_HOST:redis}
-    port: ${REDIS_PORT:6379}
-    timeout: 6000
-    connect-timeout: 6000
-  cache:
-    type: redis
 
   elasticsearch:
     uris: ${ELASTIC_URI:http://elasticsearch:9200}
