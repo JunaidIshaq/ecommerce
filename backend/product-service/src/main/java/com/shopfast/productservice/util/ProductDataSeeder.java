@@ -62,7 +62,7 @@ public class ProductDataSeeder {
         }
 
         productRepository.saveAll(products);
-
+        elasticService.deleteProduct();
         // Index in Elasticsearch
         products.forEach(product -> {
             try {
