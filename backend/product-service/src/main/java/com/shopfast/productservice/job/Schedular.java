@@ -17,8 +17,8 @@ public class Schedular {
         this.productDataSeeder = productDataSeeder;
     }
 
-    // runs at 00 minutes, 00 seconds of every 2nd hour: 00:00, 02:00, 04:00, ...
-    @Scheduled(cron = "0 0 */2 * * *")
+    // Runs every hour
+    @Scheduled(cron = "0 0 * * * *")
     public void everyTwoHours() {
         log.info("Job Running every two hour : {}", LocalDateTime.now());
         productDataSeeder.seed();
