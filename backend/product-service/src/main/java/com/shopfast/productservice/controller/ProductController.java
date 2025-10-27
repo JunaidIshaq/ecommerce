@@ -4,7 +4,7 @@ import com.shopfast.productservice.dto.PagedResponse;
 import com.shopfast.productservice.dto.ProductDto;
 import com.shopfast.productservice.model.Product;
 import com.shopfast.productservice.service.ProductService;
-import com.shopfast.productservice.util.MapperUtils;
+import com.shopfast.productservice.util.ProductMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -61,7 +61,7 @@ public class ProductController {
     @Operation(summary = "Update Product based on Id")
     @PutMapping("/{id}")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable String id, @Valid @RequestBody ProductDto productDto) throws IOException {
-        ProductDto updated = productService.updateProduct(id, MapperUtils.getProduct(productDto));
+        ProductDto updated = productService.updateProduct(id, ProductMapper.getProduct(productDto));
         return ResponseEntity.ok(updated);
     }
 

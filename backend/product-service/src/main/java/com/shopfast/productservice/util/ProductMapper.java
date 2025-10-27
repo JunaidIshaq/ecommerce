@@ -7,7 +7,7 @@ import jakarta.validation.Valid;
 import java.time.Instant;
 import java.util.UUID;
 
-public class MapperUtils {
+public class ProductMapper {
 
     public static Product getProduct(ProductDto dto) {
         Product product = new Product();

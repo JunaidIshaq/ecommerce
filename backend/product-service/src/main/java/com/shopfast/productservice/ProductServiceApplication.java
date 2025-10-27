@@ -9,10 +9,12 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableMongoAuditing
 @EnableCaching
 @SpringBootApplication
+@EnableScheduling
 public class ProductServiceApplication {
 
 	public static void main(String[] args) {
