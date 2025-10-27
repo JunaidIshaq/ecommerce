@@ -37,9 +37,6 @@ spring:
   cache:
     type: redis
 
-  elasticsearch:
-    uris: ${ELASTIC_URI:http://elasticsearch:9200}
-
   jackson:
     serialization:
       write-dates-as-timestamps: false

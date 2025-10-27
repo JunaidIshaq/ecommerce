@@ -13,7 +13,6 @@
     <properties>
         <java.version>17</java.version>
         <spring.boot.version>3.3.5</spring.boot.version>
-        <elasticsearch.client.version>8.19.5</elasticsearch.client.version>
     </properties>
 
     <!-- Dependency Management -->
@@ -80,13 +79,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
-        </dependency>
-
-        <!-- Elasticsearch Java API Client -->
-        <dependency>
-            <groupId>co.elastic.clients</groupId>
-            <artifactId>elasticsearch-java</artifactId>
-            <version>${elasticsearch.client.version}</version>
         </dependency>
 
         <!-- Spring Security -->

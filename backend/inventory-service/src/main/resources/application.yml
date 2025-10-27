@@ -37,9 +37,6 @@ spring:
   cache:
     type: redis
 
-  elasticsearch:
-    uris: ${ELASTIC_URI:http://elasticsearch:9200}
-
   jackson:
     serialization:
       write-dates-as-timestamps: false
@@ -57,11 +54,6 @@ logging:
     root: INFO
     org.springframework.data.redis: WARN
     org.springframework.cache.interceptor: DEBUG
-
-
-elastic:
-  host:
-    name: elasticsearch
 
 management:
   endpoints:
