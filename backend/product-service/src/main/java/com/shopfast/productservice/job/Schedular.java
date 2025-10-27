@@ -20,7 +20,7 @@ public class Schedular {
     // Runs every hour
     @Scheduled(cron = "0 0 * * * *")
     public void everyTwoHours() {
-        log.info("Job Running every two hour : {}", LocalDateTime.now());
+        log.info("Job Running every hour : {}", LocalDateTime.now());
         productDataSeeder.seed();
     }
 }
