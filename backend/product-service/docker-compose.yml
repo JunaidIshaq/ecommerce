@@ -28,9 +28,10 @@ services:
       - product-service_mongo_data:/data/db
     entrypoint: >
       bash -c "while true; do
+        echo '🔁 Running MongoDB backup...';
         mongodump --host mongo --out /backup/$(date +%F_%H-%M-%S);
         find /backup -type d -mtime +7 -exec rm -rf {} \;;
-        sleep 3600;
+        sleep 86400;
       done"
     networks:
       - product-net
