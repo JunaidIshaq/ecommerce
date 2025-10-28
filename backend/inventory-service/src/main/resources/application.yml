@@ -67,6 +67,9 @@ management:
     tags:
       application: inventory-service
 
+app:
+  seed-inventory: true
+
 category:
   service:
     url: ${CATEGORY_SERVICE_URL:http://localhost:8090/api/v1/category}

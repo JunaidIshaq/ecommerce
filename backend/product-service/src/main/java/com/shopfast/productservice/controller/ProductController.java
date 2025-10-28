@@ -51,6 +51,16 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Get all products (paginated)")
+    @GetMapping("/ids")
+    public ResponseEntity<PagedResponse<String>> getAllProductIds(
+            @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
+    ) {
+        PagedResponse<String> response = productService.getAllProductIds(pageNumber, pageSize);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "Get Product details based on Id")
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable("id") String id) {

@@ -37,14 +37,6 @@ public class ElasticProductSearchService {
         }
     }
 
-    public void deleteProduct() {
-        try {
-            client.delete(d -> d.index("product"));
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to delete product from Elasticsearch: ", e);
-        }
-    }
-
 
     public SearchResult searchProducts(
             String keyword,
@@ -127,4 +119,8 @@ public class ElasticProductSearchService {
         return new SearchResult(products, totalHits);
     }
 
+    public void deleteAllProducts() throws IOException {
+        client.indices().delete(d -> d.index("product"));
+
+    }
 }

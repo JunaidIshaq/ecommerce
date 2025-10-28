@@ -1,6 +1,5 @@
 package com.shopfast.inventoryservice.util;
 
-import com.shopfast.inventoryservice.dto.InventoryRequestDto;
 import com.shopfast.inventoryservice.dto.InventoryResponseDto;
 import com.shopfast.inventoryservice.model.InventoryItem;
 

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -17,10 +18,10 @@ public class Schedular {
         this.productDataSeeder = productDataSeeder;
     }
 
-    // Runs every hour
-    @Scheduled(cron = "0 0 * * * *")
-    public void everyTwoHours() {
-        log.info("Job Running every hour : {}", LocalDateTime.now());
-        productDataSeeder.seed();
-    }
+//    // Runs every hour
+//    @Scheduled(cron = "0 0 * * * *")
+//    public void everyTwoHours() throws IOException {
+//        log.info("Job Running every hour : {}", LocalDateTime.now());
+//        productDataSeeder.seed();
+//    }
 }

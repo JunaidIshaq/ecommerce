@@ -1,9 +1,11 @@
 package com.shopfast.inventoryservice.service;
 
+import com.shopfast.common.events.InventoryEvent;
 import com.shopfast.inventoryservice.dto.AdjustQuantityDto;
 import com.shopfast.inventoryservice.dto.InventoryRequestDto;
 import com.shopfast.inventoryservice.dto.InventoryResponseDto;
 import com.shopfast.inventoryservice.dto.PagedResponse;
+import com.shopfast.inventoryservice.events.KafkaInventoryProducer;
 import com.shopfast.inventoryservice.model.InventoryItem;
 import com.shopfast.inventoryservice.repository.InventoryRepository;
 import com.shopfast.inventoryservice.util.InventoryMapper;
@@ -17,7 +19,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -26,8 +30,11 @@ public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
 
-    public InventoryService(InventoryRepository inventoryRepository) {
+    private final KafkaInventoryProducer kafkaInventoryProducer;
+
+    public InventoryService(InventoryRepository inventoryRepository, KafkaInventoryProducer kafkaInventoryProducer) {
         this.inventoryRepository = inventoryRepository;
+        this.kafkaInventoryProducer = kafkaInventoryProducer;
     }
 
     // CRUD
@@ -70,6 +77,7 @@ public class InventoryService {
                 .orElseThrow(() -> new IllegalArgumentException("Inventory not found for product " + productId));
     }
 
+    @Transactional
     @CacheEvict(value = {"inventory", "inventoryByProduct"}, allEntries = true)
     public InventoryItem adjustQuantity(UUID productId, AdjustQuantityDto dto) {
         InventoryItem item = getByProductId(productId);
@@ -77,33 +85,41 @@ public class InventoryService {
         if (newQty < 0)
             throw new IllegalArgumentException("Cannot reduce below 0");
         item.setAvailableQuantity(newQty);
-        return inventoryRepository.save(item);
+        inventoryRepository.save(item);
+        // 🔁 Call Kafka producer to sync with Product Service
+        publishStockUpdateEvent("INVENTORY_ADJUSTED", item, dto.getQuantityChange());
+        return item;
     }
+
 
     // --- Reserve / Release / Confirm ---
 
     @Transactional
     @CacheEvict(value = {"inventory", "inventoryByProduct"}, allEntries = true)
-    public InventoryItem reserveStock(UUID productId, int qty) {
+    public InventoryItem reserveStock(UUID productId, int quantity) {
         InventoryItem item = getByProductId(productId);
-        if (item.getAvailableQuantity() < qty)
+        if (item.getAvailableQuantity() < quantity)
             throw new IllegalArgumentException("Insufficient stock");
-        item.setAvailableQuantity(item.getAvailableQuantity() - qty);
-        item.setReservedQuantity(item.getReservedQuantity() + qty);
-        log.info("Reserved {} units of {}", qty, productId);
-        return inventoryRepository.save(item);
+        item.setAvailableQuantity(item.getAvailableQuantity() - quantity);
+        item.setReservedQuantity(item.getReservedQuantity() + quantity);
+        log.info("Reserved {} units of {}", quantity, productId);
+        inventoryRepository.save(item);
+        publishStockUpdateEvent("INVENTORY_ADJUSTED", item, quantity);
+        return item;
     }
 
     @Transactional
     @CacheEvict(value = {"inventory", "inventoryByProduct"}, allEntries = true)
-    public InventoryItem releaseStock(UUID productId, int qty) {
+    public InventoryItem releaseStock(UUID productId, int quantity) {
         InventoryItem item = getByProductId(productId);
-        if (item.getReservedQuantity() < qty)
+        if (item.getReservedQuantity() < quantity)
             throw new IllegalArgumentException("Not enough reserved stock to release");
-        item.setReservedQuantity(item.getReservedQuantity() - qty);
-        item.setAvailableQuantity(item.getAvailableQuantity() + qty);
-        log.info("Released {} units of {}", qty, productId);
-        return inventoryRepository.save(item);
+        item.setReservedQuantity(item.getReservedQuantity() - quantity);
+        item.setAvailableQuantity(item.getAvailableQuantity() + quantity);
+        log.info("Released {} units of {}", quantity, productId);
+        inventoryRepository.save(item);
+        publishStockUpdateEvent("INVENTORY_ADJUSTED", item, quantity);
+        return item;
     }
 
     @Transactional
@@ -116,6 +132,24 @@ public class InventoryService {
         item.setSoldQuantity(item.getSoldQuantity() + qty);
         log.info("Confirmed {} units sold for {}", qty, productId);
         return inventoryRepository.save(item);
+    }
+
+    private void publishStockUpdateEvent(String type, InventoryItem item, int quantityChange) {
+        InventoryEvent event = new InventoryEvent();
+        event.setEventId(UUID.randomUUID().toString());
+        event.setEventType(type);
+        event.setEventVersion(1);
+        event.setOccurredAt(Instant.now());
+        event.setPayload(Map.of(
+                "productId", item.getProductId().toString(),
+                "availableQuantity", item.getAvailableQuantity(),
+                "reservedQuantity", item.getReservedQuantity(),
+                "soldQuantity", item.getSoldQuantity(),
+                "change", quantityChange,
+                "source", "inventory-service"
+        ));
+
+        kafkaInventoryProducer.publishInventoryEvent(event);
     }
 
 

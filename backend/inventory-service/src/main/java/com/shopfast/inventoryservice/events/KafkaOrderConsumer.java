@@ -1,5 +1,6 @@
 package com.shopfast.inventoryservice.events;
 
+import com.shopfast.common.events.InventoryEvent;
 import com.shopfast.inventoryservice.model.InventoryItem;
 import com.shopfast.inventoryservice.repository.InventoryRepository;
 import com.shopfast.inventoryservice.service.InventoryService;

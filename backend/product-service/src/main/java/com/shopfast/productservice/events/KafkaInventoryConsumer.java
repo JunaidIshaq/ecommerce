@@ -1,23 +1,23 @@
 package com.shopfast.productservice.events;
 
+import com.shopfast.common.events.InventoryEvent;
 import com.shopfast.productservice.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 @Component
-public class InventoryEventsListener {
+public class KafkaInventoryConsumer {
 
     private final ProductService productService;
 
     private final ProcessedEventStore processedEventStore;
 
-    public InventoryEventsListener(ProductService productService, ProcessedEventStore processedEventStore) {
+    public KafkaInventoryConsumer(ProductService productService, ProcessedEventStore processedEventStore) {
         this.productService = productService;
         this.processedEventStore = processedEventStore;
     }
@@ -38,7 +38,7 @@ public class InventoryEventsListener {
         }
         
         try {
-            Map<String, Object> p = new HashMap<>();
+            Map<String, Object> p = event.getPayload();
             String productId = p.get("productId").toString();
             int available = (int) p.get("availableQuantity");
             // update product availability (pseudo-code)

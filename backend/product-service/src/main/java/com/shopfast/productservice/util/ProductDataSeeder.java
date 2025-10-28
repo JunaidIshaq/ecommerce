@@ -1,9 +1,11 @@
 package com.shopfast.productservice.util;
 
 import com.github.javafaker.Faker;
+import com.shopfast.productservice.config.ElasticIndexConfig;
 import com.shopfast.productservice.model.Product;
 import com.shopfast.productservice.repository.ProductRepository;
 import com.shopfast.productservice.search.ElasticProductSearchService;
+import com.shopfast.productservice.service.ProductService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +21,22 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class ProductDataSeeder {
 
     private final ProductRepository productRepository;
 
     private final ElasticProductSearchService elasticService;
+
+    private final ElasticIndexConfig elasticIndexConfig;
+
+    private final ProductService productService;
+
+    public ProductDataSeeder(ElasticIndexConfig elasticIndexConfig, ElasticProductSearchService elasticService, ProductRepository productRepository, ProductService productService) {
+        this.elasticIndexConfig = elasticIndexConfig;
+        this.elasticService = elasticService;
+        this.productRepository = productRepository;
+        this.productService = productService;
+    }
 
     @Value("${app.seed-products:false}")
     private boolean seedProducts; // toggle via application.yml
@@ -32,22 +44,27 @@ public class ProductDataSeeder {
     private static final int PRODUCT_COUNT = 1000;
 
     @PostConstruct
-    public void seed() {
+    public void seed() throws IOException {
         if (!seedProducts) {
             System.out.println("🟢 Product seeding disabled (set app.seed-products=true to enable)");
             return;
         }
+        productRepository.deleteAll();
 
-        if (productRepository.count() > 0) {
-            System.out.println("🟢 Products already exist, skipping seeding.");
-            return;
-        }
+//        if (productRepository.count() > 0) {
+//            System.out.println("🟢 Products already exist, skipping seeding.");
+//            return;
+//        }
 
         log.info("🚀 Generating " + PRODUCT_COUNT + " dummy products...");
         Faker faker = new Faker();
         Random random = new Random();
 
         List<Product> products = new ArrayList<>();
+
+
+        elasticIndexConfig.resetProductIndex();
+        elasticIndexConfig.createProductIndexIfNotExists();
 
         for (int i = 1; i <= PRODUCT_COUNT; i++) {
             Product p = new Product();
@@ -59,18 +76,8 @@ public class ProductDataSeeder {
             p.setStock(random.nextInt(1000));
             p.setImages(List.of("https://picsum.photos/seed/" + i + "/600/400"));
             products.add(p);
+            productService.createProduct(ProductMapper.getProductDto(p));
         }
-
-        productRepository.saveAll(products);
-        elasticService.deleteProduct();
-        // Index in Elasticsearch
-        products.forEach(product -> {
-            try {
-                elasticService.indexProduct(product);
-            } catch (IOException e) {
-                System.err.println("⚠️ Failed to index product: " + product.getName());
-            }
-        });
 
         System.out.println("✅ Seeded " + PRODUCT_COUNT + " products successfully!");
     }

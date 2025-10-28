@@ -10,11 +10,24 @@ spring:
       port: ${REDIS_PORT:6379}
       timeout: 6000
       connect-timeout: 6000
-  cache:
-    type: redis
+    cache:
+      type: redis
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:product-service-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
   elasticsearch:
-    uris: ${ELASTIC_URI:http://elasticsearch:9200}
+    uris: ${ELASTIC_URI:http://localhost:9200}
 
   jackson:
     serialization:
@@ -43,10 +56,13 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: always
+  metrics:
+    tags:
+      application: product-service
 
 app:
   seed-products: true

@@ -18,18 +18,18 @@ public class ElasticIndexConfig {
         this.client = client;
     }
 
-//    @PostConstruct
-//    public void resetProductIndex() {
-//        try {
-//            boolean exists = client.indices().exists(e -> e.index("products")).value();
-//            if (exists) {
-//                client.indices().delete(d -> d.index("products"));
-//                log.info("Old Elasticsearch index 'products' deleted successfully");
-//            }
-//        } catch (IOException e) {
-//            log.error("Failed to delete old Elasticsearch index", e);
-//        }
-//    }
+    @PostConstruct
+    public void resetProductIndex() {
+        try {
+            boolean exists = client.indices().exists(e -> e.index("product")).value();
+            if (exists) {
+                client.indices().delete(d -> d.index("product"));
+                log.info("Old Elasticsearch index 'product' deleted successfully");
+            }
+        } catch (IOException e) {
+            log.error("Failed to delete old Elasticsearch index", e);
+        }
+    }
 
 
     @PostConstruct

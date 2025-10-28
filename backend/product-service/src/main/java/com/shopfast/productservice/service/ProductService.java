@@ -1,9 +1,11 @@
 package com.shopfast.productservice.service;
 
+import com.shopfast.common.events.ProductEvent;
 import com.shopfast.productservice.client.CategoryClient;
 import com.shopfast.productservice.dto.PagedResponse;
 import com.shopfast.productservice.dto.ProductDto;
 import com.shopfast.productservice.dto.SearchResult;
+import com.shopfast.productservice.events.KafkaProductProducer;
 import com.shopfast.productservice.exception.InvalidCategoryException;
 import com.shopfast.productservice.exception.ProductNotFoundException;
 import com.shopfast.productservice.model.Product;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -34,10 +37,13 @@ public class ProductService {
 
     private CategoryClient categoryClient;
 
-    public ProductService(ElasticProductSearchService elasticProductSearchService, ProductRepository productRepository, CategoryClient categoryClient) {
+    private KafkaProductProducer kafkaProductProducer;
+
+    public ProductService(ElasticProductSearchService elasticProductSearchService, ProductRepository productRepository, CategoryClient categoryClient, KafkaProductProducer kafkaProductProducer) {
         this.elasticProductSearchService = elasticProductSearchService;
         this.productRepository = productRepository;
         this.categoryClient = categoryClient;
+        this.kafkaProductProducer = kafkaProductProducer;
     }
 
     public Optional<ProductDto> findBySlug(String slug) {
@@ -77,6 +83,22 @@ public class ProductService {
             e.printStackTrace();  // or use log.error("Elasticsearch indexing failed", e);
             throw new RuntimeException("Failed to index product: " + e.getMessage(), e);
         }
+        // Publish product created event
+        ProductEvent event = new ProductEvent(
+                java.util.UUID.randomUUID().toString(),
+                "PRODUCT_CREATED",
+                1,
+                java.time.Instant.now(),
+                Map.of(
+                        "productId", product.getId(),
+                        "name", product.getName(),
+                        "categoryId", product.getCategoryId(),
+                        "price", product.getPrice()
+                )
+        );
+
+        kafkaProductProducer.publishProductEvent(event);
+        log.info("✅ Product event published for {}", product.getId());
         return ProductMapper.getProductDto(product);
     }
 
@@ -93,6 +115,26 @@ public class ProductService {
         List<ProductDto> productDtos = productPage.getContent()
                 .stream()
                 .map(ProductMapper::getProductDto)
+                .toList();
+
+        return new PagedResponse<>(
+                productDtos,
+                productPage.getTotalElements(),
+                productPage.getTotalPages(),
+                pageNumber,
+                pageSize
+        );
+    }
+
+    public PagedResponse<String> getAllProductIds(int pageNumber, int pageSize) {
+        log.info("🧠 Inside getAllProductIds() -> pageNumber={}, pageSize={}", pageNumber, pageSize);
+
+        PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Product> productPage = productRepository.findAll(pageable);
+
+        List<String> productDtos = productPage.getContent()
+                .stream()
+                .map(Product::getId)
                 .toList();
 
         return new PagedResponse<>(
@@ -199,9 +241,8 @@ public class ProductService {
 
             product.setStock(stock);
             productRepository.save(product);
-            elasticProductSearchService.indexProduct(product);
 
-        log.info("Updated product {} in MongoDB. New stock = {}", productId, stock);
+            log.info("Updated product {} in MongoDB. New stock = {}", productId, stock);
 
             // 3️⃣ Reindex product in Elasticsearch (try-catch to avoid breaking Kafka listener)
             try {
