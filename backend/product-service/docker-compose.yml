@@ -289,3 +289,4 @@ volumes:
   es_data:
   redis_data:
   pgdata:
+  product-service_mongo_data:
