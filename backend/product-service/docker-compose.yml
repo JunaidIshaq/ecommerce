@@ -18,6 +18,23 @@ services:
     networks:
       - product-net
 
+  mongo-backup:
+    image: mongo:7
+    container_name: mongo-backup
+    depends_on:
+      - mongo
+    volumes:
+      - ./mongo_backups:/backup
+      - product-service_mongo_data:/data/db
+    entrypoint: >
+      bash -c "while true; do
+        mongodump --host mongo --out /backup/$(date +%F_%H-%M-%S);
+        find /backup -type d -mtime +7 -exec rm -rf {} \;;
+        sleep 3600;
+      done"
+    networks:
+      - product-net
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
     container_name: elasticsearch
