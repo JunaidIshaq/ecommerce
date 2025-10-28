@@ -30,7 +30,7 @@ services:
       bash -c "while true; do
         echo '🔁 Running MongoDB backup...';
         mongodump --host mongo --out /backup/$(date +%F_%H-%M-%S);
-        find /backup -type d -mtime +7 -exec rm -rf {} \;;
+        find /backup -type d -mtime +7 -exec rm -rf {} \;
         sleep 86400;
       done"
     networks:
