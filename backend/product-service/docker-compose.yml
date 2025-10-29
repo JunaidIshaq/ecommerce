@@ -1,40 +1,40 @@
 version: "3.9"
 
 services:
-  mongo:
-    image: mongo:7
-    container_name: mongo
-    restart: always
-    ports:
-      - "27017:27017"
-    healthcheck:
-      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - mongo_data:/data/db
-      - ./mongo_backups:/backups
-    networks:
-      - product-net
-
-  mongo-backup:
-    image: mongo:7
-    container_name: mongo-backup
-    depends_on:
-      - mongo
-    volumes:
-      - ./mongo_backups:/backup
-      - product-service_mongo_data:/data/db
-    entrypoint: >
-      bash -c "while true; do
-        echo '🔁 Running MongoDB backup...';
-        mongodump --host mongo --out /backup/$(date +%F_%H-%M-%S);
-        find /backup -type d -mtime +7 -exec rm -rf {} \;
-        sleep 86400;
-      done"
-    networks:
-      - product-net
+#  mongo:
+#    image: mongo:7
+#    container_name: mongo
+#    restart: always
+#    ports:
+#      - "27017:27017"
+#    healthcheck:
+#      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#    volumes:
+#      - mongo_data:/data/db
+#      - ./mongo_backups:/backups
+#    networks:
+#      - product-net
+#
+#  mongo-backup:
+#    image: mongo:7
+#    container_name: mongo-backup
+#    depends_on:
+#      - mongo
+#    volumes:
+#      - ./mongo_backups:/backup
+#      - product-service_mongo_data:/data/db
+#    entrypoint: >
+#      bash -c "while true; do
+#        echo '🔁 Running MongoDB backup...';
+#        mongodump --host mongo --out /backup/$(date +%F_%H-%M-%S);
+#        find /backup -type d -mtime +7 -exec rm -rf {} \;
+#        sleep 86400;
+#      done"
+#    networks:
+#      - product-net
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
