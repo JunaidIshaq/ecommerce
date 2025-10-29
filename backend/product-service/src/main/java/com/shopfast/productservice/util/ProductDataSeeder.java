@@ -49,12 +49,12 @@ public class ProductDataSeeder {
             System.out.println("🟢 Product seeding disabled (set app.seed-products=true to enable)");
             return;
         }
-        productRepository.deleteAll();
+//        productRepository.deleteAll();
 
-//        if (productRepository.count() > 0) {
-//            System.out.println("🟢 Products already exist, skipping seeding.");
-//            return;
-//        }
+        if (productRepository.count() > 0) {
+            System.out.println("🟢 Products already exist, skipping seeding.");
+            return;
+        }
 
         log.info("🚀 Generating " + PRODUCT_COUNT + " dummy products...");
         Faker faker = new Faker();
