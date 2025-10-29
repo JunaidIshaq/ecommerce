@@ -1,33 +1,48 @@
 groups:
   - name: kafka_alerts
     rules:
+      # ⚠️ Alert if Kafka consumer lag stays high for > 2m
       - alert: KafkaHighConsumerLag
-        expr: kafka_consumergroup_lag > 1000
+        expr: sum(kafka_consumergroup_lag) > 1000
         for: 2m
         labels:
           severity: warning
         annotations:
           summary: "High Kafka consumer lag (>{{ $value }})"
-          description: "Consumer group has high lag. Check consumers."
-
-  - name: inventory_alerts
-    rules:
-      - alert: LowInventoryWarning
-        expr: inventory_available_total_by_product < 5
-        for: 5m
-        labels:
-          severity: critical
-        annotations:
-          summary: "Low inventory for product"
-          description: "Product {{ $labels.productId }} has very low stock: {{ $value }}"
+          description: "Consumer group is lagging behind Kafka topic consumption."
 
   - name: dlq_alerts
     rules:
+      # ⚠️ Alert if DLQ topic grows fast (failed messages)
       - alert: DlqMessageSpike
-        expr: increase(kafka_topic_messages_total{topic=~".*\\.dlq"}[5m]) > 10
+        expr: increase(kafka_topic_partition_current_offset{topic=~".*\\.dlq"}[5m]) > 10
         for: 1m
         labels:
           severity: warning
         annotations:
-          summary: "Spike in DLQ messages"
-          description: "Messages pushed to DLQ in last 5m: {{ $value }}"
+          summary: "DLQ spike detected"
+          description: "More than 10 messages added to a DLQ topic in the last 5 minutes."
+
+  - name: inventory_alerts
+    rules:
+      # ⚠️ Alert if a product’s inventory drops too low
+      - alert: LowInventoryWarning
+        expr: inventory_available{productId!=""} < 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low stock for product {{ $labels.productId }}"
+          description: "Available quantity is only {{ $value }} units for {{ $labels.productId }}"
+
+  - name: service_alerts
+    rules:
+      # ❌ Alert if any microservice stops responding
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.instance }} is DOWN"
+          description: "Prometheus target {{ $labels.job }} is not reachable"
