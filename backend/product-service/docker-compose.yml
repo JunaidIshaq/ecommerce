@@ -319,3 +319,4 @@ volumes:
   es_data:
   redis_data:
   pgdata:
+  grafana_data:
