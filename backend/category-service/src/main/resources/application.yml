@@ -3,7 +3,7 @@ spring:
     name: category-service
   data:
     mongodb:
-      uri: ${MONGO_URI:mongodb://localhost:27017/category_db}
+      uri: ${MONGO_URI:mongodb://host.docker.internal:27017/category_db}
 
     redis:
       host: ${REDIS_HOST:redis}
