@@ -3,7 +3,7 @@ spring:
     name: product-service
   data:
     mongodb:
-      uri: ${MONGO_URI:mongodb://host.docker.internal:27017/product_db}
+      uri: ${MONGO_URI:mongodb://172.17.0.1:27017/product_db}
 
     redis:
       host: ${REDIS_HOST:redis}
