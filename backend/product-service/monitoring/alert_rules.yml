@@ -1,0 +1,33 @@
+groups:
+  - name: kafka_alerts
+    rules:
+      - alert: KafkaHighConsumerLag
+        expr: kafka_consumergroup_lag > 1000
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High Kafka consumer lag (>{{ $value }})"
+          description: "Consumer group has high lag. Check consumers."
+
+  - name: inventory_alerts
+    rules:
+      - alert: LowInventoryWarning
+        expr: inventory_available_total_by_product < 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low inventory for product"
+          description: "Product {{ $labels.productId }} has very low stock: {{ $value }}"
+
+  - name: dlq_alerts
+    rules:
+      - alert: DlqMessageSpike
+        expr: increase(kafka_topic_messages_total{topic=~".*\\.dlq"}[5m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Spike in DLQ messages"
+          description: "Messages pushed to DLQ in last 5m: {{ $value }}"

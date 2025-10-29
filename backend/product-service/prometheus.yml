@@ -1,7 +1,20 @@
 global:
-  scrape_interval: 5s
+  scrape_interval: 15s
+  evaluation_interval: 15s
 
 scrape_configs:
+  # Prometheus self
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090']
+
+  # Kafka Exporter (broker metrics & consumer group offsets/lag)
+  - job_name: 'kafka-exporter'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['kafka-exporter:9308']
+
+  # Spring Boot services (actuator prometheus endpoint)
   - job_name: 'product-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
@@ -10,9 +23,20 @@ scrape_configs:
   - job_name: 'category-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ 'category-service:8090' ]
+      - targets: ['category-service:8090']
 
   - job_name: 'inventory-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ 'category-service:8090' ]
+      - targets: ['inventory-service:8091']
+
+  - job_name: 'order-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['order-service:8092']
+
+# Optional: scrape Kafka JMX exporter if you run one (recommended for broker-level metrics)
+# - job_name: 'kafka-jmx'
+#   metrics_path: '/metrics'
+#   static_configs:
+#     - targets: ['kafka-jmx:9404']

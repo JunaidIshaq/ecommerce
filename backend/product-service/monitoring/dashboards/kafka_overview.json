@@ -1,0 +1,45 @@
+{
+  "annotations": { "list": [] },
+  "description": "Kafka & Inventory overview",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Kafka Consumer Group Lag",
+      "targets": [
+        {
+          "expr": "sum(kafka_consumergroup_lag) by (group)",
+          "format": "time_series"
+        }
+      ],
+      "gridPos": {"x":0,"y":0,"w":12,"h":8}
+    },
+    {
+      "type": "graph",
+      "title": "Inventory Events Processed",
+      "targets": [
+        {
+          "expr": "increase(events_inventory_processed_total[5m])",
+          "format": "time_series"
+        }
+      ],
+      "gridPos": {"x":12,"y":0,"w":12,"h":8}
+    },
+    {
+      "type": "graph",
+      "title": "DLQ messages (per topic)",
+      "targets": [
+        {
+          "expr": "sum(increase(kafka_topic_messages_total{topic=~\".*\\.dlq\"}[5m])) by (topic)",
+          "format": "time_series"
+        }
+      ],
+      "gridPos": {"x":0,"y":8,"w":24,"h":8}
+    }
+  ],
+  "schemaVersion": 30,
+  "title": "Event-driven Overview",
+  "version": 1
+}

@@ -9,6 +9,8 @@ import com.shopfast.inventoryservice.events.KafkaInventoryProducer;
 import com.shopfast.inventoryservice.model.InventoryItem;
 import com.shopfast.inventoryservice.repository.InventoryRepository;
 import com.shopfast.inventoryservice.util.InventoryMapper;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -32,9 +34,12 @@ public class InventoryService {
 
     private final KafkaInventoryProducer kafkaInventoryProducer;
 
-    public InventoryService(InventoryRepository inventoryRepository, KafkaInventoryProducer kafkaInventoryProducer) {
+    private final MeterRegistry meterRegistry;
+
+    public InventoryService(InventoryRepository inventoryRepository, KafkaInventoryProducer kafkaInventoryProducer, MeterRegistry meterRegistry) {
         this.inventoryRepository = inventoryRepository;
         this.kafkaInventoryProducer = kafkaInventoryProducer;
+        this.meterRegistry = meterRegistry;
     }
 
     // CRUD
@@ -88,6 +93,7 @@ public class InventoryService {
         inventoryRepository.save(item);
         // 🔁 Call Kafka producer to sync with Product Service
         publishStockUpdateEvent("INVENTORY_ADJUSTED", item, dto.getQuantityChange());
+        publishInventoryMetrics(item.getProductId(), item);
         return item;
     }
 
@@ -105,6 +111,7 @@ public class InventoryService {
         log.info("Reserved {} units of {}", quantity, productId);
         inventoryRepository.save(item);
         publishStockUpdateEvent("INVENTORY_ADJUSTED", item, quantity);
+        publishInventoryMetrics(item.getProductId(), item);
         return item;
     }
 
@@ -119,6 +126,7 @@ public class InventoryService {
         log.info("Released {} units of {}", quantity, productId);
         inventoryRepository.save(item);
         publishStockUpdateEvent("INVENTORY_ADJUSTED", item, quantity);
+        publishInventoryMetrics(item.getProductId(), item);
         return item;
     }
 
@@ -131,7 +139,9 @@ public class InventoryService {
         item.setReservedQuantity(item.getReservedQuantity() - qty);
         item.setSoldQuantity(item.getSoldQuantity() + qty);
         log.info("Confirmed {} units sold for {}", qty, productId);
-        return inventoryRepository.save(item);
+        item = inventoryRepository.save(item);
+        publishInventoryMetrics(item.getProductId(), item);
+        return item;
     }
 
     private void publishStockUpdateEvent(String type, InventoryItem item, int quantityChange) {
@@ -150,6 +160,15 @@ public class InventoryService {
         ));
 
         kafkaInventoryProducer.publishInventoryEvent(event);
+    }
+
+    // Call this after changes (create/adjust/reserve/release/confirm)
+    private void publishInventoryMetrics(UUID productId, InventoryItem item) {
+        String name = "inventory.available";
+        meterRegistry.gauge(name, Tags.of("productId", productId.toString()), item.getAvailableQuantity());
+        // a counter for reservations
+        meterRegistry.counter("inventory.reservations.count", "productId", productId.toString())
+                .increment(); // call when reservation happens
     }
 
 
