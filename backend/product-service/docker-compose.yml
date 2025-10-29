@@ -247,23 +247,51 @@ services:
       - product-net
 
 
+  # ---------- Prometheus ----------
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
     ports:
       - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-lifecycle'  # allows reload via API
     networks:
       - product-net
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:9.6
     container_name: grafana
+    user: "472" # avoid permission issues; optional
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
     ports:
       - "3000:3000"
     depends_on:
       - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/dashboards:/var/lib/grafana/dashboards:ro
+      - ./monitoring/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - product-net
+
+    # ---------- Kafka Exporter (broker metrics & consumer lag) ----------
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    container_name: kafka-exporter
+    environment:
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_ZOOKEEPER=zookeeper:2181
+      # optional: specify topics regex or other envs per image docs
+    ports:
+      - "9308:9308"   # exporter metrics port
+    depends_on:
+      - kafka
     networks:
       - product-net
 
