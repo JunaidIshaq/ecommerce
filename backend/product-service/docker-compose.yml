@@ -65,7 +65,6 @@ services:
     container_name: product-service
     depends_on:
       - redis
-      - mongo
       - elasticsearch
       - logstash
       - category-service
@@ -91,7 +90,6 @@ services:
     container_name: category-service
     depends_on:
       - redis
-      - mongo
       - elasticsearch
       - logstash
     environment:
