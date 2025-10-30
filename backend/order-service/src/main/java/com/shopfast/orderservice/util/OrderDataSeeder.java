@@ -45,7 +45,7 @@ public class OrderDataSeeder {
             System.out.println("🟢 Order seeding disabled (set app.seed-products=true to enable)");
             return;
         }
-        orderRepository.deleteAll();
+//        orderRepository.deleteAll();
         if (orderRepository.count() > 0) {
             System.out.println("🟢 Orders already exist, skipping seeding.");
             return;
