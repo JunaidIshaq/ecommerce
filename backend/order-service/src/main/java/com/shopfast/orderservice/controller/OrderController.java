@@ -2,6 +2,7 @@ package com.shopfast.orderservice.controller;
 
 import com.shopfast.orderservice.dto.OrderRequestDto;
 import com.shopfast.orderservice.model.Order;
+import com.shopfast.orderservice.repository.OrderRepository;
 import com.shopfast.orderservice.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,8 +27,11 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    public OrderController(OrderService orderService) {
+    private OrderRepository orderRepository;
+
+    public OrderController(OrderService orderService, OrderRepository orderRepository) {
         this.orderService = orderService;
+        this.orderRepository = orderRepository;
     }
 
     @Operation(summary = "Place an order")
@@ -45,7 +49,8 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<List<Order>> myOrders() {
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.ok(orderService.getOrdersForUser(userId));
+//        return ResponseEntity.ok(orderService.getOrdersForUser(userId));
+          return ResponseEntity.ok(orderRepository.findAll());
     }
 
 
