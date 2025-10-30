@@ -3,7 +3,7 @@ spring:
     name: order-service
 
   datasource:
-    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/order_db}
+    url: ${POSTGRES_URI:jdbc:postgresql://host.docker.internal:5432/order_db}
     username: postgres
     password: postgres
   jpa:
@@ -13,7 +13,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
     consumer:
       group-id: ${KAFKA_CONSUMER_GROUP:order-service-group}
       auto-offset-reset: earliest
@@ -74,8 +74,9 @@ management:
   metrics:
     tags:
       application: order-service
+
 app:
-  seed-orders: true
+  seed-order: true
 
 category:
   service:

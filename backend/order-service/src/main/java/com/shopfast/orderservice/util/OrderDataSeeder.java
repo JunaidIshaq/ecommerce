@@ -34,14 +34,14 @@ public class OrderDataSeeder {
         this.productClient = productClient;
     }
 
-    @Value("${app.seed-orders:false")
-    private boolean seedOrders; // toggle via application.yml
+    @Value("${app.seed-order:false}")
+    private boolean seedOrder; // toggle via application.yml
 
-    private static final int ORDER_COUNT = 10;
+    private static final int ORDER_COUNT = 100;
 
     @PostConstruct
     public void seed() throws IOException {
-        if (!seedOrders) {
+        if (!seedOrder) {
             System.out.println("🟢 Order seeding disabled (set app.seed-products=true to enable)");
             return;
         }

@@ -75,6 +75,9 @@ management:
     tags:
       application: order-service
 
+app:
+  seed-order: true
+
 category:
   service:
     url: ${CATEGORY_SERVICE_URL:http://localhost:8090/api/v1/category}

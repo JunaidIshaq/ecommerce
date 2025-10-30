@@ -71,6 +71,8 @@ management:
   metrics:
     tags:
       application: inventory-service
+app:
+  seed-inventory: true
 
 category:
   service:
