@@ -122,6 +122,8 @@ services:
       - REDIS_PORT=6379
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
       - SERVER_PORT=8091
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
     ports:
       - "8091:8091"
     depends_on:
@@ -142,6 +144,8 @@ services:
       - KAFKA_BOOTSTRAP=kafka:9092
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
       - SERVER_PORT=8092
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
     ports:
       - "8092:8092"
     depends_on:
