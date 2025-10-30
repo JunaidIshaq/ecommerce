@@ -3,7 +3,7 @@ spring:
     name: order-service
 
   datasource:
-    url: ${POSTGRES_URI:jdbc:postgresql://postgres:5432/order_db}
+    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/order_db}
     username: postgres
     password: postgres
   jpa:
@@ -74,6 +74,8 @@ management:
   metrics:
     tags:
       application: order-service
+app:
+  seed-orders: true
 
 category:
   service:

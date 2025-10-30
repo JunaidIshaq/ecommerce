@@ -3,7 +3,7 @@ spring:
     name: inventory-service
 
   datasource:
-    url: ${POSTGRES_URI:jdbc:postgresql://postgres:5432/inventory_db}
+    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/inventory_db}
     username: postgres
     password: postgres
   jpa:
