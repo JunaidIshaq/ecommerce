@@ -45,7 +45,7 @@ public class OrderDataSeeder {
             System.out.println("🟢 Order seeding disabled (set app.seed-products=true to enable)");
             return;
         }
-
+        orderRepository.deleteAll();
         if (orderRepository.count() > 0) {
             System.out.println("🟢 Orders already exist, skipping seeding.");
             return;
@@ -63,7 +63,7 @@ public class OrderDataSeeder {
                 OrderItem  orderItem = new OrderItem();
                 orderItem.setId(UUID.randomUUID());
                 orderItem.setProductId(UUID.fromString(productIds.get(new Random().nextInt(1000))));
-                orderItem.setQuantity(new Random().nextInt(10));
+                orderItem.setQuantity(new Random().nextInt(1, 10));
                 orderItem.setPrice(BigDecimal.valueOf(new Random().nextDouble(1000)));
                 orderItem.setCreatedAt(Instant.now());
                 orderItem.setUpdatedAt(Instant.now());
