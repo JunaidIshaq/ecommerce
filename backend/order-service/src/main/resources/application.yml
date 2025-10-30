@@ -80,12 +80,12 @@ app:
 
 category:
   service:
-    url: ${CATEGORY_SERVICE_URL:http://localhost:8090/api/v1/category}
+    url: ${CATEGORY_SERVICE_URL:http://category:8090/api/v1/category}
 
 product:
   service:
-    url: ${PRODUCT_SERVICE_URL:http://localhost:8080/api/v1/project}
+    url: ${PRODUCT_SERVICE_URL:http://product:8080/api/v1/project}
 
 inventory:
   service:
-    url: ${INVENTORY_SERVICE_URL:http://localhost:8091/api/v1/inventory}
+    url: ${INVENTORY_SERVICE_URL:http://inventory:8091/api/v1/inventory}
