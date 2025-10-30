@@ -181,20 +181,20 @@ services:
     networks:
       - product-net
 
-  postgres:
-    image: postgres:15
-    container_name: postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: inventory_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./init-order-db.sql:/docker-entrypoint-initdb.d/init-order-db.sql
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - product-net
+#  postgres:
+#    image: postgres:15
+#    container_name: postgres
+#    environment:
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+#      POSTGRES_DB: inventory_db
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - ./init-order-db.sql:/docker-entrypoint-initdb.d/init-order-db.sql
+#      - pgdata:/var/lib/postgresql/data
+#    networks:
+#      - product-net
 
   redis:
     image: redis:7
