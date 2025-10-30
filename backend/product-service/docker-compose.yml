@@ -115,7 +115,7 @@ services:
     build: ../inventory-service
     container_name: inventory-service
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/inventory_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/inventory_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - REDIS_HOST=redis
@@ -125,7 +125,6 @@ services:
     ports:
       - "8091:8091"
     depends_on:
-      - postgres
       - redis
       - kafka
       - logstash
@@ -137,7 +136,7 @@ services:
     build: ../order-service
     container_name: order-service
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/order_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/order_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - KAFKA_BOOTSTRAP=kafka:9092
@@ -148,7 +147,6 @@ services:
     depends_on:
       - redis
       - kafka
-      - postgres
       - logstash
     networks:
       - product-net
