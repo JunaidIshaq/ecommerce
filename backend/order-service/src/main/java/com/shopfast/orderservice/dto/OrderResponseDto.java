@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 public class OrderResponseDto implements Serializable {
@@ -13,17 +14,20 @@ public class OrderResponseDto implements Serializable {
     @JsonProperty("id")
     private String id;
 
-    @JsonProperty("product_id")
-    private String productId;
+    @JsonProperty("user_id")
+    private String userId;
 
-    @JsonProperty("available_quantity")
-    private int availableQuantity;
+    @JsonProperty("order_number")
+    private String orderNumber;
 
-    @JsonProperty("reserved_quantity")
-    private int reservedQuantity;
+    @JsonProperty("status")
+    private String status;
 
-    @JsonProperty("sold_quantity")
-    private int soldQuantity;
+    @JsonProperty("total_amount")
+    private String totalAmount;
+    
+    @JsonProperty("items")
+    private List<OrderItemDto> items;
 
     @JsonProperty("created_at")
     private String createdAt;

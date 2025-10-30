@@ -71,7 +71,7 @@ public class OrderDataSeeder {
                 orderItem.setUpdatedBy(UUID.randomUUID().toString());
                 orderItems.add(orderItem);
             }
-            orderRequestDto.setItems(orderItems.stream().map(OrderMapper::getOrderDto).toList());
+            orderRequestDto.setItems(orderItems.stream().map(OrderMapper::getOrderItemDto).toList());
             orderService.placeOrder(orderRequestDto);
         }
 

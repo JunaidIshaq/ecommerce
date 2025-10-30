@@ -1,9 +1,11 @@
 package com.shopfast.orderservice.controller;
 
 import com.shopfast.orderservice.dto.OrderRequestDto;
+import com.shopfast.orderservice.dto.OrderResponseDto;
 import com.shopfast.orderservice.model.Order;
 import com.shopfast.orderservice.repository.OrderRepository;
 import com.shopfast.orderservice.service.OrderService;
+import com.shopfast.orderservice.util.OrderMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -47,10 +49,10 @@ public class OrderController {
 
     @Operation(summary = "List orders for current user")
     @GetMapping
-    public ResponseEntity<List<Order>> myOrders() {
+    public ResponseEntity<List<OrderResponseDto>> myOrders() {
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getName();
 //        return ResponseEntity.ok(orderService.getOrdersForUser(userId));
-          return ResponseEntity.ok(orderRepository.findAll());
+          return ResponseEntity.ok(orderRepository.findAll().stream().map(OrderMapper::getOrderResponseDto).toList());
     }
 
 
