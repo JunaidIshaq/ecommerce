@@ -3,7 +3,7 @@ package com.shopfast.orderservice.service;
 import com.shopfast.orderservice.dto.OrderRequestDto;
 import com.shopfast.orderservice.enums.OrderStatus;
 import com.shopfast.orderservice.events.KafkaOrderProducer;
-import com.shopfast.orderservice.events.OrderCommand;
+import com.shopfast.common.events.OrderCommand;
 import com.shopfast.orderservice.model.Order;
 import com.shopfast.orderservice.model.OrderItem;
 import com.shopfast.orderservice.model.ProcessedCommand;

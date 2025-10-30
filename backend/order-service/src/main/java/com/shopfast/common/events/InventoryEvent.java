@@ -17,7 +17,7 @@ public class InventoryEvent implements Serializable {
 
     private String eventId;
 
-    private String eventType;
+    private String eventType;  // INVENTORY_RESERVED | INVENTORY_CONFIRMED | INVENTORY_RELEASED | INVENTORY_FAILED
 
     private int eventVersion;
 

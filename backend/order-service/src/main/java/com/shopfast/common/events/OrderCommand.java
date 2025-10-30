@@ -11,15 +11,15 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductEvent implements Serializable {
+public class OrderCommand implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String eventId;
+    private String commandId;
 
-    private String eventType;     // PRODUCT_CREATED, PRODUCT_UPDATED, PRODUCT_DELETED
+    private String commandType; //RESERVE | CONFIRM | RELEASE
 
-    private int eventVersion;
+    private int commandVersion = 1;
 
     private Instant occurredAt;
 

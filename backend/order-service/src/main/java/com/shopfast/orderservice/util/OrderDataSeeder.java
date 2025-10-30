@@ -37,7 +37,7 @@ public class OrderDataSeeder {
     @Value("${app.seed-order:false}")
     private boolean seedOrder; // toggle via application.yml
 
-    private static final int ORDER_COUNT = 5;
+    private static final int ORDER_COUNT = 10;
 
     @PostConstruct
     public void seed() throws IOException {

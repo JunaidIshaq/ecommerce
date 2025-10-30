@@ -1,4 +1,4 @@
-package com.shopfast.orderservice.events;
+package com.shopfast.common.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
