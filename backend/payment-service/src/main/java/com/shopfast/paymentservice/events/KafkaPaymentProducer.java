@@ -11,11 +11,11 @@ import java.io.Serializable;
 @Component
 public class KafkaPaymentProducer {
 
-    private final KafkaTemplate<String, Serializable> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     private static final String TOPIC_PAYMENTS = "payment.events";
 
-    public KafkaPaymentProducer(KafkaTemplate<String, Serializable> kafkaTemplate) {
+    public KafkaPaymentProducer(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
