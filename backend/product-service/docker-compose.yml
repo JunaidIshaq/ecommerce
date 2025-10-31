@@ -177,7 +177,6 @@ services:
     ports:
       - "8093:8093"
     depends_on:
-      - postgres
       - kafka
       - redis
     networks:
