@@ -2,7 +2,6 @@ package com.shopfast.paymentservice.client;
 
 import com.shopfast.paymentservice.dto.PagedResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,6 @@ import java.util.Objects;
 @Component
 public class ProductClient {
 
-    @Autowired
     private final RestTemplate restTemplate;
 
     public ProductClient(RestTemplate restTemplate) {
