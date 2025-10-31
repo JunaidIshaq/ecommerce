@@ -1,5 +1,6 @@
 package com.shopfast.categoryservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,6 +8,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,17 +19,21 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CategoryDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @JsonProperty("id")
     public String id;
 
-
+    @JsonProperty("name")
     @NotBlank(message = "Category name is required")
     @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
     public String name;
 
+    @JsonProperty("description")
     @Size(max = 500, message = "Description must not exceed 500 characters")
     public String description;
 

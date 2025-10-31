@@ -48,9 +48,12 @@ public class CategoryService {
     }
 
     @Transactional
-    @Cacheable(value = "category")
+    @Cacheable(
+            value = "category",
+            key = "'pageNumber_' + #pageNumber + '_pageSize_' + #pageSize"
+    )
     public PagedResponse<CategoryDto> getAllCategories(int pageNumber, int pageSize) {
-        log.info("Getting all categories");
+        log.info("Getting all categories() -> p");
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
         Page<Category> categoryPage = categoryRepository.findAll(pageable);
         List<CategoryDto> categoryDtos = categoryPage.stream().map(CategoryMapper::getCategoryDto).toList();

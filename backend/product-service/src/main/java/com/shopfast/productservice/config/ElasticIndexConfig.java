@@ -18,7 +18,7 @@ public class ElasticIndexConfig {
         this.client = client;
     }
 
-    @PostConstruct
+
     public void resetProductIndex() {
         try {
             boolean exists = client.indices().exists(e -> e.index("product")).value();
@@ -32,7 +32,6 @@ public class ElasticIndexConfig {
     }
 
 
-    @PostConstruct
     public void createProductIndexIfNotExists() {
         try {
             boolean exists = client.indices().exists(e -> e.index("product")).value();

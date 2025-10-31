@@ -1,5 +1,6 @@
 package com.shopfast.categoryservice.util;
 
+import com.shopfast.categoryservice.config.ElasticIndexConfig;
 import com.shopfast.categoryservice.model.Category;
 import com.shopfast.categoryservice.repository.CategoryRepository;
 import com.shopfast.categoryservice.search.ElasticCategorySearchService;
@@ -22,9 +23,12 @@ public class CategoryDataSeeder {
 
     private final ElasticCategorySearchService elasticService;
 
-    public CategoryDataSeeder(CategoryRepository categoryRepository, ElasticCategorySearchService elasticService) {
+    private final ElasticIndexConfig elasticIndexConfig;
+
+    public CategoryDataSeeder(CategoryRepository categoryRepository, ElasticCategorySearchService elasticService, ElasticIndexConfig elasticIndexConfig) {
         this.categoryRepository = categoryRepository;
         this.elasticService = elasticService;
+        this.elasticIndexConfig = elasticIndexConfig;
     }
 
     @Value("${app.seed-categories:false}")
@@ -33,16 +37,22 @@ public class CategoryDataSeeder {
     private static final int CATEGORY_COUNT = 6;
 
     @PostConstruct
-    public void seed() {
+    public void seed() throws IOException {
         if (!seedCategories) {
             System.out.println("🟢 Category seeding disabled (set app.seed-categories=true to enable)");
             return;
         }
 
-        if (categoryRepository.count() > 0) {
+        if (categoryRepository.count() > 0 && elasticService.count() > 0) {
             System.out.println("🟢 Category already exist, skipping seeding.");
             return;
+        } else {
+            categoryRepository.deleteAll();
+            elasticService.deleteAllCategories();
         }
+
+        elasticIndexConfig.resetCategoryIndex();
+        elasticIndexConfig.createCategoryIndexIfNotExists();
 
         // Predefined category list with fixed UUIDs
         List<Category> predefined = List.of(

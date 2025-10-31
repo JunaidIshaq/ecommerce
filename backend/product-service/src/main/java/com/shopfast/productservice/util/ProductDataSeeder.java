@@ -62,9 +62,6 @@ public class ProductDataSeeder {
         Faker faker = new Faker();
         Random random = new Random();
 
-        List<Product> products = new ArrayList<>();
-
-
         elasticIndexConfig.resetProductIndex();
         elasticIndexConfig.createProductIndexIfNotExists();
 
@@ -76,7 +73,6 @@ public class ProductDataSeeder {
             p.setPrice(new BigDecimal(faker.commerce().price(10.0, 999.99)));
             p.setStock(random.nextInt(1000));
             p.setImages(List.of("https://picsum.photos/seed/" + i + "/600/400"));
-            products.add(p);
             productService.createProduct(ProductMapper.getProductDto(p));
         }
 

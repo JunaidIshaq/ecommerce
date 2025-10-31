@@ -1,9 +1,12 @@
 package com.shopfast.categoryservice.search;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch.core.CountResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
 import com.shopfast.categoryservice.dto.SearchResult;
 import com.shopfast.categoryservice.model.Category;
 import org.springframework.stereotype.Service;
@@ -93,4 +96,27 @@ public class ElasticCategorySearchService {
         return new SearchResult(categories, totalHits);
     }
 
+    public int count() throws IOException {
+        CountResponse countResponse = client.count(d -> d.index("category"));
+        return Math.toIntExact(countResponse.count());
+    }
+
+    public void deleteAllCategories() throws IOException {
+        try {
+            DeleteIndexResponse response = client.indices().delete(d -> d.index("category"));
+
+            if (response.acknowledged()) {
+                System.out.println("✅ Index 'category' deleted successfully.");
+            } else {
+                System.out.println("⚠️ Index 'category' deletion not acknowledged.");
+            }
+
+        } catch (ElasticsearchException e) {
+            if (e.response().error().type().equals("index_not_found_exception")) {
+                System.out.println("⚠️ Index 'category' does not exist.");
+            } else {
+                throw e;
+            }
+        }
+    }
 }
