@@ -6,6 +6,7 @@ import com.shopfast.categoryservice.exception.CategoryNotFoundException;
 import com.shopfast.categoryservice.model.Category;
 import com.shopfast.categoryservice.repository.CategoryRepository;
 import com.shopfast.categoryservice.util.CategoryMapper;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -30,6 +31,7 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+    @Transactional
     @Caching(evict = {
             @CacheEvict(value = "category", allEntries = true),
             @CacheEvict(value = "category", key = "#result.id", condition = "#result != null")
@@ -45,6 +47,7 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
+    @Transactional
     @Cacheable(value = "category")
     public PagedResponse<CategoryDto> getAllCategories(int pageNumber, int pageSize) {
         log.info("Getting all categories");
@@ -61,18 +64,21 @@ public class CategoryService {
         );
     }
 
+    @Transactional
     @Cacheable(value = "category", key = "#id")
     public Category getCategoryById(String id) {
         return categoryRepository.findById(UUID.fromString(id))
                 .orElseThrow(() -> new CategoryNotFoundException(id));
     }
 
+    @Transactional
     @Cacheable(value = "subcategories", key = "#parentId")
     public List<Category> getSubCategories(String parentId) {
         log.info("Getting subcategories for category {}", parentId);
         return categoryRepository.findByParentId(parentId);
     }
 
+    @Transactional
     @Caching(evict = {
             @CacheEvict(value = "category", allEntries = true),
             @CacheEvict(value = "category", key = "#id"),
@@ -89,6 +95,7 @@ public class CategoryService {
         return categoryRepository.save(existingCategory);
     }
 
+    @Transactional
     @Caching(evict = {
             @CacheEvict(value = "category", allEntries = true),
             @CacheEvict(value = "category", key = "#id"),

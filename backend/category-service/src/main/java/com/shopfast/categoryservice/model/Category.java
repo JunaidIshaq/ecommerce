@@ -1,6 +1,7 @@
 package com.shopfast.categoryservice.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.CollectionTable;
@@ -36,9 +37,7 @@ import java.util.UUID;
 @EntityListeners(AuditingEntityListener.class)  // Enables @CreatedDate etc.
 @JsonIgnoreProperties(ignoreUnknown = true)  // Prevent unknown fields from breaking serialization
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Category implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class Category {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -54,6 +53,7 @@ public class Category implements Serializable {
     @Column(name = "parentId")
     private String parentId;
 
+    @JsonIgnore
     @ElementCollection
     @CollectionTable(name = "category_subcategory_ids", joinColumns = @JoinColumn(name = "category_id"))
     @Column(name = "sub_category_id")
