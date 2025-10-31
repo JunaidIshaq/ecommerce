@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
-
 @Slf4j
 @Component
 public class KafkaPaymentProducer {

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @Tag(name = "Products", description = "Product CRUD and Search APIs")
 @RestController
@@ -53,11 +54,11 @@ public class ProductController {
 
     @Operation(summary = "Get all products (paginated)")
     @GetMapping("/ids")
-    public ResponseEntity<PagedResponse<String>> getAllProductIds(
+    public ResponseEntity<PagedResponse<UUID>> getAllProductIds(
             @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
     ) {
-        PagedResponse<String> response = productService.getAllProductIds(pageNumber, pageSize);
+        PagedResponse<UUID> response = productService.getAllProductIds(pageNumber, pageSize);
         return ResponseEntity.ok(response);
     }
 

@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -62,7 +63,7 @@ public class CategoryService {
 
     @Cacheable(value = "category", key = "#id")
     public Category getCategoryById(String id) {
-        return categoryRepository.findById(id)
+        return categoryRepository.findById(UUID.fromString(id))
                 .orElseThrow(() -> new CategoryNotFoundException(id));
     }
 
@@ -94,9 +95,9 @@ public class CategoryService {
             @CacheEvict(value = "subcategories", allEntries = true)
     })
     public void deleteCategory(String id) {
-        if(!categoryRepository.existsById(id)) {
+        if(!categoryRepository.existsById(UUID.fromString(id))) {
             throw new CategoryNotFoundException(id);
         }
-        categoryRepository.deleteById(id);
+        categoryRepository.deleteById(UUID.fromString(id));
     }
 }

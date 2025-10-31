@@ -30,7 +30,7 @@ public class ElasticProductSearchService {
     }
 
     public void indexProduct(Product product) throws IOException {
-        client.index(i -> i.index("product").id(product.getId()).document(product));
+        client.index(i -> i.index("product").id(String.valueOf(product.getId())).document(product));
     }
 
     public void deleteProductFromIndex(String id) {

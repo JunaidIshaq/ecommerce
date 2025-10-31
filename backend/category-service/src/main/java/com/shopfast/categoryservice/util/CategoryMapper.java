@@ -3,11 +3,13 @@ package com.shopfast.categoryservice.util;
 import com.shopfast.categoryservice.dto.CategoryDto;
 import com.shopfast.categoryservice.model.Category;
 
+import java.util.UUID;
+
 public class CategoryMapper {
 
     public static Category getCategory(CategoryDto dto) {
         Category category = new Category();
-        category.setId(dto.getId());
+        category.setId(UUID.fromString(dto.getId()));
         category.setName(dto.getName());
         category.setDescription(dto.getDescription());
         category.setParentId(dto.getParentId());
@@ -17,7 +19,7 @@ public class CategoryMapper {
 
     public static CategoryDto getCategoryDto(Category category) {
         CategoryDto dto = new CategoryDto();
-        dto.setId(category.getId());
+        dto.setId(String.valueOf(category.getId()));
         dto.setName(category.getName());
         dto.setDescription(category.getDescription());
         dto.setParentId(category.getParentId());

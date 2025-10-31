@@ -2,9 +2,6 @@ spring:
   application:
     name: product-service
   data:
-    mongodb:
-      uri: ${MONGO_URI:mongodb://host.docker.internal:27017/product_db}
-
     redis:
       host: ${REDIS_HOST:redis}
       port: ${REDIS_PORT:6379}
@@ -12,6 +9,16 @@ spring:
       connect-timeout: 6000
     cache:
       type: redis
+
+  datasource:
+    url: ${POSTGRES_URI:jdbc:postgresql://host.docker.internal:5432/product_db}
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}

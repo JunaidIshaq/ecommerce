@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -53,7 +54,7 @@ public class ProductService {
 
     private ProductDto toDto(Product p) {
         ProductDto d = new ProductDto();
-        d.id = p.getId();
+        d.id = p.getId().toString();
         d.slug = p.getSlug();
         d.name = p.getName();
         d.description = p.getDescription();
@@ -126,13 +127,13 @@ public class ProductService {
         );
     }
 
-    public PagedResponse<String> getAllProductIds(int pageNumber, int pageSize) {
+    public PagedResponse<UUID> getAllProductIds(int pageNumber, int pageSize) {
         log.info("🧠 Inside getAllProductIds() -> pageNumber={}, pageSize={}", pageNumber, pageSize);
 
         PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Product> productPage = productRepository.findAll(pageable);
 
-        List<String> productDtos = productPage.getContent()
+        List<UUID> productDtos = productPage.getContent()
                 .stream()
                 .map(Product::getId)
                 .toList();
@@ -149,7 +150,7 @@ public class ProductService {
 
     @Cacheable(value = "product", key = "#id")
     public ProductDto getProductById(String id) {
-        Optional<Product> product = productRepository.findById(id);
+        Optional<Product> product = productRepository.findById(UUID.fromString(id));
         return product.map(ProductMapper::getProductDto).orElseThrow(() -> new ProductNotFoundException(id));
     }
 
@@ -161,7 +162,7 @@ public class ProductService {
         if (!categoryClient.validateCategoryExists(updatedProduct.getCategoryId())) {
             throw new InvalidCategoryException(updatedProduct.getCategoryId());
         }
-        return productRepository.findById(id).map(existing -> {
+        return productRepository.findById(UUID.fromString(id)).map(existing -> {
             existing.setName(updatedProduct.getName());
             existing.setDescription(updatedProduct.getDescription());
             existing.setCategoryId(updatedProduct.getCategoryId());
@@ -183,7 +184,7 @@ public class ProductService {
             @CacheEvict(value = "productsPage", allEntries = true)
     })
     public void deleteProduct(String id) {
-        productRepository.deleteById(id);
+        productRepository.deleteById(UUID.fromString(id));
         elasticProductSearchService.deleteProductFromIndex(id);
     }
 
@@ -231,7 +232,7 @@ public class ProductService {
         log.info("Updating stock for product {} -> {}", productId, stock);
 
         // 1️⃣ Find product in MongoDB
-        Optional<Product> optionalProduct = productRepository.findById(productId);
+        Optional<Product> optionalProduct = productRepository.findById(UUID.fromString(productId));
         if (optionalProduct.isEmpty()) {
             log.warn("Product {} not found, skipping stock update", productId);
             return;

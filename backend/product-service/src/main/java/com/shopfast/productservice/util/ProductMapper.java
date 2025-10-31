@@ -11,7 +11,7 @@ public class ProductMapper {
 
     public static Product getProduct(ProductDto dto) {
         Product product = new Product();
-        product.setId(dto.getId());
+        product.setId(UUID.fromString(dto.getId()));
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
         product.setCategoryId(dto.getCategoryId());
@@ -27,7 +27,7 @@ public class ProductMapper {
 
     public static ProductDto getProductDto(Product product) {
         ProductDto dto = new ProductDto();
-        dto.setId(product.getId());
+        dto.setId(String.valueOf(product.getId()));
         dto.setName(product.getName());
         dto.setDescription(product.getDescription());
         dto.setCategoryId(product.getCategoryId());
@@ -43,7 +43,6 @@ public class ProductMapper {
 
     public static Product createProduct(@Valid ProductDto productDto) {
         Product product = new Product();
-        product.setId(UUID.randomUUID().toString());
         product.setName(productDto.getName());
         product.setSlug(productDto.getSlug());
         product.setDescription(productDto.getDescription());

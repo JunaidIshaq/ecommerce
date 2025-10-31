@@ -26,7 +26,7 @@ public class ElasticCategorySearchService {
     }
 
     public void indexCategory(Category category) throws IOException {
-        client.index(i -> i.index("category").id(category.getId()).document(category));
+        client.index(i -> i.index("category").id(String.valueOf(category.getId())).document(category));
     }
 
     public void deleteCategoryFromIndex(String id) {

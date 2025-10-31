@@ -70,7 +70,6 @@ public class ProductDataSeeder {
 
         for (int i = 1; i <= PRODUCT_COUNT; i++) {
             Product p = new Product();
-            p.setId(UUID.randomUUID().toString());
             p.setName(faker.commerce().productName());
             p.setDescription(faker.lorem().sentence(100));
             p.setCategoryId(getCategoriesList(random.nextInt(30)));
