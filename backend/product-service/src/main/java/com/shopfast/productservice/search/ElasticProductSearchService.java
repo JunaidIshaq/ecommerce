@@ -1,9 +1,13 @@
 package com.shopfast.productservice.search;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch.core.CountResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
+import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
 import com.shopfast.productservice.dto.SearchResult;
 import com.shopfast.productservice.model.Product;
 import org.springframework.stereotype.Service;
@@ -120,7 +124,26 @@ public class ElasticProductSearchService {
     }
 
     public void deleteAllProducts() throws IOException {
-        client.indices().delete(d -> d.index("product"));
+        try {
+            DeleteIndexResponse response = client.indices().delete(d -> d.index("product"));
 
+            if (response.acknowledged()) {
+                System.out.println("✅ Index 'product' deleted successfully.");
+            } else {
+                System.out.println("⚠️ Index 'product' deletion not acknowledged.");
+            }
+
+        } catch (ElasticsearchException e) {
+            if (e.response().error().type().equals("index_not_found_exception")) {
+                System.out.println("⚠️ Index 'product' does not exist.");
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    public int count() throws IOException {
+        CountResponse countResponse = client.count(d -> d.index("product"));
+        return Math.toIntExact(countResponse.count());
     }
 }

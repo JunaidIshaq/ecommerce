@@ -5,5 +5,6 @@ public enum OrderStatus {
     RESERVED,
     CONFIRMED,
     CANCELLED,
-    REJECTED
+    REJECTED,
+    REFUNDED
 }

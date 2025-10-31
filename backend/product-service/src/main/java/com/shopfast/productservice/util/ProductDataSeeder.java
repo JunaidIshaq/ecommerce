@@ -49,11 +49,13 @@ public class ProductDataSeeder {
             System.out.println("🟢 Product seeding disabled (set app.seed-products=true to enable)");
             return;
         }
-//        productRepository.deleteAll();
 
-        if (productRepository.count() > 0) {
+        if (productRepository.count() > 0 && elasticService.count() > 0) {
             System.out.println("🟢 Products already exist, skipping seeding.");
             return;
+        }else{
+            productRepository.deleteAll();
+            elasticService.deleteAllProducts();
         }
 
         log.info("🚀 Generating " + PRODUCT_COUNT + " dummy products...");

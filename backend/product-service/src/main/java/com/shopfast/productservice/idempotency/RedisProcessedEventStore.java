@@ -1,5 +1,6 @@
-package com.shopfast.productservice.events;
+package com.shopfast.productservice.idempotency;
 
+import com.shopfast.productservice.events.ProcessedEventStore;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 

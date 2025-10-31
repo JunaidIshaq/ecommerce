@@ -1,31 +1,25 @@
-package com.shopfast.orderservice.model;
+package com.shopfast.paymentservice.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.shopfast.orderservice.enums.OrderStatus;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -33,36 +27,32 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "orders")
+@Table(name = "order_items")
 @JsonIgnoreProperties(ignoreUnknown = true)  // Prevent unknown fields from breaking serialization
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Order {
+public class OrderItem {
 
     @Id
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
-    @Column(nullable = false)
-    private String userId;
-
-    @Column(nullable = false, unique = true)
-    private String orderNumber;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private OrderStatus status;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Payment payment;
 
     @Column(nullable = false)
-    private BigDecimal totalAmount;
+    private UUID productId;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<OrderItem> items;
+    @Column(nullable = false)
+    private int quantity;
+
+    @Column(nullable = false)
+    private BigDecimal price;
 
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant createdAt;
 
-    @UpdateTimestamp
+    @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant updatedAt;
 

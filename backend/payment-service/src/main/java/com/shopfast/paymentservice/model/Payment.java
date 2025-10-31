@@ -1,9 +1,10 @@
-package com.shopfast.orderservice.model;
+package com.shopfast.paymentservice.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.shopfast.orderservice.enums.OrderStatus;
+import com.shopfast.paymentservice.enums.PaymentMethod;
+import com.shopfast.paymentservice.enums.PaymentStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,30 +34,31 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "orders")
+@Table(name = "payments")
 @JsonIgnoreProperties(ignoreUnknown = true)  // Prevent unknown fields from breaking serialization
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Order {
+public class Payment {
 
     @Id
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
     @Column(nullable = false)
-    private String userId;
+    private UUID orderId;
 
-    @Column(nullable = false, unique = true)
-    private String orderNumber;
+    @Column(nullable = false)
+    private UUID userId;
+
+    @Column(nullable = false)
+    private double amount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private OrderStatus status;
+    private PaymentMethod method;
 
-    @Column(nullable = false)
-    private BigDecimal totalAmount;
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<OrderItem> items;
+    private String transactionId; // gateway reference
 
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING)

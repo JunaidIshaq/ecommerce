@@ -11,15 +11,15 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderCommand implements Serializable {
+public class PaymentEvent implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String commandId;
+    private String eventId;
 
-    private String commandType; //RESERVE | CONFIRM | RELEASE
+    private String eventType; // PAYMENT_SUCCESS | PAYMENT_FAILED | PAYMENT_REFUNDED
 
-    private int commandVersion = 1;
+    private int eventVersion = 1;
 
     private Instant occurredAt;
 

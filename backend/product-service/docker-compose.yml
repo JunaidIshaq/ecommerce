@@ -160,6 +160,30 @@ services:
     networks:
       - product-net
 
+  payment-service:
+    build: ../payment-service
+    container_name: payment-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/payment_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - SERVER_PORT=8093
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
+    ports:
+      - "8093:8093"
+    depends_on:
+      - postgres
+      - kafka
+      - redis
+    networks:
+      - product-net
+
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1
     container_name: zookeeper
