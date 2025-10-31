@@ -9,6 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -16,7 +17,9 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -34,9 +37,11 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "category")
-@EntityListeners(AuditingEntityListener.class)  // Enables @CreatedDate etc.
-@JsonIgnoreProperties(ignoreUnknown = true)  // Prevent unknown fields from breaking serialization
+@EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(value = { "hibernateLazyInitializer", "handler", "subCategoryIds" }, ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@ToString(exclude = "subCategoryIds")   // <— Lombok won’t trigger lazy load
+@EqualsAndHashCode(exclude = "subCategoryIds")
 public class Category {
 
     @Id
@@ -53,10 +58,10 @@ public class Category {
     @Column(name = "parentId")
     private String parentId;
 
-    @JsonIgnore
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "category_subcategory_ids", joinColumns = @JoinColumn(name = "category_id"))
     @Column(name = "sub_category_id")
+    @JsonIgnore
     private List<String> subCategoryIds;
 
     @CreatedDate
