@@ -29,6 +29,15 @@ public class ElasticProductSearchService {
         this.client = client;
     }
 
+    public void healthCheck() {
+        try {
+            this.client.ping();
+        } catch (Exception e) {
+            throw new RuntimeException("Elasticsearch not reachable yet", e);
+        }
+    }
+
+
     public void indexProduct(Product product) throws IOException {
         client.index(i -> i.index("product").id(String.valueOf(product.getId())).document(product));
     }
