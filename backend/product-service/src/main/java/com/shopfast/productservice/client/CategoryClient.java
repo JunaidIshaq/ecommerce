@@ -1,10 +1,13 @@
 package com.shopfast.productservice.client;
 
+import com.shopfast.common.dto.CategoryDto;
+import com.shopfast.common.dto.PagedResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
@@ -35,5 +38,19 @@ public class CategoryClient {
             log.error("⚠️ Category Service not reachable: {}", e.getMessage());
             return false; // optional: fail open or fail safe
         }
+    }
+
+    public PagedResponse getAllCategories() {
+        try {
+           return webClient.get()
+                    .uri(categoryServiceUrl+ "?pageNumber=1&pageSize=30")
+                    .retrieve()
+                    .bodyToMono(PagedResponse.class).block();
+        } catch (WebClientResponseException.NotFound e) {
+            log.warn("❌ Category {} not found in Category Service", e);
+        } catch (Exception e) {
+            log.error("⚠️ Category Service not reachable: {}", e.getMessage());
+        }
+        return null;
     }
 }

@@ -1,0 +1,91 @@
+spring:
+  application:
+    name: order-service
+
+  datasource:
+    url: ${POSTGRES_URI:jdbc:postgresql://host.docker.internal:5432/order_db}
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:order-service-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
+
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      timeout: 6000
+      connect-timeout: 6000
+  cache:
+    type: redis
+
+  elasticsearch:
+    uris: ${ELASTIC_URI:http://elasticsearch:9200}
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: ${SERVER_PORT:8092}
+
+  forward-headers-strategy: framework
+
+jwt:
+  secret: ${JWT_SECRET:supersecretkeythatshouldbereplacedandstoredsecurely}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.data.redis: WARN
+    org.springframework.cache.interceptor: DEBUG
+
+
+elastic:
+  host:
+    name: elasticsearch
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: order-service
+
+app:
+  seed-order: true
+
+category:
+  service:
+    url: ${CATEGORY_SERVICE_URL:http://category-service:8090/api/v1/category}
+
+product:
+  service:
+    url: ${PRODUCT_SERVICE_URL:http://product-service:8080/api/v1/product}
+
+inventory:
+  service:
+    url: ${INVENTORY_SERVICE_URL:http://inventory-service:8091/api/v1/inventory}

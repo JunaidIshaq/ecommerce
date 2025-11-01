@@ -1,6 +1,7 @@
 package com.shopfast.productservice.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.CollectionTable;
@@ -8,6 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -44,7 +46,7 @@ public class Product {
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
-    @Column(name = "slug", unique = true, nullable = false)
+    @Column(name = "slug", nullable = false)
     private String slug;
 
     @Column(name = "name", nullable = false)
@@ -72,17 +74,19 @@ public class Product {
      * For List and Map, we use @ElementCollection.
      * These are stored in separate join tables automatically.
      */
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
     private List<String> images;
 
-    @ElementCollection
+    @JsonIgnore
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "product_tags", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "tag")
     private List<String> tags;
 
-    @ElementCollection
+    @JsonIgnore
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "product_attributes", joinColumns = @JoinColumn(name = "product_id"))
     @MapKeyColumn(name = "attribute_key")
     @Column(name = "attribute_value")

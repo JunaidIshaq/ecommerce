@@ -12,8 +12,10 @@ import com.shopfast.productservice.model.Product;
 import com.shopfast.productservice.repository.ProductRepository;
 import com.shopfast.productservice.search.ElasticProductSearchService;
 import com.shopfast.productservice.util.ProductMapper;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -68,6 +70,7 @@ public class ProductService {
         return d;
     }
 
+    @Transactional
     @Caching(evict = {
             @CacheEvict(value = "product", key = "#result.id", condition = "#result != null"),
             @CacheEvict(value = "productsPage", allEntries = true)
@@ -103,6 +106,7 @@ public class ProductService {
         return ProductMapper.getProductDto(product);
     }
 
+    @Transactional
     @Cacheable(
             value = "productsPage",
             key = "'pageNumber_' + #pageNumber + '_pageSize_' + #pageSize"
@@ -127,6 +131,7 @@ public class ProductService {
         );
     }
 
+    @Transactional
     public PagedResponse<UUID> getAllProductIds(int pageNumber, int pageSize) {
         log.info("🧠 Inside getAllProductIds() -> pageNumber={}, pageSize={}", pageNumber, pageSize);
 
@@ -147,13 +152,17 @@ public class ProductService {
         );
     }
 
-
+    @Transactional
     @Cacheable(value = "product", key = "#id")
     public ProductDto getProductById(String id) {
         Optional<Product> product = productRepository.findById(UUID.fromString(id));
+        if(product.isPresent()) {
+            Hibernate.initialize(product.get().getImages());
+        }
         return product.map(ProductMapper::getProductDto).orElseThrow(() -> new ProductNotFoundException(id));
     }
 
+    @Transactional
     @Caching(evict = {
             @CacheEvict(value = "product", key = "#id"),
             @CacheEvict(value = "productsPage", allEntries = true)
@@ -179,6 +188,7 @@ public class ProductService {
         }).orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }
 
+    @Transactional
     @Caching(evict = {
             @CacheEvict(value = "product", key = "#id"),
             @CacheEvict(value = "productsPage", allEntries = true)
@@ -228,6 +238,7 @@ public class ProductService {
     /**
      * Updates inStock status of a product, persists it, and reindexes in Elasticsearch.
      */
+    @Transactional
     public void updateStockAndAvailability(String productId, int stock) throws IOException {
         log.info("Updating stock for product {} -> {}", productId, stock);
 

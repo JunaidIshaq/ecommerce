@@ -68,7 +68,7 @@ public class CategoryController {
 
     @Operation(summary = "Update category details", security = @SecurityRequirement(name = "bearerAuth"))
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryDto> updateCategory(@PathVariable String id, @Valid @RequestBody CategoryDto dto) {
+    public ResponseEntity<CategoryDto> updateCategory(@PathVariable String id, @Valid @RequestBody CategoryDto dto) throws IOException {
         Category updated = categoryService.updateCategory(id, CategoryMapper.getCategory(dto));
         return ResponseEntity.ok(CategoryMapper.getCategoryDto(updated));
     }

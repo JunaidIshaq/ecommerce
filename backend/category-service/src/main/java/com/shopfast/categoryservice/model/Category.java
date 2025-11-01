@@ -45,7 +45,6 @@ import java.util.UUID;
 public class Category {
 
     @Id
-    @GeneratedValue(generator = "UUID")
     private UUID id;
 
     @Column(name = "name", unique = true, nullable = false)

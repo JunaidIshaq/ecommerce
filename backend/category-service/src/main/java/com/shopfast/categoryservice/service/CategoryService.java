@@ -5,6 +5,7 @@ import com.shopfast.categoryservice.dto.PagedResponse;
 import com.shopfast.categoryservice.exception.CategoryNotFoundException;
 import com.shopfast.categoryservice.model.Category;
 import com.shopfast.categoryservice.repository.CategoryRepository;
+import com.shopfast.categoryservice.search.ElasticCategorySearchService;
 import com.shopfast.categoryservice.util.CategoryMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,9 +28,11 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ElasticCategorySearchService elasticService;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, ElasticCategorySearchService elasticService) {
         this.categoryRepository = categoryRepository;
+        this.elasticService = elasticService;
     }
 
     @Transactional
@@ -36,7 +40,7 @@ public class CategoryService {
             @CacheEvict(value = "category", allEntries = true),
             @CacheEvict(value = "category", key = "#result.id", condition = "#result != null")
     })
-    public Category createCategory(Category category) {
+    public Category createCategory(Category category) throws IOException {
         log.info("Creating new category {}", category.getName());
 
         // Prevent Duplicates
@@ -44,7 +48,9 @@ public class CategoryService {
                 .ifPresent(existingCategory -> {
                     throw new IllegalArgumentException("Category with this name already exists");
                 });
-        return categoryRepository.save(category);
+        category = categoryRepository.save(category);
+        elasticService.indexCategory(category);
+        return category;
     }
 
     @Transactional
@@ -87,7 +93,7 @@ public class CategoryService {
             @CacheEvict(value = "category", key = "#id"),
             @CacheEvict(value = "subcategories", allEntries = true)
     })
-    public Category updateCategory(String id, Category updatedCategory) {
+    public Category updateCategory(String id, Category updatedCategory) throws IOException {
         log.info("Updating category with id : {} and updatedCategory : {}", id, updatedCategory.getName());
         Category existingCategory = getCategoryById(id);
         existingCategory.setName(updatedCategory.getName());
@@ -95,7 +101,9 @@ public class CategoryService {
         existingCategory.setParentId(updatedCategory.getParentId());
         existingCategory.setSubCategoryIds(updatedCategory.getSubCategoryIds());
 
-        return categoryRepository.save(existingCategory);
+        existingCategory = categoryRepository.save(existingCategory);
+        elasticService.indexCategory(existingCategory);
+        return existingCategory;
     }
 
     @Transactional

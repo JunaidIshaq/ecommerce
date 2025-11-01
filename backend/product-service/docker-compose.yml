@@ -182,6 +182,46 @@ services:
     networks:
       - product-net
 
+  user-service:
+    build: ../user-service
+    container_name: user-service
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/user_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - SERVER_PORT=8094
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
+    ports:
+      - "8094:8094"
+    depends_on:
+      - kafka
+      - redis
+    networks:
+      - product-net
+
+  auth-service:
+    build: ../auth-service
+    container_name: auth-service
+    environment:
+      - USER_SERVICE_URL=http://user-service:8094
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - SERVER_PORT=8095
+    ports:
+      - "8095:8095"
+    networks:
+      - product-net
+    depends_on:
+      - user-service
+      - redis
+
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1

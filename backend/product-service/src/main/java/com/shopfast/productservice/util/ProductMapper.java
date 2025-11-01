@@ -29,6 +29,7 @@ public class ProductMapper {
         ProductDto dto = new ProductDto();
         dto.setId(String.valueOf(product.getId()));
         dto.setName(product.getName());
+        dto.setSlug(product.getSlug());
         dto.setDescription(product.getDescription());
         dto.setCategoryId(product.getCategoryId());
         dto.setPrice(product.getPrice());

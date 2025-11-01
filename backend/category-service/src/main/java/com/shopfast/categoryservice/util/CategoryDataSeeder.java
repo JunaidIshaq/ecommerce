@@ -4,6 +4,7 @@ import com.shopfast.categoryservice.config.ElasticIndexConfig;
 import com.shopfast.categoryservice.model.Category;
 import com.shopfast.categoryservice.repository.CategoryRepository;
 import com.shopfast.categoryservice.search.ElasticCategorySearchService;
+import com.shopfast.categoryservice.service.CategoryService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +22,15 @@ public class CategoryDataSeeder {
 
     private final CategoryRepository categoryRepository;
 
+    private final CategoryService categoryService;
+
     private final ElasticCategorySearchService elasticService;
 
     private final ElasticIndexConfig elasticIndexConfig;
 
-    public CategoryDataSeeder(CategoryRepository categoryRepository, ElasticCategorySearchService elasticService, ElasticIndexConfig elasticIndexConfig) {
+    public CategoryDataSeeder(CategoryRepository categoryRepository, CategoryService categoryService, ElasticCategorySearchService elasticService, ElasticIndexConfig elasticIndexConfig) {
         this.categoryRepository = categoryRepository;
+        this.categoryService = categoryService;
         this.elasticService = elasticService;
         this.elasticIndexConfig = elasticIndexConfig;
     }
@@ -42,13 +46,16 @@ public class CategoryDataSeeder {
             System.out.println("🟢 Category seeding disabled (set app.seed-categories=true to enable)");
             return;
         }
-
-        if (categoryRepository.count() > 0 && elasticService.count() > 0) {
-            System.out.println("🟢 Category already exist, skipping seeding.");
-            return;
-        } else {
-            categoryRepository.deleteAll();
-            elasticService.deleteAllCategories();
+        try {
+            if (categoryRepository.count() > 0 && elasticService.count() > 0) {
+                System.out.println("🟢 Category already exist, skipping seeding.");
+                return;
+            } else {
+                categoryRepository.deleteAll();
+                elasticService.deleteAllCategories();
+            }
+        }catch (Exception ex){
+           log.error("Exception : {}", ex);
         }
 
         elasticIndexConfig.resetCategoryIndex();
@@ -99,16 +106,14 @@ public class CategoryDataSeeder {
             }
         });
         // Saving Categories
-        categoryRepository.saveAll(categories);
-
         // Index in Elasticsearch
-        categories.forEach(category -> {
-            try {
-                elasticService.indexCategory(category);
-            } catch (IOException e) {
-                log.error("⚠️ Failed to index category: " + category.getName());
+        try {
+            for (Category category : categories) {
+                categoryService.createCategory(category);
             }
-        });
+        }catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
 
         log.info("✅ Seeded " + CATEGORY_COUNT + " categories successfully!");
     }
