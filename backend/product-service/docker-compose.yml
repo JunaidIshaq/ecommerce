@@ -64,11 +64,14 @@ services:
     build: .
     container_name: product-service
     depends_on:
-      - redis
-      - elasticsearch
-#      - logstash
-      - category-service
-      - kafka
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      category-service:
+        condition: service_healthy
 
     environment:
       - CATEGORY_SERVICE_URL=http://category-service:8090/api/v1/category
@@ -91,9 +94,10 @@ services:
     build: ../category-service
     container_name: category-service
     depends_on:
-      - redis
-      - elasticsearch
-#      - logstash
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
     environment:
       - PRODUCT_SERVICE_URL=http://product-service:8080/api/v1/product
       - MONGO_URI=mongodb://host.docker.internal:27017/category_db
@@ -129,10 +133,14 @@ services:
     ports:
       - "8091:8091"
     depends_on:
-      - redis
-      - kafka
-#      - logstash
-      - product-service
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
     networks:
       - product-net
 
@@ -153,10 +161,12 @@ services:
     ports:
       - "8092:8092"
     depends_on:
-      - redis
-      - kafka
-#      - logstash
-      - product-service
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
     networks:
       - product-net
 
@@ -177,8 +187,10 @@ services:
     ports:
       - "8093:8093"
     depends_on:
-      - kafka
-      - redis
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - product-net
 
@@ -199,8 +211,10 @@ services:
     ports:
       - "8094:8094"
     depends_on:
-      - kafka
-      - redis
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - product-net
 
@@ -219,8 +233,10 @@ services:
     networks:
       - product-net
     depends_on:
-      - user-service
-      - redis
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 
   zookeeper:
@@ -231,6 +247,11 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
+    healthcheck:
+      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181", "|", "grep", "imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - product-net
 
@@ -238,7 +259,13 @@ services:
     image: confluentinc/cp-kafka:7.6.1
     container_name: kafka
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
     ports:
       - "9092:9092"
     environment:
