@@ -74,7 +74,7 @@ public class Product {
      * For List and Map, we use @ElementCollection.
      * These are stored in separate join tables automatically.
      */
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
     private List<String> images;

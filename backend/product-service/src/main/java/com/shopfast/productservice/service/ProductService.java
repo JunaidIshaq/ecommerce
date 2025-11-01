@@ -156,9 +156,6 @@ public class ProductService {
     @Cacheable(value = "product", key = "#id")
     public ProductDto getProductById(String id) {
         Optional<Product> product = productRepository.findById(UUID.fromString(id));
-        if(product.isPresent()) {
-            Hibernate.initialize(product.get().getImages());
-        }
         return product.map(ProductMapper::getProductDto).orElseThrow(() -> new ProductNotFoundException(id));
     }
 
