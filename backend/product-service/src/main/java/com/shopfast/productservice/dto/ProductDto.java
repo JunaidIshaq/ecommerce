@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -52,10 +53,9 @@ public class ProductDto implements Serializable {
 
     public Double rating;
 
-    public List<String> images;
+    public List<String> images = new ArrayList<>();
 
-    @JsonIgnore
-    public List<String> tags;
+    public List<String> tags = new ArrayList<>();
 
     private String createdAt;
 
