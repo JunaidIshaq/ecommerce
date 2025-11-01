@@ -58,13 +58,16 @@ public class ProductDataSeeder {
             System.out.println("🟢 Product seeding disabled (set app.seed-products=true to enable)");
             return;
         }
-
-        if (productRepository.count() > 0 && elasticService.count() > 0) {
-            System.out.println("🟢 Products already exist, skipping seeding.");
-            return;
-        }else{
-            productRepository.deleteAll();
-            elasticService.deleteAllProducts();
+        try {
+            if (productRepository.count() > 0 && elasticService.count() > 0) {
+                System.out.println("🟢 Products already exist, skipping seeding.");
+                return;
+            } else {
+                productRepository.deleteAll();
+                elasticService.deleteAllProducts();
+            }
+        } catch (Exception e){
+            log.error("Exception occurred when seeding products.", e);
         }
 
         log.info("🚀 Generating " + PRODUCT_COUNT + " dummy products...");
