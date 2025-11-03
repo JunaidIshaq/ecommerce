@@ -48,8 +48,8 @@ public class TokenService {
 
     public void blackListAccessToken(String token) {
         // keep blacklist entry until token expiry
-        long ttl = jwtUtils.parseToken(token).getBody().getExpiration().toInstant().getEpochSecond() -
-                jwtUtils.parseToken(token).getBody().getIssuedAt().toInstant().getEpochSecond();
+        long ttl = jwtUtils.parseToken(token).getExpiration().toInstant().getEpochSecond() -
+                jwtUtils.parseToken(token).getIssuedAt().toInstant().getEpochSecond();
         if (ttl <= 0) {
             ttl = jwtUtils.getAccessTokenExpiresIn();
             stringRedisTemplate.opsForValue().set(BLACKLIST_PREFIX + extractTokenId(token), "1", Duration.ofSeconds(ttl));

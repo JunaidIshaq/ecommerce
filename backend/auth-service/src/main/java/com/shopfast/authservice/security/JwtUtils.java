@@ -60,8 +60,8 @@ public class JwtUtils {
                 .compact();
     }
 
-    public Jws<Claims> parseToken(String refreshToken) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(refreshToken);
+    public Claims parseToken(String refreshToken) {
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(refreshToken).getBody();
     }
 
     public boolean isTokenValid(String token) {

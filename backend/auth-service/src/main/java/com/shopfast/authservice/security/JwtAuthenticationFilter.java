@@ -1,5 +1,6 @@
 package com.shopfast.authservice.security;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,8 +28,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // ✅ List of endpoints to ignore for JWT validation
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/api/v1/order",
-            "/api/v1/order/",
             "/actuator/health",
             "/api/v1/auth",
             "/api/v1/auth/",
@@ -57,7 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String token = authHeader.substring(7);
         try {
-            var claims = jwtUtils.parseClaims(token);
+            Claims claims = jwtUtils.parseToken(token);
 
             String username = claims.getSubject();
             String role = claims.get("role", String.class);

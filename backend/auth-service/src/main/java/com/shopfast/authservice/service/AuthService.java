@@ -57,8 +57,8 @@ public class AuthService {
             throw new IllegalArgumentException("Refresh token invalid");
         }
         var parsed = tokenService.jwtUtils.parseToken(refreshToken);
-        String userId = parsed.getBody().getSubject();
-        String email = parsed.getBody().get("email", String.class);
+        String userId = parsed.getSubject();
+        String email = parsed.get("email", String.class);
 
         Map<String, Object> claims = Map.of("email", email);
         String newAccess = tokenService.createAccessToken(userId, claims);
