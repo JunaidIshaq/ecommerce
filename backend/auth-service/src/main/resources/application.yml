@@ -76,7 +76,7 @@ app:
 
 user:
   service:
-    url: ${CATEGORY_SERVICE_URL:http://user-service:8095/api/v1/user}
+    url: ${USER_SERVICE_URL:http://user-service:8094/api/v1/user}
 
 category:
   service:
