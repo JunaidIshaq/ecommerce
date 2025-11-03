@@ -9,6 +9,7 @@ public class UserMapper {
         return UserDto.builder()
                 .id(u.getId())
                 .email(u.getEmail())
+                .password(u.getPassword())
                 .firstName(u.getFirstName())
                 .lastName(u.getLastName())
                 .role(u.getRole())

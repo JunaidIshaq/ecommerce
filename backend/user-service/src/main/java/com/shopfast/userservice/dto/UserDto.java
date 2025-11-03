@@ -22,6 +22,9 @@ public class UserDto implements Serializable {
     @JsonProperty("email")
     private String email;
 
+    @JsonProperty("password")
+    private String password;
+
     @JsonProperty("firstName")
     private String firstName;
 

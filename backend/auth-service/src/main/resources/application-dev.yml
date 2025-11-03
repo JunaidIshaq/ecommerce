@@ -78,6 +78,10 @@ management:
 app:
   seed-auth: true
 
+user:
+  service:
+    url: ${USER_SERVICE_URL:http://localhost:8094/api/v1/user}
+
 category:
   service:
     url: ${CATEGORY_SERVICE_URL:http://localhost:8090/api/v1/category}
