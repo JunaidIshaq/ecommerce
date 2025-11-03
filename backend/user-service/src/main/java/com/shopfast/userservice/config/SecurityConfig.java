@@ -43,8 +43,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/internal/**").permitAll()     // internal API used by Auth Service
                         .requestMatchers("/api/v1/user").permitAll()      // registration allowed
+                        .requestMatchers("/api/v1/user/internal/email").permitAll()      // registration allowed
                         .requestMatchers("/actuator/**","/v3/api-docs/**","/swagger-ui/**").permitAll()
                         .requestMatchers("/api/v1/user/**").authenticated()
                         .anyRequest().authenticated()
