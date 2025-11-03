@@ -77,7 +77,6 @@ services:
 
     environment:
       - CATEGORY_SERVICE_URL=http://category-service:8090/api/v1/category
-      - MONGO_URI=mongodb://host.docker.internal:27017/product_db
       - ELASTIC_URI=http://elasticsearch:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
       - SERVER_PORT=8080
@@ -108,7 +107,6 @@ services:
         condition: service_healthy
     environment:
       - PRODUCT_SERVICE_URL=http://product-service:8080/api/v1/product
-      - MONGO_URI=mongodb://host.docker.internal:27017/category_db
       - ELASTIC_URI=http://elasticsearch:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
       - SERVER_PORT=8090
