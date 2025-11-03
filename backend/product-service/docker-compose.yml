@@ -44,7 +44,7 @@ services:
       - bootstrap.memory_lock=true
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - xpack.ml.enabled=false
-      - xpack.transform.enabled=false
+      - xpack.monitoring.collection.enabled=false
       - xpack.security.enabled=false
     ulimits:
       memlock:
