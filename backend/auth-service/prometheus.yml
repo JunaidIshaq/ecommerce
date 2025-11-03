@@ -30,4 +30,4 @@ scrape_configs:
   - job_name: 'auth-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: [ 'order-service:8095' ]
+      - targets: [ 'auth-service:8095' ]

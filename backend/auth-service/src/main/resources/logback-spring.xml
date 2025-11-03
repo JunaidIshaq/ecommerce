@@ -15,7 +15,7 @@
         <destination>${LOGSTASH_HOST}:${LOGSTASH_PORT}</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <!-- include additional fields if needed -->
-            <customFields>{"app":"order-service","env":"${SPRING_PROFILES_ACTIVE:-default}"}</customFields>
+            <customFields>{"app":"auth-service","env":"${SPRING_PROFILES_ACTIVE:-default}"}</customFields>
         </encoder>
 
         <!-- reconnect policy -->

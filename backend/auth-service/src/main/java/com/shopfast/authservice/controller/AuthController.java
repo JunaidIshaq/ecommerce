@@ -3,7 +3,6 @@ package com.shopfast.authservice.controller;
 import com.shopfast.authservice.dto.AuthResponse;
 import com.shopfast.authservice.dto.LoginRequestDto;
 import com.shopfast.authservice.dto.RefreshRequestDto;
-import com.shopfast.authservice.model.Order;
 import com.shopfast.authservice.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,7 +45,7 @@ public class AuthController {
 
     @Operation(summary = "Logout — revoke refresh token and blacklist access")
     @PostMapping("/logout")
-    public ResponseEntity<Order> logout(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader,
+    public ResponseEntity<?> logout(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader,
                                         @RequestBody(required = false) RefreshRequestDto dto) {
         String accessToken = null;
         if(authHeader != null && authHeader.startsWith("Bearer ")) {

@@ -7,7 +7,7 @@ import { Product } from '../models/product.model';
 @Injectable({ providedIn: 'root' })
 export class ProductService {
 
-  private apiUrl = 'https://shopfast.live/api/v1/product'; // ✅ plural endpoint
+  private apiUrl = 'http://localhost:8080/api/v1/product'; // ✅ plural endpoint
 
   constructor(private http: HttpClient) {}
 

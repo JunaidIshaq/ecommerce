@@ -79,7 +79,7 @@ public class UserController {
 
     // Internal endpoint used by Auth Service
     @Operation(summary = "Internal: find user by email")
-    @GetMapping("/internal/user/email")
+    @GetMapping("/internal/email")
     public ResponseEntity<UserDto> findByEmail(@RequestParam String email) {
         return userService.findByEmail(email)
                 .map(UserMapper::getUserDto)
