@@ -23,7 +23,7 @@ import java.util.UUID;
 
 @Tag(name = "Orders", description = "Order APIs")
 @RestController
-@RequestMapping("/api/v1/order")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final AuthService authService;
