@@ -1,9 +1,9 @@
 spring:
   application:
-    name: order-service
+    name: auth-service
 
   datasource:
-    url: ${POSTGRES_URI:jdbc:postgresql://host.docker.internal:5432/order_db}
+    url: ${POSTGRES_URI:jdbc:postgresql://host.docker.internal:5432/auth_db}
     username: postgres
     password: postgres
   jpa:
@@ -11,22 +11,6 @@ spring:
       ddl-auto: update
     show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
-
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
-    consumer:
-      group-id: ${KAFKA_CONSUMER_GROUP:order-service-group}
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: '*'
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      properties:
-        enable.idempotence: true
-        max.in.flight.requests.per.connection: 1
 
   data:
     redis:
@@ -37,6 +21,16 @@ spring:
   cache:
     type: redis
 
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+
+  feign:
+    client:
+      config:
+        default:
+          connectTimeout: 5000
+          readTimeout: 5000
+
   elasticsearch:
     uris: ${ELASTIC_URI:http://elasticsearch:9200}
 
@@ -45,12 +39,14 @@ spring:
       write-dates-as-timestamps: false
 
 server:
-  port: ${SERVER_PORT:8092}
+  port: ${SERVER_PORT:8095}
 
   forward-headers-strategy: framework
 
 jwt:
   secret: ${JWT_SECRET:supersecretkeythatshouldbereplacedandstoredsecurely}
+  access-expiration: 3600          # seconds (1h)
+  refresh-expiration: 86400        # seconds (24h)
 
 logging:
   level:
@@ -73,10 +69,14 @@ management:
       show-details: always
   metrics:
     tags:
-      application: order-service
+      application: auth-service
 
 app:
-  seed-order: true
+  seed-auth: true
+
+user:
+  service:
+    url: ${CATEGORY_SERVICE_URL:http://user-service:8095/api/v1/user}
 
 category:
   service:

@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.shopfast</groupId>
-    <artifactId>order-service</artifactId>
+    <artifactId>auth-service</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
-    <name>order-service</name>
+    <name>auth-service</name>
 
     <properties>
         <java.version>17</java.version>
@@ -34,6 +34,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>4.0.6</version>
         </dependency>
 
         <!-- Data JPA -->
@@ -69,13 +75,6 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
-
-
-        <!-- MongoDB -->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-data-mongodb</artifactId>-->
-<!--        </dependency>-->
 
         <!-- Redis -->
         <dependency>

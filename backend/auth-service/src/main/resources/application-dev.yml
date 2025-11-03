@@ -1,9 +1,9 @@
 spring:
   application:
-    name: order-service
+    name: auth-service
 
   datasource:
-    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/order_db}
+    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/auth_db}
     username: postgres
     password: postgres
   jpa:
@@ -45,7 +45,7 @@ spring:
       write-dates-as-timestamps: false
 
 server:
-  port: ${SERVER_PORT:8092}
+  port: ${SERVER_PORT:8095}
 
   forward-headers-strategy: framework
 
@@ -73,10 +73,10 @@ management:
       show-details: always
   metrics:
     tags:
-      application: order-service
+      application: auth-service
 
 app:
-  seed-order: true
+  seed-auth: true
 
 category:
   service:

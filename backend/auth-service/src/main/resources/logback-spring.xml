@@ -28,7 +28,7 @@
     </root>
 
     <!-- Example: DEBUG for your packages -->
-    <logger name="com.shopfast.orderservice" level="DEBUG" additivity="false">
+    <logger name="com.shopfast.authservice" level="DEBUG" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="LOGSTASH"/>
     </logger>
