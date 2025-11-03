@@ -26,6 +26,15 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <!-- ✅ Add this block -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>2023.0.3</version> <!-- ✅ Compatible with Spring Boot 3.3.x -->
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -39,6 +48,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>4.0.6</version>
         </dependency>
 
         <!-- Data JPA -->
