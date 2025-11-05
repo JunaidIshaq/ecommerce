@@ -4,6 +4,7 @@ import com.shopfast.authservice.client.UserClient;
 import com.shopfast.authservice.dto.AuthResponse;
 import com.shopfast.authservice.dto.LoginRequestDto;
 import com.shopfast.authservice.dto.UserInternalDto;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -84,4 +85,28 @@ public class AuthService {
     }
 
 
+    public ResponseEntity<String> validate(String token) {
+        try {
+            // Check if token is blacklisted
+            if (tokenService.isAccessTokenBlacklisted(token)) {
+                return ResponseEntity.status(401).body("Token has been revoked or blacklisted");
+            }
+
+            // Validate JWT signature and expiration
+            boolean valid = tokenService.jwtUtils.isTokenValid(token);
+            if(!valid) {
+                return ResponseEntity.status(401).body("Invalid or expired token");
+            }
+
+            // Optional : Extract claims if you want to return token info
+            var claims = tokenService.jwtUtils.parseToken(token);
+            String userId = claims.getSubject();
+            String role = claims.get("role", String.class);
+
+            // Return success response
+            return ResponseEntity.ok("Token valid for userId : " + userId + ", role : " + role);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Invalid token : " + e.getMessage());
+        }
+    }
 }

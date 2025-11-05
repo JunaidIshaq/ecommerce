@@ -41,6 +41,11 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+
 server:
   port: ${SERVER_PORT:8091}
 

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @Tag(name = "Auth", description = "Auth APIs")
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -53,19 +55,16 @@ public class AuthController {
         }
         String refreshToken = (dto != null) ? dto.getRefreshToken() : null;
         authService.logout(accessToken, refreshToken);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(Map.of("message", "Logged out successfully !"));
     }
 
     @Operation(summary = "Validate token (simple) — returns 200 if valid")
     @GetMapping("/validate")
-    public ResponseEntity<Void> validate(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+    public ResponseEntity<String> validate(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer "))
             return ResponseEntity.badRequest().build();
-        String token = authHeader.substring(7);
-        // tokenService can check blacklist and signature — but we delegate to TokenService via AuthService if needed
-        // For simplicity, just return 200 when token signature valid
-        // Alternatively inject TokenService and check blacklist.
-        return ResponseEntity.ok().build();
+        String token = authHeader.substring(7).trim();
+        return authService.validate(token);
     }
 
 }

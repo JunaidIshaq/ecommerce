@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: eureka-server
+
+server:
+  port: ${SERVER_PORT:8761}
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    wait-time-in-ms-when-sync-empty: 0
+  instance:
+    hostname: eureka-server
+
+logging:
+  level:
+    root: INFO
+    org.springframework.data.redis: WARN
+    org.springframework.cache.interceptor: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: auth-service

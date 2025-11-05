@@ -1,9 +1,9 @@
 spring:
   application:
-    name: user-service
+    name: eureka-server
 
   datasource:
-    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/user_db}
+    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/auth_db}
     username: postgres
     password: postgres
   jpa:
@@ -15,7 +15,7 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
     consumer:
-      group-id: ${KAFKA_CONSUMER_GROUP:user-service-group}
+      group-id: ${KAFKA_CONSUMER_GROUP:product-service-group}
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -44,13 +44,8 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-
 server:
-  port: ${SERVER_PORT:8094}
+  port: ${SERVER_PORT:8761}
 
   forward-headers-strategy: framework
 
@@ -78,10 +73,14 @@ management:
       show-details: always
   metrics:
     tags:
-      application: user-service
+      application: eureka-server
 
 app:
-  seed-user: true
+  seed-auth: true
+
+user:
+  service:
+    url: ${USER_SERVICE_URL:http://localhost:8094/api/v1/user}
 
 category:
   service:
