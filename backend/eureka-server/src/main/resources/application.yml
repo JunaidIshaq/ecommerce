@@ -6,13 +6,19 @@ server:
   port: ${SERVER_PORT:8761}
 
 eureka:
+  instance:
+    hostname: shopfast.live
+    secure-port-enabled: true
+    secure-port: 443
+    non-secure-port-enabled: false
+    home-page-url: https://shopfast.live/eureka/
+    status-page-url: https://shopfast.live/eureka/actuator/info
+    health-check-url: https://shopfast.live/eureka/actuator/health
+    prefer-ip-address: false
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
   client:
     register-with-eureka: false
     fetch-registry: false
-  server:
-    wait-time-in-ms-when-sync-empty: 0
-  instance:
-    hostname: eureka-server
 
 logging:
   level:
