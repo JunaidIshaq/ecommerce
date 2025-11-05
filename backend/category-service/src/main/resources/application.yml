@@ -68,5 +68,5 @@ app:
 
 product:
   service:
-    url: ${PRODUCT_SERVICE_URL:http://localhost:8081/api/v1/product}
+    url: ${PRODUCT_SERVICE_URL:http://product-service:8081/api/v1/product}
 
