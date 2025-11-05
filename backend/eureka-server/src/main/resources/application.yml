@@ -5,6 +5,9 @@ spring:
 server:
   port: ${SERVER_PORT:8761}
 
+  servlet:
+    context-path: /eureka
+
 eureka:
   instance:
     hostname: shopfast.live
