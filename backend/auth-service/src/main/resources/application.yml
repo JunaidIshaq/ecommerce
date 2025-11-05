@@ -42,9 +42,9 @@ eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
-      
+
 server:
-  port: ${SERVER_PORT:8095}
+  port: ${SERVER_PORT:8087}
 
   forward-headers-strategy: framework
 
@@ -81,16 +81,16 @@ app:
 
 user:
   service:
-    url: ${USER_SERVICE_URL:http://user-service:8094/api/v1/user}
+    url: ${USER_SERVICE_URL:http://user-service:8086/api/v1/user}
 
 category:
   service:
-    url: ${CATEGORY_SERVICE_URL:http://category-service:8090/api/v1/category}
+    url: ${CATEGORY_SERVICE_URL:http://category-service:8082/api/v1/category}
 
 product:
   service:
-    url: ${PRODUCT_SERVICE_URL:http://product-service:8080/api/v1/product}
+    url: ${PRODUCT_SERVICE_URL:http://product-service:8081/api/v1/product}
 
 inventory:
   service:
-    url: ${INVENTORY_SERVICE_URL:http://inventory-service:8091/api/v1/inventory}
+    url: ${INVENTORY_SERVICE_URL:http://inventory-service:8083/api/v1/inventory}

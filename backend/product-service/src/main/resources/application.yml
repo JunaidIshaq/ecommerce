@@ -46,7 +46,7 @@ eureka:
       defaultZone: http://eureka-server:8761/eureka/
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT:8081}
 
   forward-headers-strategy: framework
 
@@ -81,4 +81,4 @@ app:
 
 category:
   service:
-    url: ${CATEGORY_SERVICE_URL:http://localhost:8090/api/v1/category}
+    url: ${CATEGORY_SERVICE_URL:http://localhost:8082/api/v1/category}

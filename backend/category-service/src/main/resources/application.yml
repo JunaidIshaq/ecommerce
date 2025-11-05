@@ -33,7 +33,7 @@ eureka:
       defaultZone: http://eureka-server:8761/eureka/
 
 server:
-  port: ${SERVER_PORT:8090}
+  port: ${SERVER_PORT:8082}
 
   forward-headers-strategy: framework
 
@@ -68,5 +68,5 @@ app:
 
 product:
   service:
-    url: ${PRODUCT_SERVICE_URL:http://localhost:8080/api/v1/product}
+    url: ${PRODUCT_SERVICE_URL:http://localhost:8081/api/v1/product}
 

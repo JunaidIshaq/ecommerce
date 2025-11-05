@@ -35,6 +35,34 @@ services:
 #      done"
 #    networks:
 #      - product-net
+  eureka-server:
+    build: ../eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - product-net
+
+  api-gateway:
+    build: ../api-gateway
+    container_name: api-gateway
+    environment:
+      - SPRING_REDIS_HOST=redis
+      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    ports:
+      - "8080:8080"
+    depends_on:
+        - eureka-server
+        - auth-service
+        - user-service
+        - product-service
+        - order-service
+        - payment-service
+        - inventory-service
+        - category-service
+    networks:
+        - product-net
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
@@ -79,7 +107,7 @@ services:
       - CATEGORY_SERVICE_URL=http://category-service:8090/api/v1/category
       - ELASTIC_URI=http://elasticsearch:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
-      - SERVER_PORT=8080
+      - SERVER_PORT=8081
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - LOGSTASH_HOST=logstash
@@ -93,7 +121,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8080:8080"
+      - "8081:8081"
     networks:
       - product-net
 
@@ -109,7 +137,7 @@ services:
       - PRODUCT_SERVICE_URL=http://product-service:8080/api/v1/product
       - ELASTIC_URI=http://elasticsearch:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
-      - SERVER_PORT=8090
+      - SERVER_PORT=8082
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - LOGSTASH_HOST=logstash
@@ -123,7 +151,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8090:8090"
+      - "8082:8082"
     networks:
       - product-net
 
@@ -137,7 +165,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
-      - SERVER_PORT=8091
+      - SERVER_PORT=8083
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
     healthcheck:
@@ -149,7 +177,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8091:8091"
+      - "8083:8083"
     depends_on:
       redis:
         condition: service_healthy
@@ -171,7 +199,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=postgres
       - KAFKA_BOOTSTRAP=kafka:9092
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
-      - SERVER_PORT=8092
+      - SERVER_PORT=8084
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
     healthcheck:
@@ -183,7 +211,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8092:8092"
+      - "8084:8084"
     depends_on:
       redis:
         condition: service_healthy
@@ -205,7 +233,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
-      - SERVER_PORT=8093
+      - SERVER_PORT=8085
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8093/actuator/health || exit 1" ]
       interval: 20s
@@ -215,7 +243,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8093:8093"
+      - "8085:8085"
     depends_on:
       kafka:
         condition: service_healthy
@@ -235,7 +263,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
-      - SERVER_PORT=8094
+      - SERVER_PORT=8086
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8094/actuator/health || exit 1" ]
       interval: 20s
@@ -245,7 +273,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8094:8094"
+      - "8086:8086"
     depends_on:
       kafka:
         condition: service_healthy
@@ -263,7 +291,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
-      - SERVER_PORT=8095
+      - SERVER_PORT=8087
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8095/actuator/health || exit 1" ]
       interval: 20s
@@ -271,7 +299,7 @@ services:
       retries: 5
       start_period: 20s
     ports:
-      - "8095:8095"
+      - "8087:8087"
     networks:
       - product-net
     depends_on:
