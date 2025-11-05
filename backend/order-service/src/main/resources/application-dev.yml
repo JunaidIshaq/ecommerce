@@ -47,7 +47,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
 
 server:
   port: ${SERVER_PORT:8092}
@@ -89,7 +89,7 @@ category:
 
 product:
   service:
-    url: ${PRODUCT_SERVICE_URL:http://localhost:8080/api/v1/project}
+    url: ${PRODUCT_SERVICE_URL:http://localhost:8080/api/v1/product}
 
 inventory:
   service:
