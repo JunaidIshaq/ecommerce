@@ -30,4 +30,4 @@ management:
       show-details: always
   metrics:
     tags:
-      application: auth-service
+      application: eureka-server
