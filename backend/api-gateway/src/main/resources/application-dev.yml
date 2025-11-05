@@ -25,7 +25,11 @@ spring:
       type: redis
 
 eureka:
+  instance:
+    prefer-ip-address: true
   client:
+    register-with-eureka: true
+    fetch-registry: true
     service-url:
       defaultZone: http://eureka-server:8761/eureka/eureka/
 
