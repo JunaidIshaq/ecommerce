@@ -55,7 +55,7 @@ services:
     environment:
       - SPRING_REDIS_HOST=redis
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/eureka/
     ports:
       - "8080:8080"
     depends_on:
