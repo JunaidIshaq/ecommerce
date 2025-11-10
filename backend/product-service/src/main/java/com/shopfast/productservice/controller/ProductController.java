@@ -69,6 +69,13 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Get Product details based on Id")
+    @GetMapping("/{id}/internal")
+    public ResponseEntity<ProductDto> getProductByIdInternal(@PathVariable("id") String id) {
+        ProductDto response = productService.getProductById(id);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "Update Product based on Id")
     @PutMapping("/{id}")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable String id, @Valid @RequestBody ProductDto productDto) throws IOException {
