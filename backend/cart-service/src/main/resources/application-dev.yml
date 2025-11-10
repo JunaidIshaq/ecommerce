@@ -1,6 +1,6 @@
 spring:
   application:
-    name: order-service
+    name: cart-service
 
   datasource:
     url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/cart_db}
@@ -47,10 +47,10 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/eureka/
 
 server:
-  port: ${SERVER_PORT:8084}
+  port: ${SERVER_PORT:8088}
 
   forward-headers-strategy: framework
 
