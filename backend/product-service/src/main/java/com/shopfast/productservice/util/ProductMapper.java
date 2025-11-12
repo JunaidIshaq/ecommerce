@@ -1,6 +1,7 @@
 package com.shopfast.productservice.util;
 
 import com.shopfast.productservice.dto.ProductDto;
+import com.shopfast.productservice.dto.ProductInternalResponseDto;
 import com.shopfast.productservice.model.Product;
 import jakarta.validation.Valid;
 
@@ -40,6 +41,15 @@ public class ProductMapper {
         dto.setCreatedBy(product.getCreatedBy());
         dto.setUpdatedBy(product.getUpdatedBy());
         return dto;
+    }
+
+    public static ProductInternalResponseDto getProductInternalDto(Product product) {
+        return ProductInternalResponseDto.builder()
+                .id(String.valueOf(product.getId()))
+                .title(String.valueOf(product.getName()))
+                .active(product.getIsActive())
+                .price(product.getPrice())
+                .build();
     }
 
     public static Product createProduct(@Valid ProductDto productDto) {

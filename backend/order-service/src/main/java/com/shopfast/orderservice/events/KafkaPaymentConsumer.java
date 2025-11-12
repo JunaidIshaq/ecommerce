@@ -1,6 +1,7 @@
 package com.shopfast.orderservice.events;
 
 import com.shopfast.common.events.PaymentEvent;
+import com.shopfast.orderservice.client.CartClient;
 import com.shopfast.orderservice.enums.OrderStatus;
 import com.shopfast.orderservice.model.Order;
 import com.shopfast.orderservice.repository.OrderRepository;
@@ -20,10 +21,14 @@ public class KafkaPaymentConsumer {
 
     private final OrderRepository orderRepository;
     private final RedisProcessedEventStore processedEventStore;
+    private final CartClient cartClient;
+    private final KafkaOrderProducer kafkaOrderProducer;
 
-    public KafkaPaymentConsumer(OrderRepository orderRepository, RedisProcessedEventStore processedEventStore) {
+    public KafkaPaymentConsumer(OrderRepository orderRepository, RedisProcessedEventStore processedEventStore, CartClient cartClient, KafkaOrderProducer kafkaOrderProducer) {
         this.orderRepository = orderRepository;
         this.processedEventStore = processedEventStore;
+        this.cartClient = cartClient;
+        this.kafkaOrderProducer = kafkaOrderProducer;
     }
 
     @KafkaListener(topics = "payment.events", groupId = "order-service-group")
@@ -60,6 +65,7 @@ public class KafkaPaymentConsumer {
             String eventType = event.getEventType();
             if ("PAYMENT_SUCCESS".equals(eventType)) {
                 order.setStatus(OrderStatus.CONFIRMED);
+                cartClient.clearCartInternal(order.getUserId());
                 // optionally set payment reference, etc.
             } else if ("PAYMENT_FAILED".equals(eventType)) {
                 order.setStatus(OrderStatus.CANCELLED);
@@ -68,8 +74,8 @@ public class KafkaPaymentConsumer {
             } else {
                 log.info("Unhandled payment event type {} for event {}", eventType, eventId);
             }
-
             orderRepository.save(order);
+            kafkaOrderProducer.releaseOrder(order);
             log.info("Order {} updated to {} due to payment event {}", orderId, order.getStatus(), eventId);
 
         } catch (Exception ex) {

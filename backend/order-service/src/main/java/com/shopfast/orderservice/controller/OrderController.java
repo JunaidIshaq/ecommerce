@@ -1,5 +1,7 @@
 package com.shopfast.orderservice.controller;
 
+import com.shopfast.orderservice.client.CartClient;
+import com.shopfast.orderservice.dto.CheckoutRequestDto;
 import com.shopfast.orderservice.dto.OrderRequestDto;
 import com.shopfast.orderservice.dto.OrderResponseDto;
 import com.shopfast.orderservice.model.Order;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,9 +34,12 @@ public class OrderController {
 
     private OrderRepository orderRepository;
 
-    public OrderController(OrderService orderService, OrderRepository orderRepository) {
+    private CartClient cartClient;
+
+    public OrderController(OrderService orderService, OrderRepository orderRepository, CartClient cartClient) {
         this.orderService = orderService;
         this.orderRepository = orderRepository;
+        this.cartClient = cartClient;
     }
 
     @Operation(summary = "Place an order")
@@ -75,5 +81,16 @@ public class OrderController {
         Order canceled = orderService.confirmOrder(id);
         return ResponseEntity.ok(canceled);
     }
+
+    @Operation(summary = "Confirm order")
+    @PatchMapping("/checkout")
+    public ResponseEntity<OrderResponseDto> checkout(@RequestHeader("user_id") String userId, @RequestBody CheckoutRequestDto dto) {
+        var items = cartClient.getCartInternal(userId);
+        var order = orderService.createFromCart(userId, items, dto.getCouponCode());
+//        return ResponseEntity.ok(OrderResponseDto.from(order);
+        return null;
+    }
+
+
 
 }

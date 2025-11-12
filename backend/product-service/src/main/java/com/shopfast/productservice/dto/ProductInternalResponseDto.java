@@ -1,12 +1,18 @@
-package com.shopfast.cartservice.dto;
+package com.shopfast.productservice.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
-public class ProductInternalResponse implements Serializable {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class ProductInternalResponseDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

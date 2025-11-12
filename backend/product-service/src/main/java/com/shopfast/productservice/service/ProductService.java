@@ -4,6 +4,7 @@ import com.shopfast.common.events.ProductEvent;
 import com.shopfast.productservice.client.CategoryClient;
 import com.shopfast.productservice.dto.PagedResponse;
 import com.shopfast.productservice.dto.ProductDto;
+import com.shopfast.productservice.dto.ProductInternalResponseDto;
 import com.shopfast.productservice.dto.SearchResult;
 import com.shopfast.productservice.events.KafkaProductProducer;
 import com.shopfast.productservice.exception.InvalidCategoryException;
@@ -15,7 +16,6 @@ import com.shopfast.productservice.util.ProductMapper;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -157,6 +157,13 @@ public class ProductService {
     public ProductDto getProductById(String id) {
         Optional<Product> product = productRepository.findById(UUID.fromString(id));
         return product.map(ProductMapper::getProductDto).orElseThrow(() -> new ProductNotFoundException(id));
+    }
+
+    @Transactional
+    @Cacheable(value = "product", key = "#id")
+    public ProductInternalResponseDto getProductByIdInternal(String id) {
+        Optional<Product> product = productRepository.findById(UUID.fromString(id));
+        return product.map(ProductMapper::getProductInternalDto).orElseThrow(() -> new ProductNotFoundException(id));
     }
 
     @Transactional

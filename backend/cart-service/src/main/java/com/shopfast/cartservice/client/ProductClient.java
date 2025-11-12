@@ -1,6 +1,6 @@
 package com.shopfast.cartservice.client;
 
-import com.shopfast.cartservice.dto.ProductInternalResponse;
+import com.shopfast.cartservice.dto.ProductInternalResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface ProductClient {
 
    @GetMapping("/api/v1/product/{id}/internal")
-   ProductInternalResponse getProduct(@PathVariable("id") String id);
+   ProductInternalResponseDto getProduct(@PathVariable("id") String id);
 
 }

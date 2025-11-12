@@ -2,6 +2,7 @@ package com.shopfast.productservice.controller;
 
 import com.shopfast.productservice.dto.PagedResponse;
 import com.shopfast.productservice.dto.ProductDto;
+import com.shopfast.productservice.dto.ProductInternalResponseDto;
 import com.shopfast.productservice.model.Product;
 import com.shopfast.productservice.service.ProductService;
 import com.shopfast.productservice.util.ProductMapper;
@@ -71,8 +72,8 @@ public class ProductController {
 
     @Operation(summary = "Get Product details based on Id")
     @GetMapping("/{id}/internal")
-    public ResponseEntity<ProductDto> getProductByIdInternal(@PathVariable("id") String id) {
-        ProductDto response = productService.getProductById(id);
+    public ResponseEntity<ProductInternalResponseDto> getProductByIdInternal(@PathVariable("id") String id) {
+        ProductInternalResponseDto response = productService.getProductByIdInternal(id);
         return ResponseEntity.ok(response);
     }
 

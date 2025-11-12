@@ -1,7 +1,7 @@
 //package com.shopfast.cartservice.util;
 //
 //import com.shopfast.cartservice.client.ProductClient;
-//import com.shopfast.cartservice.dto.ProductInternalResponse;
+//import com.shopfast.cartservice.dto.ProductInternalResponseDto;
 //import com.shopfast.cartservice.model.OrderItem;
 //import com.shopfast.cartservice.repository.OrderRepository;
 //import com.shopfast.cartservice.service.CartService;
@@ -56,7 +56,7 @@
 //        List<String> productIds = productClient.fetchAllProducts();
 //
 //        for (int i = 1; i <= ORDER_COUNT; i++) {
-//            ProductInternalResponse productInternalResponse = new ProductInternalResponse();
+//            ProductInternalResponseDto productInternalResponse = new ProductInternalResponseDto();
 //            productInternalResponse.setUserId(UUID.randomUUID().toString());
 //            List<OrderItem> orderItems = new ArrayList<>();
 //            for(int j = 1; j <= new Random().nextInt(1,20); j++) {

@@ -53,6 +53,12 @@ public class Order {
     private OrderStatus status;
 
     @Column(nullable = false)
+    private BigDecimal subTotal;
+
+    @Column(nullable = false)
+    private BigDecimal discount;
+
+    @Column(nullable = false)
     private BigDecimal totalAmount;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)

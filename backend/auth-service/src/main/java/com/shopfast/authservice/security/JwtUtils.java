@@ -41,8 +41,8 @@ public class JwtUtils {
     public String generateAccessToken(String subject, Map<String, Object> claims) {
         Instant now = Instant.now();
         return Jwts.builder()
-                .setSubject(subject)
                 .setClaims(claims)
+                .setSubject(subject)
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plusSeconds(accessTokenExpiresIn)))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -52,8 +52,8 @@ public class JwtUtils {
     public String generateRefreshToken(String subject, Map<String, Object> claims) {
         Instant now = Instant.now();
         return Jwts.builder()
-                .setSubject(subject)
                 .setClaims(claims)
+                .setSubject(subject)
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plusSeconds(refreshTokenExpiresIn)))
                 .signWith(key, SignatureAlgorithm.HS256)

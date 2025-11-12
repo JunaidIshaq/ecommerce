@@ -94,3 +94,11 @@ product:
 inventory:
   service:
     url: ${INVENTORY_SERVICE_URL:http://localhost:8083/api/v1/inventory}
+
+cart:
+  redis:
+    prefix:
+      user: "cart:"
+      guest: "cart:guest:"
+    # guest carts expire after 14 days
+    ttl-days: 14
