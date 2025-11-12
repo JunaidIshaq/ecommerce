@@ -55,7 +55,6 @@ public class Order {
     @Column(nullable = false)
     private BigDecimal subTotal;
 
-    @Column(nullable = false)
     private BigDecimal discount;
 
     @Column(nullable = false)

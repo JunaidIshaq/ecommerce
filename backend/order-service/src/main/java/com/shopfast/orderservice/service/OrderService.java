@@ -50,6 +50,7 @@ public class OrderService {
                 .userId(orderRequestDto.getUserId())
                 .orderNumber(orderNumber)
                 .status(OrderStatus.PENDING)
+                .subTotal(total)
                 .totalAmount(total)
                 .build();
 
