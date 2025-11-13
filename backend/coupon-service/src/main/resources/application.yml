@@ -1,9 +1,9 @@
 spring:
   application:
-    name: cart-service
+    name: coupon-service
 
   datasource:
-    url: ${POSTGRES_URI:jdbc:postgresql://host.docker.internal:5432/cart_db}
+    url: ${POSTGRES_URI:jdbc:postgresql://host.docker.internal:5432/coupon_db}
     username: postgres
     password: postgres
   jpa:
@@ -11,6 +11,22 @@ spring:
       ddl-auto: update
     show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:order-service-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
 
   data:
     redis:
@@ -34,7 +50,7 @@ eureka:
       defaultZone: http://eureka-server:8761/eureka/eureka/
 
 server:
-  port: ${SERVER_PORT:8088}
+  port: ${SERVER_PORT:8089}
   forward-headers-strategy: framework
 
 jwt:
@@ -60,7 +76,7 @@ management:
       show-details: always
   metrics:
     tags:
-      application: cart-service
+      application: coupon-service
 
 app:
   seed-order: true
