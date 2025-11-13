@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/cart/guest")
@@ -29,9 +31,12 @@ public class CartGuestController {
 
     // anonId is a client-generated UUID (e.g., stored in localStorage)
     @PostMapping("/items")
-    public ResponseEntity<Void> addItem(@RequestParam String anonId, @Valid @RequestBody CartItemRequestDto requestDto) throws JsonProcessingException {
+    public ResponseEntity<Map<String, String>> addItem(@RequestParam String anonId, @Valid @RequestBody CartItemRequestDto requestDto) throws JsonProcessingException {
         cartService.addOrUpdateGuest(anonId, requestDto.getProductId(), requestDto.getQuantity());
-        return ResponseEntity.ok().build();
+        Map<String, String> map = new HashMap<>();
+        map.put("status", "success");
+        map.put("message", "Cart item added successfully !");
+        return ResponseEntity.ok(map);
     }
 
     @GetMapping
@@ -40,15 +45,21 @@ public class CartGuestController {
     }
 
     @DeleteMapping("/items/{productId}")
-    public ResponseEntity<Void> removeItem(@RequestParam String anonId, @PathVariable String productId) {
+    public ResponseEntity<Map<String, String>> removeItem(@RequestParam String anonId, @PathVariable String productId) {
         cartService.removeGuestItem(anonId, productId);
-        return ResponseEntity.ok().build();
+        Map<String, String> map = new HashMap<>();
+        map.put("status", "success");
+        map.put("message", "Cart item removed successfully !");
+        return ResponseEntity.ok(map);
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> clear(@RequestParam String anonId) {
+    public ResponseEntity<Map<String, String>> clear(@RequestParam String anonId) {
         cartService.clearGuestCart(anonId);
-        return ResponseEntity.ok().build();
+        Map<String, String> map = new HashMap<>();
+        map.put("status", "success");
+        map.put("message", "Cart item cleared successfully !");
+        return ResponseEntity.ok(map);
     }
 
 
