@@ -1,7 +1,9 @@
 package com.shopfast.orderservice.events;
 
+import com.shopfast.common.events.CouponRedeemRequestDto;
 import com.shopfast.common.events.PaymentEvent;
 import com.shopfast.orderservice.client.CartClient;
+import com.shopfast.orderservice.client.CouponClient;
 import com.shopfast.orderservice.enums.OrderStatus;
 import com.shopfast.orderservice.model.Order;
 import com.shopfast.orderservice.repository.OrderRepository;
@@ -23,12 +25,15 @@ public class KafkaPaymentConsumer {
     private final RedisProcessedEventStore processedEventStore;
     private final CartClient cartClient;
     private final KafkaOrderProducer kafkaOrderProducer;
+    private final CouponClient couponClient;
 
-    public KafkaPaymentConsumer(OrderRepository orderRepository, RedisProcessedEventStore processedEventStore, CartClient cartClient, KafkaOrderProducer kafkaOrderProducer) {
+
+    public KafkaPaymentConsumer(OrderRepository orderRepository, RedisProcessedEventStore processedEventStore, CartClient cartClient, KafkaOrderProducer kafkaOrderProducer, CouponClient couponClient) {
         this.orderRepository = orderRepository;
         this.processedEventStore = processedEventStore;
         this.cartClient = cartClient;
         this.kafkaOrderProducer = kafkaOrderProducer;
+        this.couponClient = couponClient;
     }
 
     @KafkaListener(topics = "payment.events", groupId = "order-service-group")
@@ -65,17 +70,46 @@ public class KafkaPaymentConsumer {
             String eventType = event.getEventType();
             if ("PAYMENT_SUCCESS".equals(eventType)) {
                 order.setStatus(OrderStatus.CONFIRMED);
-                cartClient.clearCartInternal(order.getUserId());
-                // optionally set payment reference, etc.
+                orderRepository.save(order);
+                // Confirm stock
+                kafkaOrderProducer.confirmOrder(order);
+
+                // Redeem coupon (if used)
+                if (order.getCouponCode() != null && !order.getCouponCode().isBlank()) {
+                    try {
+                        couponClient.redeem(new CouponRedeemRequestDto() {{
+                            setCode(order.getCouponCode());
+                            setUserId(order.getUserId().toString());
+                        }});
+                        log.info("Coupon {} redeemed for user {}", order.getCouponCode(), order.getUserId());
+                    } catch (Exception ex) {
+                        log.error("Failed to redeem coupon {} for order {}: {}",
+                                order.getCouponCode(), orderId, ex.getMessage());
+                        // Not fatal — payment succeeded, order confirmed
+                    }
+                }
+                    // Clear cart
+                    try {
+                        cartClient.clearCartInternal(order.getUserId());
+                        log.info("Cart cleared for user {}", order.getUserId());
+                    } catch (Exception ex) {
+                        log.error("Failed to clear cart for user {}: {}", order.getUserId(), ex.getMessage());
+                    }
+                    // optionally set payment reference, etc.
+                    log.info("Order {} confirmed", orderId);
             } else if ("PAYMENT_FAILED".equals(eventType)) {
+                log.warn("Payment FAILED for order {}", orderId);
+
                 order.setStatus(OrderStatus.CANCELLED);
+                orderRepository.save(order);
+
+                // Release reserved stock
+                kafkaOrderProducer.releaseOrder(order);
             } else if ("PAYMENT_REFUNDED".equals(eventType)) {
                 order.setStatus(OrderStatus.REFUNDED);
             } else {
                 log.info("Unhandled payment event type {} for event {}", eventType, eventId);
             }
-            orderRepository.save(order);
-            kafkaOrderProducer.releaseOrder(order);
             log.info("Order {} updated to {} due to payment event {}", orderId, order.getStatus(), eventId);
 
         } catch (Exception ex) {

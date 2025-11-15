@@ -40,9 +40,8 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/v1/cart").permitAll()
-                        .requestMatchers("/api/v1/cart/**").permitAll()
-                        .requestMatchers("/api/v1/cart/guest/**").permitAll()
+                        .requestMatchers("/api/v1/coupon").permitAll()
+                        .requestMatchers("/api/v1/coupon/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

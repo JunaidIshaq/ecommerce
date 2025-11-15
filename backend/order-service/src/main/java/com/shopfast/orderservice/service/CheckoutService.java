@@ -1,8 +1,11 @@
 package com.shopfast.orderservice.service;
 
 import com.shopfast.common.events.CartItemDto;
+import com.shopfast.common.events.CouponLineItemDto;
+import com.shopfast.common.events.CouponValidateRequestDto;
 import com.shopfast.common.events.OrderCommand;
 import com.shopfast.orderservice.client.CartClient;
+import com.shopfast.orderservice.client.CouponClient;
 import com.shopfast.orderservice.enums.OrderStatus;
 import com.shopfast.orderservice.events.KafkaOrderProducer;
 import com.shopfast.orderservice.model.Order;
@@ -31,13 +34,15 @@ public class CheckoutService {
     private final CartClient cartClient;
     private final KafkaOrderProducer kafkaOrderProducer;
     private final ProcessedCommandRepository processedCommandRepository;
+    private final CouponClient couponClient;
 
-    public CheckoutService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, CartClient cartClient, KafkaOrderProducer kafkaOrderProducer, ProcessedCommandRepository processedCommandRepository) {
+    public CheckoutService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, CartClient cartClient, KafkaOrderProducer kafkaOrderProducer, ProcessedCommandRepository processedCommandRepository, CouponClient couponClient) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.cartClient = cartClient;
         this.kafkaOrderProducer = kafkaOrderProducer;
         this.processedCommandRepository = processedCommandRepository;
+        this.couponClient = couponClient;
     }
 
     @Transactional
@@ -53,6 +58,27 @@ public class CheckoutService {
                 .sum();
         double discount = 0.0;
         double total = Math.max(9, subTotal - discount);
+
+        if(couponCode != null && !couponCode.isBlank()) {
+            CouponValidateRequestDto requestDto = new CouponValidateRequestDto();
+            requestDto.setUserId(userId);
+            requestDto.setCode(couponCode);
+            requestDto.setSubTotal(subTotal);
+            requestDto.setItems(cartItems.stream().map(ci -> {
+                CouponLineItemDto couponLineItemDto = new CouponLineItemDto();
+                couponLineItemDto.setProductId(ci.getProductId().toString());
+                couponLineItemDto.setQuantity(ci.getQuantity());
+                couponLineItemDto.setPrice(ci.getPrice().doubleValue());
+                return couponLineItemDto;
+            }).toList());
+            var response = couponClient.validate(requestDto);
+            if(response.isValid()) {
+                discount = response.getDiscount();
+                total = Math.max(total, subTotal - discount);
+            }else {
+                throw new IllegalArgumentException("Coupon code is invalid");
+            }
+        }
 
         // 3) Persist order + items
         Order order = new Order();
