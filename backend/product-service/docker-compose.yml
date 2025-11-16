@@ -69,6 +69,7 @@ services:
         - category-service
         - cart-service
         - coupon-service
+        - review-service
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
       interval: 10s
