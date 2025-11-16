@@ -1,0 +1,88 @@
+spring:
+  application:
+    name: review-service
+
+  datasource:
+    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/review_db}
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 6000
+      connect-timeout: 6000
+  cache:
+    type: redis
+
+  elasticsearch:
+    uris: ${ELASTIC_URI:http://elasticsearch:9200}
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/eureka/
+
+server:
+  port: ${SERVER_PORT:8090}
+
+  forward-headers-strategy: framework
+
+jwt:
+  secret: ${JWT_SECRET:supersecretkeythatshouldbereplacedandstoredsecurely}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.data.redis: WARN
+    org.springframework.cache.interceptor: DEBUG
+
+
+elastic:
+  host:
+    name: elasticsearch
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: review-service
+
+app:
+  seed-order: true
+
+category:
+  service:
+    url: ${CATEGORY_SERVICE_URL:http://localhost:8082/api/v1/category}
+
+product:
+  service:
+    url: ${PRODUCT_SERVICE_URL:http://localhost:8081/api/v1/product}
+
+inventory:
+  service:
+    url: ${INVENTORY_SERVICE_URL:http://localhost:8083/api/v1/inventory}
+
+cart:
+  redis:
+    prefix:
+      user: "cart:"
+      guest: "cart:guest:"
+    # guest carts expire after 14 days
+    ttl-days: 14
