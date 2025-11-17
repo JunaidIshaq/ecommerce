@@ -468,7 +468,8 @@ services:
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
-      - KAFKA_UI_BASE_PATH=/kafka
+      - SERVER_SERVLET_CONTEXT_PATH=/kafka
+      - MANAGEMENT_SERVER_BASE_PATH=/kafka
     depends_on:
       - kafka
     networks:
