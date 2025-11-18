@@ -119,7 +119,7 @@ services:
         condition: service_healthy
 
     environment:
-      - CATEGORY_SERVICE_URL=http://category-service:8082
+      - CATEGORY_SERVICE_URL=http://category-service:8082/api/v1/category
       - ELASTIC_URI=http://elasticsearch:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
       - SERVER_PORT=8081
@@ -149,7 +149,7 @@ services:
       elasticsearch:
         condition: service_healthy
     environment:
-      - PRODUCT_SERVICE_URL=http://product-service:8081
+      - PRODUCT_SERVICE_URL=http://product-service:8081/api/v1/product
       - ELASTIC_URI=http://elasticsearch:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
       - SERVER_PORT=8082
