@@ -114,6 +114,8 @@ services:
   elasticvue:
     image: cars10/elasticvue
     container_name: elasticvue
+    environment:
+      - SERVER_BASEPATH=/elastic
     ports:
       - "9999:8080"
     depends_on:
