@@ -89,11 +89,11 @@ services:
       - xpack.security.enabled=false
 
       # Correct CORS settings
-      - http.cors.enabled=true
-      - http.cors.allow-origin="*"
-      - http.cors.allow-credentials=true
-      - http.cors.allow-headers="X-Requested-With, X-Auth-Token, Content-Type, Content-Length, Authorization"
-      - http.cors.allow-methods="OPTIONS, HEAD, GET, POST, PUT, DELETE"
+#      - http.cors.enabled=true
+#      - http.cors.allow-origin="*"
+#      - http.cors.allow-credentials=true
+#      - http.cors.allow-headers="X-Requested-With, X-Auth-Token, Content-Type, Content-Length, Authorization"
+#      - http.cors.allow-methods="OPTIONS, HEAD, GET, POST, PUT, DELETE"
 
     ulimits:
       memlock:
@@ -107,6 +107,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
+      - /etc/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
       - es_data:/usr/share/elasticsearch/data
     networks:
       - product-net
