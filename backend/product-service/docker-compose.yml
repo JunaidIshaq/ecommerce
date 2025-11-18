@@ -117,9 +117,13 @@ services:
     container_name: elasticvue
     environment:
       - LISTEN_PORT=8080
-      - VUE_APP_BASEPATH=/elastic/
+      - SERVER_BASEPATH=/elastic/
+      - SERVER_DEFAULT_CLUSTER=http://elasticsearch:9200
     ports:
       - "9999:8080"
+    volumes:
+      - /root/elasticvue-config/config.js:/usr/share/nginx/html/config.js:ro
+      - /root/elasticvue-config/index.html:/usr/share/nginx/html/index.html:ro
     depends_on:
       elasticsearch:
         condition: service_healthy

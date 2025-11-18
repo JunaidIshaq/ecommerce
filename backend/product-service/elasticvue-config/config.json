@@ -1,0 +1,11 @@
+{
+  "server": {
+    "basepath": "/elastic/"
+  },
+  "clusters": [
+    {
+      "name": "Local Elasticsearch",
+      "uri": "http://localhost:9200"
+    }
+  ]
+}
