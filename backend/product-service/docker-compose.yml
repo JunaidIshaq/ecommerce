@@ -86,9 +86,15 @@ services:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - xpack.ml.enabled=false
-      - xpack.monitoring.collection.enabled=false
       - xpack.security.enabled=false
+
+      # Correct CORS settings
+      - http.cors.enabled=true
+      - http.cors.allow-origin="*"
+      - http.cors.allow-credentials=true
+      - http.cors.allow-headers="X-Requested-With, X-Auth-Token, Content-Type, Content-Length, Authorization"
+      - http.cors.allow-methods="OPTIONS, HEAD, GET, POST, PUT, DELETE"
+
     ulimits:
       memlock:
         soft: -1
@@ -102,6 +108,17 @@ services:
       retries: 5
     volumes:
       - es_data:/usr/share/elasticsearch/data
+    networks:
+      - product-net
+
+  elasticvue:
+    image: cars10/elasticvue
+    container_name: elasticvue
+    ports:
+      - "9999:8080"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
     networks:
       - product-net
 
