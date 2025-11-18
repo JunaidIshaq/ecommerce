@@ -119,7 +119,7 @@ services:
         condition: service_healthy
 
     environment:
-      - CATEGORY_SERVICE_URL=http://category-service:8090/api/v1/category
+      - CATEGORY_SERVICE_URL=http://category-service:8082
       - ELASTIC_URI=http://elasticsearch:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
       - SERVER_PORT=8081
@@ -149,7 +149,7 @@ services:
       elasticsearch:
         condition: service_healthy
     environment:
-      - PRODUCT_SERVICE_URL=http://product-service:8080/api/v1/product
+      - PRODUCT_SERVICE_URL=http://product-service:8081
       - ELASTIC_URI=http://elasticsearch:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
       - SERVER_PORT=8082
@@ -301,7 +301,7 @@ services:
     build: ../auth-service
     container_name: auth-service
     environment:
-      - USER_SERVICE_URL=http://user-service:8094
+      - USER_SERVICE_URL=http://user-service:8086
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - REDIS_HOST=redis
       - REDIS_PORT=6379
