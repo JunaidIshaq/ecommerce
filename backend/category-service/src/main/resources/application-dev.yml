@@ -14,6 +14,15 @@ spring:
     url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/category_db}
     username: postgres
     password: postgres
+
+    hikari:
+      maximum-pool-size: 10        # Max connections per service
+      minimum-idle: 5              # Idle connections
+      idle-timeout: 30000          # 30 seconds
+      max-lifetime: 1800000        # 30 minutes
+      connection-timeout: 30000    # 30 seconds
+      pool-name: ${spring.application.name}-pool
+
   jpa:
     hibernate:
       ddl-auto: update
