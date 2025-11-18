@@ -22,11 +22,11 @@ class CategoryClientIntegrationTest {
     @Container
     static GenericContainer<?> categoryService =
             new GenericContainer<>("junaidishaq/category-service:latest")
-                    .withExposedPorts(8090);
+                    .withExposedPorts(8082);
 
     @DynamicPropertySource
     static void registerProps(DynamicPropertyRegistry registry) {
-        String baseUrl = "http://" + categoryService.getHost() + ":" + categoryService.getMappedPort(8090)
+        String baseUrl = "http://" + categoryService.getHost() + ":" + categoryService.getMappedPort(8082)
                 + "/api/v1/category";
         registry.add("category.service.url", () -> baseUrl);
     }
