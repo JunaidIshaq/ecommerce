@@ -57,6 +57,7 @@ public class ProductDataSeeder {
         try {
             waitForElasticsearch();
 
+            elasticIndexConfig.resetProductIndex();
             // ✅ Create product index if not exists
             elasticIndexConfig.createProductIndexIfNotExists();
 

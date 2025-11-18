@@ -51,15 +51,14 @@ public class CategoryDataSeeder {
                 log.info("🟢 Category already exist, skipping seeding.");
                 return;
             }else {
+                elasticIndexConfig.resetCategoryIndex();
+                elasticIndexConfig.createCategoryIndexIfNotExists();
                 categoryRepository.deleteAll();
                 elasticService.deleteAllCategories();
             }
         }catch (Exception ex){
            log.error("Exception : {}", ex);
         }
-
-        elasticIndexConfig.resetCategoryIndex();
-        elasticIndexConfig.createCategoryIndexIfNotExists();
 
         // Predefined category list with fixed UUIDs
         List<Category> predefined = List.of(
