@@ -472,6 +472,11 @@ services:
       - MANAGEMENT_SERVER_BASE_PATH=/kafka
     depends_on:
       - kafka
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:9093/kafka/actuator/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
     networks:
       - product-net
 
