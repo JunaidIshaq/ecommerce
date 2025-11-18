@@ -77,7 +77,7 @@ public class CategoryClient {
             webClient.get()
                     .uri("/{id}", categoryId)
                     .retrieve()
-                    .bodyToMono(Void.class)
+                    .bodyToMono(new ParameterizedTypeReference<CategoryDto>() {})
                     .block(Duration.ofSeconds(3));
             log.info("✅ Category {} validated successfully", categoryId);
             return true;
