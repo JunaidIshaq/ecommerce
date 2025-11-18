@@ -107,7 +107,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - /etc/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
       - es_data:/usr/share/elasticsearch/data
     networks:
       - product-net
