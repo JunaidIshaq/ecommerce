@@ -46,19 +46,20 @@ public class CategoryDataSeeder {
             System.out.println("🟢 Category seeding disabled (set app.seed-categories=true to enable)");
             return;
         }
+
+
         try {
             if (categoryRepository.count() > 0 && elasticService.count() > 0) {
                 log.info("🟢 Category already exist, skipping seeding.");
                 return;
-            }else {
-                elasticIndexConfig.resetCategoryIndex();
-                elasticIndexConfig.createCategoryIndexIfNotExists();
-                categoryRepository.deleteAll();
-                elasticService.deleteAllCategories();
             }
         }catch (Exception ex){
-           log.error("Exception : {}", ex);
+            log.warn("⚠️ Could not count existing categories, proceeding with seeding", ex);
         }
+        elasticIndexConfig.resetCategoryIndex();
+        elasticIndexConfig.createCategoryIndexIfNotExists();
+        categoryRepository.deleteAll();
+        elasticService.deleteAllCategories();
 
         // Predefined category list with fixed UUIDs
         List<Category> predefined = List.of(

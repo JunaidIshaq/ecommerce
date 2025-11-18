@@ -57,9 +57,6 @@ public class ProductDataSeeder {
         try {
             waitForElasticsearch();
 
-            elasticIndexConfig.resetProductIndex();
-            // ✅ Create product index if not exists
-            elasticIndexConfig.createProductIndexIfNotExists();
 
             long dbCount = 0;
             long esCount = 0;
@@ -73,10 +70,11 @@ public class ProductDataSeeder {
             if (dbCount > 0 && esCount > 0) {
                 log.info("🟢 Products already exist, skipping seeding.");
                 return;
-            }else {
-                productRepository.deleteAll();
-                elasticService.deleteAllProducts();
             }
+            elasticIndexConfig.resetProductIndex();
+            elasticIndexConfig.createProductIndexIfNotExists();
+            productRepository.deleteAll();
+            elasticService.deleteAllProducts();
 
 
             log.info("🚀 Generating {} dummy products...", PRODUCT_COUNT);
