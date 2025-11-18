@@ -81,4 +81,4 @@ app:
 
 category:
   service:
-    url: ${CATEGORY_SERVICE_URL:http://localhost:8082/api/v1/category}
+    url: ${CATEGORY_SERVICE_URL:http://category-service:8082/api/v1/category}
