@@ -72,10 +72,11 @@ public class ProductDataSeeder {
             if (dbCount > 0 && esCount > 0) {
                 log.info("🟢 Products already exist, skipping seeding.");
                 return;
+            }else {
+                productRepository.deleteAll();
+                elasticService.deleteAllProducts();
             }
 
-            productRepository.deleteAll();
-            elasticService.deleteAllProducts();
 
             log.info("🚀 Generating {} dummy products...", PRODUCT_COUNT);
 

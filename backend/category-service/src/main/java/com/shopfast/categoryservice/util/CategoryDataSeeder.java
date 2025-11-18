@@ -48,9 +48,9 @@ public class CategoryDataSeeder {
         }
         try {
             if (categoryRepository.count() > 0 && elasticService.count() > 0) {
-                System.out.println("🟢 Category already exist, skipping seeding.");
+                log.info("🟢 Category already exist, skipping seeding.");
                 return;
-            } else {
+            }else {
                 categoryRepository.deleteAll();
                 elasticService.deleteAllCategories();
             }
