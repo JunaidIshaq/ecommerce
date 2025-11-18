@@ -1,7 +1,5 @@
-network.host: 0.0.0.0
-http.port: 9200
-
 http.cors.enabled: true
 http.cors.allow-origin: "https://shopfast.live"
-http.cors.allow-headers: "X-Requested-With,Content-Type,Content-Length,Authorization"
 http.cors.allow-credentials: true
+http.cors.allow-headers: "*"
+http.cors.allow-methods: "OPTIONS, HEAD, GET, POST, PUT, DELETE"
