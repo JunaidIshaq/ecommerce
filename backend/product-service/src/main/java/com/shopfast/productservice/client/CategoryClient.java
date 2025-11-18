@@ -4,6 +4,7 @@ import com.shopfast.common.dto.CategoryDto;
 import com.shopfast.common.dto.PagedResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -42,7 +43,7 @@ public class CategoryClient {
                 return webClient.get()
                         .uri("?pageNumber=1&pageSize=30")
                         .retrieve()
-                        .bodyToMono(PagedResponse.class)
+                        .bodyToMono(new ParameterizedTypeReference<PagedResponse<CategoryDto>>() {})
                         .block(Duration.ofSeconds(5));
 
             } catch (WebClientResponseException.NotFound e) {

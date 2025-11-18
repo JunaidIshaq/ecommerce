@@ -1,6 +1,7 @@
 package com.shopfast.productservice.util;
 
 import com.github.javafaker.Faker;
+import com.shopfast.common.dto.CategoryDto;
 import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.productservice.client.CategoryClient;
 import com.shopfast.productservice.config.ElasticIndexConfig;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -125,14 +125,14 @@ public class ProductDataSeeder {
      */
     private List<String> getSafeCategoryList() {
         try {
-            PagedResponse pagedResponse = categoryClient.getAllCategories();
-            List<Map<String, Object>> items = pagedResponse.getItems();
+            PagedResponse<CategoryDto> pagedResponse = categoryClient.getAllCategories();
+            List<CategoryDto> items = pagedResponse.getItems();
             if (items == null || items.isEmpty()) {
                 log.warn("⚠️ No categories found, using fallback dummy category IDs.");
                 return List.of(UUID.randomUUID().toString());
             }
             return items.stream()
-                    .map(item -> item.get("id").toString())
+                    .map(CategoryDto::getId)
                     .toList();
         } catch (Exception e) {
             log.error("⚠️ Failed to fetch categories, using fallback dummy ID.", e);

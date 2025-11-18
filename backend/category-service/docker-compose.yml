@@ -44,7 +44,7 @@
 #      - elasticsearch
 #      - logstash
 #    environment:
-#      - CATEGORY_SERVICE_URL=http://localhost:8090/api/v1/categories
+#      - CATEGORY_SERVICE_URL=http://localhost:8082/api/v1/categories
 #      - MONGO_URI=mongodb://localhost:27017/product_db
 #      - ELASTIC_URI=http://localhost:9200
 #      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
