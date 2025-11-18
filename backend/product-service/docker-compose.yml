@@ -116,7 +116,7 @@ services:
     container_name: elasticvue
     environment:
       - LISTEN_PORT=8080
-      - SERVER_BASEPATH=/elastic/
+      - VUE_APP_BASEPATH=/elastic/
     ports:
       - "9999:8080"
     depends_on:
