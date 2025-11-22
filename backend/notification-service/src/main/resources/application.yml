@@ -68,7 +68,6 @@ jwt:
 #logging:
   level:
     root: INFO
-    org.springframework.data.redis: WARN
     org.springframework.cache.interceptor: DEBUG
 
 elastic:
