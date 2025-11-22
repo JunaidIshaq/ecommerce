@@ -1,8 +1,12 @@
 package com.shopfast.orderservice.service;
 
+import com.shopfast.common.enums.NotificationChannel;
+import com.shopfast.common.enums.NotificationType;
 import com.shopfast.common.events.CartItemDto;
+import com.shopfast.common.events.NotificationEvent;
 import com.shopfast.orderservice.dto.OrderRequestDto;
 import com.shopfast.orderservice.enums.OrderStatus;
+import com.shopfast.orderservice.events.KafkaNotificationProducer;
 import com.shopfast.orderservice.events.KafkaOrderProducer;
 import com.shopfast.common.events.OrderCommand;
 import com.shopfast.orderservice.model.Order;
@@ -18,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -30,12 +35,14 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProcessedCommandRepository processedCommandRepository;
     private final KafkaOrderProducer kafkaOrderProducer;
+    private final KafkaNotificationProducer kafkaNotificationProducer;
 //    private final CouponClient couponClient;
 
-    public OrderService(OrderRepository orderRepository, ProcessedCommandRepository processedCommandRepository, KafkaOrderProducer kafkaOrderProducer) {
+    public OrderService(OrderRepository orderRepository, ProcessedCommandRepository processedCommandRepository, KafkaOrderProducer kafkaOrderProducer, KafkaNotificationProducer kafkaNotificationProducer) {
         this.orderRepository = orderRepository;
         this.processedCommandRepository = processedCommandRepository;
         this.kafkaOrderProducer = kafkaOrderProducer;
+        this.kafkaNotificationProducer = kafkaNotificationProducer;
     }
 
     @Transactional
@@ -178,4 +185,19 @@ public class OrderService {
 //        return order;
         return null;
     }
+
+// TODO - Send Notifications for ORDER CREATED, APPROVED, SHIPPED, DELIVERED, REJECTED
+//    public void createOrderNotification(Order order, User user) {
+//        NotificationEvent event = new NotificationEvent();
+//        event.setUserId(user.getId());
+//        event.setRecipient(user.getEmail());
+//        event.setNotificationType(NotificationType.ORDER_CREATED);
+//        event.setNotificationChannel(NotificationChannel.EMAIL);
+//        event.setSubject("Your order has been placed");
+//        event.setContent("Your order #" + order.getId() + " has been successfully placed.");
+//        event.setEventSource("order-service");
+//        event.setReferenceId(order.getId().toString());
+//
+//        kafkaNotificationProducer.send(event);
+//    }
 }

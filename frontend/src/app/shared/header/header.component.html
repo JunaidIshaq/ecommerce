@@ -38,15 +38,64 @@
       <a routerLink="/product" class="nav-link">Products</a>
       <a routerLink="/profile" class="nav-link">Profile</a>
 
+      <!-- 🌟 Notification Bell -->
+      <div class="notif-wrapper" (click)="toggleDropdown()">
+        <i class="fa fa-bell notif-icon"></i>
+
+        <!-- Unread Count -->
+        <span class="notif-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+
+        <!-- Dropdown Menu -->
+        <div class="notif-dropdown" *ngIf="isDropdownOpen" (click)="$event.stopPropagation()">
+
+          <div class="notif-header">
+            <h4>Notifications</h4>
+            <span class="view-all">View All</span>
+          </div>
+
+          <div class="notif-list">
+            <div
+              class="notif-item"
+              *ngFor="let n of notifications"
+              [class.unread]="n.status !== 'READ'"
+              (click)="markAsRead(n)"
+            >
+              <div class="notif-icon-box">
+                <i class="fa"
+                   [ngClass]="{
+               'fa-shopping-bag': n.type === 'ORDER_CREATED',
+               'fa-check-circle': n.type === 'ORDER_DELIVERED',
+               'fa-truck': n.type === 'ORDER_SHIPPED',
+               'fa-ban': n.type === 'ORDER_CANCELLED',
+               'fa-bolt': n.type === 'PROMOTION',
+               'fa-envelope': true
+             }">
+                </i>
+              </div>
+
+              <div class="notif-content">
+                <div class="notif-title">{{ n.subject }}</div>
+                <div class="notif-desc">{{ n.content }}</div>
+                <div class="notif-time">{{ n.createdAt | date:'short' }}</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Cart -->
       <a routerLink="/cart" class="icon-btn cart">
         <i class="fa fa-shopping-cart"></i>
         <span class="cart-count">{{ (cartCount$ | async) || 0 }}</span>
       </a>
 
+      <!-- Auth -->
       <ng-container *ngIf="(user$ | async) as u; else guest">
         <span class="user">Hi, {{ u.name }}</span>
         <button (click)="logout()" class="btn-logout">Logout</button>
       </ng-container>
+
       <ng-template #guest>
         <a routerLink="/login" class="nav-link">Login</a>
         <a routerLink="/signup" class="btn-primary small">Sign Up</a>

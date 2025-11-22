@@ -10,11 +10,11 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class InventoryEventsListener {
+public class KafkaInventoryConsumer {
 
     private final OrderService orderService;
 
-    public InventoryEventsListener(OrderService orderService) {
+    public KafkaInventoryConsumer(OrderService orderService) {
         this.orderService = orderService;
     }
 

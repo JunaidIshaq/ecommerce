@@ -1,43 +1,76 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
 import { map } from 'rxjs/operators';
-import {Observable} from 'rxjs';
-import {User} from '../../models/user.model';
-import {FormsModule} from '@angular/forms';
-import {AsyncPipe, NgIf} from '@angular/common';
-import {RouterLink} from '@angular/router';
+import { Observable } from 'rxjs';
+import { User } from '../../models/user.model';
+import { FormsModule } from '@angular/forms';
+import {AsyncPipe, NgIf, NgFor, DatePipe, NgForOf, NgClass} from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { NotificationService, Notification } from '../../services/notification.service';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
-  imports: [
-    FormsModule,
-    AsyncPipe,
-    NgIf,
-    RouterLink
-  ],
+  imports: [FormsModule, AsyncPipe, NgIf, RouterLink, DatePipe, NgForOf, NgClass],
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent {
-  protected cartCount$: Observable<number>;
-  protected user$: Observable<User | null>;
-  protected query: string;
-  protected menuOpen: boolean;
+export class HeaderComponent implements OnInit {
 
-  constructor(private cart: CartService, private auth: AuthService) {
+  cartCount$: Observable<number>;
+  user$: Observable<User | null>;
+  query = '';
+  menuOpen = false;
+
+  // NOTIFICATION fields
+  notifications: Notification[] = [];
+  unreadCount = 0;
+  isDropdownOpen = false;
+  userId = '28e2ac7f-09ef-4e7e-94df-042a987fa9c9';
+
+  constructor(
+    private cart: CartService,
+    private auth: AuthService,
+    private notificationService: NotificationService
+  ) {
     this.cartCount$ = this.cart.getCart().pipe(map(() => this.cart.count()));
     this.user$ = this.auth.currentUser();
-    this.query = '';
-    this.menuOpen = false;
   }
 
-  doSearch() {
-    console.log('Searching:', this.query);
+  ngOnInit(): void {
+    this.loadNotifications();
+  }
+
+  // Load latest 10 notifications
+  loadNotifications(): void {
+    this.notificationService.getUserNotifications(this.userId, 1, 12)
+      .subscribe(res => {
+        this.notifications = res.content;
+        this.unreadCount = this.notifications.filter(n => n.status !== 'READ').length;
+      });
+  }
+
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  markAsRead(n: Notification) {
+    if (n.status === 'READ') return;
+
+    this.notificationService.markAsRead(n.id)
+      .subscribe((updated: { status: any; readAt: any; }) => {
+        n.status = updated.status;
+        n.readAt = updated.readAt;
+        this.unreadCount--;
+      });
   }
 
   logout() {
     this.auth.logout();
+  }
+
+  doSearch() {
+    console.log('Searching:', this.query);
   }
 
   toggleMenu() {

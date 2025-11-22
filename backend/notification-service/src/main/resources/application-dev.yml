@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: notification-service
+
+  datasource:
+    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/notification_db}
+    username: postgres
+    password: postgres
+
+    hikari:
+      maximum-pool-size: 10        # Max connections per service
+      minimum-idle: 5              # Idle connections
+      idle-timeout: 30000          # 30 seconds
+      max-lifetime: 1800000        # 30 minutes
+      connection-timeout: 30000    # 30 seconds
+      pool-name: ${spring.application.name}-pool
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:notification-service-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  elasticsearch:
+    uris: ${ELASTIC_URI:http://elasticsearch:9200}
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/eureka/
+
+server:
+  port: ${SERVER_PORT:8091}
+
+  forward-headers-strategy: framework
+
+jwt:
+  secret: ${JWT_SECRET:supersecretkeythatshouldbereplacedandstoredsecurely}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.data.redis: WARN
+    org.springframework.cache.interceptor: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: notification-service
