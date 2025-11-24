@@ -4,12 +4,10 @@ import com.shopfast.common.enums.NotificationChannel;
 import com.shopfast.common.enums.NotificationType;
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
 public class NotificationEvent {
 
-    private UUID userId;
+    private String userId;
 
     private String recipient;
 
