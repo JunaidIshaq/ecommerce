@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.shopfast</groupId>
-    <artifactId>notificationEntity-service</artifactId>
+    <artifactId>notification-service</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
-    <name>notificationEntity-service</name>
+    <name>notification-service</name>
 
     <properties>
         <java.version>17</java.version>

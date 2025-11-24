@@ -112,23 +112,23 @@ services:
     networks:
       - product-net
 
-  elasticvue:
-    image: cars10/elasticvue
-    container_name: elasticvue
-    environment:
-      - LISTEN_PORT=8080
-      - SERVER_BASEPATH=/elastic/
-      - SERVER_DEFAULT_CLUSTER=http://elasticsearch:9200
-    ports:
-      - "9999:8080"
+#  elasticvue:
+#    image: cars10/elasticvue
+#    container_name: elasticvue
+#    environment:
+#      - LISTEN_PORT=8080
+#      - SERVER_BASEPATH=/elastic/
+#      - SERVER_DEFAULT_CLUSTER=http://elasticsearch:9200
+#    ports:
+#      - "9999:8080"
 #    volumes:
 #      - /root/elasticvue-config/config.js:/usr/share/nginx/html/config.js:ro
 #      - /root/elasticvue-config/index.html:/usr/share/nginx/html/index.html:ro
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    networks:
-      - product-net
+#    depends_on:
+#      elasticsearch:
+#        condition: service_healthy
+#    networks:
+#      - product-net
 
   product-service:
     build: .
@@ -513,25 +513,25 @@ services:
     networks:
       - product-net
 
-#  kafka-ui:
-#    image: provectuslabs/kafka-ui:latest
-#    container_name: kafka-ui
-#    ports:
-#      - "9093:8080"
-#    environment:
-#      - KAFKA_CLUSTERS_0_NAME=local
-#      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
-#      - SERVER_SERVLET_CONTEXT_PATH=/kafka
-#      - MANAGEMENT_SERVER_BASE_PATH=/kafka
-#    depends_on:
-#      - kafka
-#    healthcheck:
-#      test: ["CMD", "wget", "--spider", "http://localhost:8080/kafka/actuator/health"]
-#      interval: 10s
-#      timeout: 10s
-#      retries: 10
-#    networks:
-#      - product-net
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "9093:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - SERVER_SERVLET_CONTEXT_PATH=/kafka
+      - MANAGEMENT_SERVER_BASE_PATH=/kafka
+    depends_on:
+      - kafka
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8080/kafka/actuator/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    networks:
+      - product-net
 
 #  postgres:
 #    image: postgres:15
