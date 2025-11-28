@@ -32,8 +32,8 @@ export interface Page<T> {
 export class NotificationService {
 
   // TODO: Update if your backend port changes
-  private baseUrl = 'https://shopfast.live/api/v1/notification';
-  // private baseUrl = 'http://localhost:8091/api/v1/notification';
+  // private baseUrl = 'https://shopfast.live/api/v1/notification';
+  private baseUrl = 'http://localhost:8091/api/v1/notification';
 
   constructor(private http: HttpClient) {}
 

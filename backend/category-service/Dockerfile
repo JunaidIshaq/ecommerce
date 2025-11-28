@@ -2,6 +2,10 @@
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
+# Copy and install common-lib
+COPY ../common-lib ./common-lib
+RUN mvn -f common-lib/pom.xml install -DskipTests
+
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
