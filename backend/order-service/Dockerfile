@@ -1,20 +1,20 @@
-# Build stage
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Copy and install common-lib
-COPY ../common-lib ./common-lib
+# Copy shared common-lib (because it's inside the context ".")
+COPY common-lib ./common-lib
 RUN mvn -f common-lib/pom.xml install -DskipTests
 
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
+# Copy inventory-service sources from subfolder
+COPY order-service/pom.xml ./pom.xml
+COPY order-service/src ./src
 
-COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Runtime stage
+# Run stage
 FROM eclipse-temurin:21-jdk
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
