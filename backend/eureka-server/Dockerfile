@@ -5,9 +5,9 @@ WORKDIR /app
 COPY common-lib ./common-lib
 RUN mvn -f common-lib/pom.xml install -DskipTests
 
-# Copy eureka-service sources from subfolder
-COPY eureka-service/pom.xml ./pom.xml
-COPY eureka-service/src ./src
+# Copy eureka-server sources from subfolder
+COPY eureka-server/pom.xml ./pom.xml
+COPY eureka-server/src ./src
 
 RUN mvn clean package -DskipTests
 
