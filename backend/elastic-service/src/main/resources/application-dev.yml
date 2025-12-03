@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: elastic-service
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:product-service-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  elasticsearch:
+    uris: ${ELASTIC_URI:http://localhost:9200}
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/eureka/
+
+server:
+  port: ${SERVER_PORT:8092}
+  forward-headers-strategy: framework
+
+jwt:
+  secret: ${JWT_SECRET:supersecretkeythatshouldbereplacedandstoredsecurely}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.data.redis: WARN
+    org.springframework.cache.interceptor: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: elastic-service

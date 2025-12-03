@@ -25,6 +25,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -182,13 +184,35 @@ public class ProductService {
             existing.setPrice(updatedProduct.getPrice());
             existing.setImages(updatedProduct.getImages());
             existing.setStock(updatedProduct.getStock());
-            Product saved = productRepository.save(existing);
+            Product savedProduct = productRepository.save(existing);
             try {
-                elasticProductSearchService.indexProduct(saved);
+                elasticProductSearchService.indexProduct(savedProduct);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to reindex product", e);
             }
-            return ProductMapper.getProductDto(saved);
+
+            // Publish Product Update event to Kafka for elastic search
+            ProductEvent event = new ProductEvent();
+            event.setEventId(UUID.randomUUID().toString());
+            event.setEventType("PRODUCT_UPDATED");
+            event.setEventVersion(1);
+            event.setOccurredAt(Instant.now());
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("id", savedProduct.getId());
+            payload.put("name", savedProduct.getName());
+            payload.put("description", savedProduct.getDescription());
+            payload.put("category", savedProduct.getCategoryId());
+//            payload.put("brand", savedProduct.getBrand());
+            payload.put("price", savedProduct.getPrice());
+            payload.put("tags", savedProduct.getTags());
+
+            event.setPayload(payload);
+
+            kafkaProductProducer.publishProductEvent(event);
+            log.info("✅ Product event published for {}", savedProduct.getId());
+
+            return ProductMapper.getProductDto(savedProduct);
         }).orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }
 
