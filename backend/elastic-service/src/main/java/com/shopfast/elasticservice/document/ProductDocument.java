@@ -11,6 +11,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -21,6 +22,7 @@ import java.util.List;
 public class ProductDocument {
 
     @Id
+    @Field(name = "id")
     private String id;
 
     @Field(type = FieldType.Text)
