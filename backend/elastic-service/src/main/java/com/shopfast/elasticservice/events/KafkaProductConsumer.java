@@ -32,12 +32,10 @@ public class KafkaProductConsumer {
         this.productSearchRepository = productSearchRepository;
     }
 
-    @KafkaListener(topics = "product.events")
-    public void consume(String message) {
+    @KafkaListener(topics = "product.events", groupId = "elastic-service-group")
+    public void consume(ProductEvent event) {
         try {
-            log.info("Received notification message: {}", message);
-
-            ProductEvent event = objectMapper.readValue(message, ProductEvent.class);
+            log.info("Received product event: {}", event);
 
             switch (event.getEventType()) {
                 case "PRODUCT_CREATED":
