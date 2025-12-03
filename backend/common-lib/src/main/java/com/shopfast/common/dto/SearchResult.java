@@ -1,6 +1,5 @@
-package com.shopfast.productservice.dto;
+package com.shopfast.common.dto;
 
-import com.shopfast.productservice.model.Product;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

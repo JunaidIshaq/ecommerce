@@ -85,7 +85,7 @@ public class ProductService {
         try {
             Product saved = productRepository.save(product);
 //            Elastic service will consume events through kakfa.
-//            elasticProductSearchService.indexProduct(saved);
+            elasticProductSearchService.indexProduct(saved);
         }catch (Exception e){
             e.printStackTrace();  // or use log.error("Elasticsearch indexing failed", e);
             throw new RuntimeException("Failed to index product: " + e.getMessage(), e);

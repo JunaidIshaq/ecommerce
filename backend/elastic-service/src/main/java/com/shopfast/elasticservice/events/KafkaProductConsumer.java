@@ -2,14 +2,18 @@ package com.shopfast.elasticservice.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shopfast.common.events.ProductEvent;
+import com.shopfast.common.model.elastic.Product;
 import com.shopfast.elasticservice.document.ProductDocument;
 import com.shopfast.elasticservice.repository.ProductSearchRepository;
+import com.shopfast.elasticservice.search.ElasticProductSearchService;
 import com.shopfast.elasticservice.service.EmbeddingService;
 import com.shopfast.elasticservice.service.ProductIndexService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -25,11 +29,14 @@ public class KafkaProductConsumer {
 
     private final ProductSearchRepository productSearchRepository;
 
-    public KafkaProductConsumer(ObjectMapper objectMapper, EmbeddingService embeddingService, ProductIndexService productIndexService, ProductSearchRepository productSearchRepository) {
+    private final ElasticProductSearchService elasticProductSearchService;
+
+    public KafkaProductConsumer(ObjectMapper objectMapper, EmbeddingService embeddingService, ProductIndexService productIndexService, ProductSearchRepository productSearchRepository, ElasticProductSearchService elasticProductSearchService) {
         this.objectMapper = objectMapper;
         this.embeddingService = embeddingService;
         this.productIndexService = productIndexService;
         this.productSearchRepository = productSearchRepository;
+        this.elasticProductSearchService = elasticProductSearchService;
     }
 
     @KafkaListener(topics = "product.events", groupId = "elastic-service-group")
@@ -57,19 +64,26 @@ public class KafkaProductConsumer {
     }
 
 
-    private void indexProduct(Map<String, Object> payload) {
-        ProductDocument doc = ProductDocument.builder()
-                .id((String) payload.get("id"))
-                .name((String) payload.get("name"))
-                .description((String) payload.get("description"))
-                .category((String) payload.get("category"))
-                .brand((String) payload.get("brand"))
-                .price(payload.get("price") != null
-                        ? Double.valueOf(payload.get("price").toString()) : null)
-                .tags((List<String>) payload.get("tags"))
-                .build();
+    private void indexProduct(Map<String, Object> payload) throws IOException {
+//        ProductDocument doc = ProductDocument.builder()
+//                .id((String) payload.get("id"))
+//                .name((String) payload.get("name"))
+//                .description((String) payload.get("description"))
+//                .category((String) payload.get("category"))
+//                .brand((String) payload.get("brand"))
+//                .price(payload.get("price") != null
+//                        ? Double.valueOf(payload.get("price").toString()) : null)
+//                .tags((List<String>) payload.get("tags"))
+//                .build();
 
-        productIndexService.index(doc);
+
+//        productIndexService.index(doc);
+        Product product = new Product();
+        product.setId(String.valueOf(payload.get("productId")));
+        product.setName(String.valueOf(payload.get("name")));
+        product.setCategoryId(String.valueOf(payload.get("categoryId")));
+        product.setPrice(BigDecimal.valueOf((Double) payload.get("price")));
+        elasticProductSearchService.indexProduct(product);
     }
 
 
