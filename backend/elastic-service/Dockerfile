@@ -6,8 +6,8 @@ COPY common-lib ./common-lib
 RUN mvn -f common-lib/pom.xml install -DskipTests
 
 # Copy search-service sources from subfolder
-COPY search-service/pom.xml ./pom.xml
-COPY search-service/src ./src
+COPY elastic-service/pom.xml ./pom.xml
+COPY elastic-service/src ./src
 
 RUN mvn clean package -DskipTests
 
