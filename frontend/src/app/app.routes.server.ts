@@ -1,7 +1,15 @@
-import {RenderMode, ServerRoute} from '@angular/ssr';
-import {routesIDs} from './routes-ids';
+import { RenderMode, ServerRoute } from '@angular/ssr';
+import { routesIDs } from './routes-ids';
 
 export const serverRoutes: ServerRoute[] = [
+
+  // ✅ STATIC ROUTE (MANDATORY)
+  {
+    path: '',
+    renderMode: RenderMode.Prerender,
+  },
+
+  // ✅ DYNAMIC ROUTE (OPTIONAL PRERENDER)
   {
     path: 'product/:id',
     renderMode: RenderMode.Prerender,
@@ -9,8 +17,10 @@ export const serverRoutes: ServerRoute[] = [
       return routesIDs.map(id => ({ id }));
     },
   },
+
+  // ✅ WILDCARD MUST BE SSR (NOT PRERENDER)
   {
     path: '**',
-    renderMode: RenderMode.Prerender
+    renderMode: RenderMode.Server
   }
 ];
