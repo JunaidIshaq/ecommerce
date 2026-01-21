@@ -14,6 +14,7 @@ export const serverRoutes: ServerRoute[] = [
     path: 'product/:id',
     renderMode: RenderMode.Prerender,
     async getPrerenderParams() {
+      console.log('VPS prerender routesIDs:', routesIDs);
       return routesIDs.map(id => ({ id }));
     },
   },
