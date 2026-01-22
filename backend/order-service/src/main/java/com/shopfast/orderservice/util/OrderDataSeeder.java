@@ -62,7 +62,7 @@ public class OrderDataSeeder {
             for(int j = 1; j <= new Random().nextInt(1,20); j++) {
                 OrderItem  orderItem = new OrderItem();
                 orderItem.setId(UUID.randomUUID());
-                orderItem.setProductId(UUID.fromString(productIds.get(new Random().nextInt(1000))));
+                orderItem.setProductId(UUID.fromString(productIds.get(new Random().nextInt(productIds.size()))));
                 orderItem.setQuantity(new Random().nextInt(1, 10));
                 orderItem.setPrice(BigDecimal.valueOf(new Random().nextDouble(1000)));
                 orderItem.setCreatedAt(Instant.now());

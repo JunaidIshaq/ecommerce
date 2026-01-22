@@ -37,7 +37,7 @@ public class ProductIndexServiceImpl implements ProductIndexService {
 
         // save other fields via repository
         ProductDocument saved = repository.save(product);
-/** TODO Add open embedding
+        /** TODO Add open embedding
         // update embedding using ES REST API, because dense_vector is not fully supported by repo
         try {
             StringBuilder sb = new StringBuilder();
