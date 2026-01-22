@@ -1,6 +1,6 @@
 spring:
   application:
-    name: category-service
+    name: auth-service
   data:
     redis:
       host: ${REDIS_HOST:redis}
