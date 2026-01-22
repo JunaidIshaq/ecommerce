@@ -150,6 +150,9 @@ services:
         condition: service_healthy
 
     environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/product_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
       - CATEGORY_SERVICE_URL=http://category-service:8082/api/v1/category
       - ELASTIC_URI=http://elasticsearch:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
@@ -182,6 +185,9 @@ services:
       elasticsearch:
         condition: service_healthy
     environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/category_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
       - PRODUCT_SERVICE_URL=http://product-service:8081/api/v1/product
       - ELASTIC_URI=http://elasticsearch:9200
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
