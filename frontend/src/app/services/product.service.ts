@@ -15,11 +15,14 @@ export class ProductService {
   /**
    * ✅ Fetch products from backend with pagination
    */
-  getAllProducts(pageNumber: number, pageSize: number, categoryId?: string | null, sortBy?: string | null, sortOrder?: string | null): Observable<Product[]> {
+  getAllProducts(pageNumber: number, pageSize: number, searchKeyword?: string | null, categoryId?: string | null, sortBy?: string | null, sortOrder?: string | null): Observable<Product[]> {
     let params = new HttpParams()
       .set('pageNumber', pageNumber)
       .set('pageSize', pageSize);
 
+    if(searchKeyword){
+      params = params.set('searchKeyword', searchKeyword);
+    }
     if(categoryId){
       params = params.set('categoryId', categoryId);
     }

@@ -4,6 +4,8 @@ import {ProductService} from '../../services/product.service';
 import {CartService} from '../../services/cart.service';
 import {Router} from '@angular/router';
 import {CategoryService} from '../../services/category.service';
+import {SearchService} from '../../services/search.service';
+import {debounceTime, distinctUntilChanged} from 'rxjs';
 
 @Component({
   selector: 'app-product',
@@ -27,10 +29,12 @@ export class ProductComponent implements OnInit {
   maxVisible = 3;
   loading = true;
   errorMessage = '';
+  private searchKeyword: string | undefined;
 
   constructor(
     private productService: ProductService,
     private categoryService: CategoryService,
+    private searchService: SearchService,
     private cart: CartService,
     private ngZone: NgZone,
     private router: Router,
@@ -41,7 +45,19 @@ export class ProductComponent implements OnInit {
   ngOnInit(): void {
     this.loadProducts(this.currentPage);
     this.loadCategories();
+
+    this.searchService.search$
+      .pipe(
+        debounceTime(100),
+        distinctUntilChanged()
+      )
+      .subscribe(keyword => {
+        this.searchKeyword = keyword;
+        this.currentPage = 1;
+        this.loadProducts(1);
+      });
   }
+
 
   /**
    * 🔹 Fetch paginated products from backend
@@ -49,7 +65,7 @@ export class ProductComponent implements OnInit {
   loadProducts(page: number): void {
     this.loading = true;
 
-    this.productService.getAllProducts(page, this.pageSize, this.selectedCategoryId, this.sortBy, this.sortOrder).subscribe({
+    this.productService.getAllProducts(page, this.pageSize, this.searchKeyword, this.selectedCategoryId, this.sortBy, this.sortOrder).subscribe({
       next: (response: any) => {
         this.ngZone.run(() => {
           // Expecting backend response shape: { items, totalItems, totalPages, page, size }

@@ -26,8 +26,8 @@
       <div class="search-bar">
         <input
           type="text"
+          (keyup)="doSearch()"
           [(ngModel)]="query"
-          (keyup.enter)="doSearch()"
           placeholder="Search for products, categories, brands..."
         />
         <button (click)="doSearch()"><i class="fa fa-search"></i></button>

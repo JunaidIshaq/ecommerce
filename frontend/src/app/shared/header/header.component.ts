@@ -1,13 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { CartService } from '../../services/cart.service';
-import { AuthService } from '../../services/auth.service';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { User } from '../../models/user.model';
-import { FormsModule } from '@angular/forms';
-import {AsyncPipe, NgIf, NgFor, DatePipe, NgForOf, NgClass} from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { NotificationService, Notification } from '../../services/notification.service';
+import {Component, OnInit} from '@angular/core';
+import {CartService} from '../../services/cart.service';
+import {AuthService} from '../../services/auth.service';
+import {map} from 'rxjs/operators';
+import {Observable} from 'rxjs';
+import {User} from '../../models/user.model';
+import {FormsModule} from '@angular/forms';
+import {AsyncPipe, DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import {RouterLink} from '@angular/router';
+import {Notification, NotificationService} from '../../services/notification.service';
+import {SearchService} from '../../services/search.service';
 
 @Component({
   selector: 'app-header',
@@ -31,7 +32,8 @@ export class HeaderComponent implements OnInit {
   constructor(
     private cart: CartService,
     private auth: AuthService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private searchService: SearchService
   ) {
     this.cartCount$ = this.cart.getCart().pipe(map(() => this.cart.count()));
     this.user$ = this.auth.currentUser();
@@ -69,8 +71,8 @@ export class HeaderComponent implements OnInit {
     this.auth.logout();
   }
 
-  doSearch() {
-    console.log('Searching:', this.query);
+  doSearch(): void {
+    this.searchService.emitSearch(this.query.trim());
   }
 
   toggleMenu() {
