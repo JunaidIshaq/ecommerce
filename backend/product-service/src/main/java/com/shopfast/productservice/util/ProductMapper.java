@@ -34,6 +34,7 @@ public class ProductMapper {
         dto.setDescription(product.getDescription());
         dto.setCategoryId(product.getCategoryId());
         dto.setPrice(product.getPrice());
+        dto.setRating(product.getRating());
         dto.setStock(product.getStock());
         dto.setImages(product.getImages().stream().toList());
         dto.setCreatedAt(String.valueOf(product.getCreatedAt()));
@@ -59,6 +60,7 @@ public class ProductMapper {
         product.setDescription(productDto.getDescription());
         product.setCategoryId(productDto.getCategoryId());
         product.setPrice(productDto.getPrice());
+        product.setRating(productDto.getRating());
         product.setStock(productDto.getStock());
         product.setImages(productDto.getImages().stream().toList());
         return product;

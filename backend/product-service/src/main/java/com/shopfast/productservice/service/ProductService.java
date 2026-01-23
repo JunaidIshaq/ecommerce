@@ -124,12 +124,14 @@ public class ProductService {
             Sort sort = sortOrder.equalsIgnoreCase("desc")
                     ? Sort.by(sortBy).descending()
                     : Sort.by(sortBy).ascending();
-            pageable.withSort(sort);
+            pageable = pageable.withSort(sort);
             productPage = productRepository.findByCategoryId(categoryId, pageable);
         } else if(Strings.hasText(categoryId)) {
-            productPage = productRepository.findByCategoryId(categoryId, pageable.withSort(defaultSort));
+            pageable = pageable.withSort(defaultSort);
+            productPage = productRepository.findByCategoryId(categoryId, pageable);
         }else {
-            productPage = productRepository.findAll(pageable.withSort(defaultSort));
+            pageable = pageable.withSort(defaultSort);
+            productPage = productRepository.findAll(pageable);
         }
 
         List<ProductDto> productDtos = productPage.getContent()

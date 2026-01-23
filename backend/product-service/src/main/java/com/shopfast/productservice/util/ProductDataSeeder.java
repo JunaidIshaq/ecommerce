@@ -92,6 +92,7 @@ public class ProductDataSeeder {
                 p.setCategoryId(categoryIds.get(random.nextInt(categoryIds.size())));
                 p.setPrice(new BigDecimal(faker.commerce().price(10.0, 999.99)));
                 p.setStock(random.nextInt(1000));
+                p.setRating(random.nextDouble(10));
                 p.setImages(List.of("https://picsum.photos/seed/" + i + "/600/400"));
                 productService.createProduct(ProductMapper.getProductDto(p));
             }
