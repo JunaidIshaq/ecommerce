@@ -24,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -93,10 +94,10 @@ public class ProductService {
         }
         // Publish product created event
         ProductEvent event = new ProductEvent(
-                java.util.UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(),
                 "PRODUCT_CREATED",
                 1,
-                java.time.Instant.now(),
+                Instant.now(),
                 Map.of(
                         "productId", product.getId(),
                         "name", product.getName(),
@@ -120,17 +121,21 @@ public class ProductService {
         PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
         Page<Product> productPage;
         Sort defaultSort = Sort.by("createdAt").descending();
+        Sort sort = null;
         if(Strings.hasText(sortBy) && Strings.hasText(sortOrder)) {
-            Sort sort = sortOrder.equalsIgnoreCase("desc")
+             sort = sortOrder.equalsIgnoreCase("desc")
                     ? Sort.by(sortBy).descending()
                     : Sort.by(sortBy).ascending();
             pageable = pageable.withSort(sort);
-            productPage = productRepository.findByCategoryId(categoryId, pageable);
-        } else if(Strings.hasText(categoryId)) {
+        }
+        if(ObjectUtils.isEmpty(sort)) {
             pageable = pageable.withSort(defaultSort);
+        }else {
+            pageable = pageable.withSort(sort);
+        }
+        if(Strings.hasText(categoryId)) {
             productPage = productRepository.findByCategoryId(categoryId, pageable);
         }else {
-            pageable = pageable.withSort(defaultSort);
             productPage = productRepository.findAll(pageable);
         }
 
