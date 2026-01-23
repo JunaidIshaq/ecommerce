@@ -15,10 +15,14 @@ export class ProductService {
   /**
    * ✅ Fetch products from backend with pagination
    */
-  getAllProducts(pageNumber: number, pageSize: number): Observable<Product[]> {
-    const params = new HttpParams()
+  getAllProducts(pageNumber: number, pageSize: number, categoryId?: string | null): Observable<Product[]> {
+    let params = new HttpParams()
       .set('pageNumber', pageNumber)
       .set('pageSize', pageSize);
+
+    if(categoryId){
+      params = params.set('categoryId', categoryId);
+    }
 
     return this.http.get<Product[]>(this.apiUrl, { params });
   }

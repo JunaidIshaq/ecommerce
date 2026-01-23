@@ -16,6 +16,7 @@ export class ProductComponent implements OnInit {
 
   products: any[] = [];
   categories: any[] = [];
+  selectedCategoryId: string | null = null;
   currentPage = 1;
   pageSize = 12;
   totalPages = 0;
@@ -46,7 +47,7 @@ export class ProductComponent implements OnInit {
   loadProducts(page: number): void {
     this.loading = true;
 
-    this.productService.getAllProducts(page, this.pageSize).subscribe({
+    this.productService.getAllProducts(page, this.pageSize, this.selectedCategoryId).subscribe({
       next: (response: any) => {
         this.ngZone.run(() => {
           // Expecting backend response shape: { items, totalItems, totalPages, page, size }
@@ -68,6 +69,13 @@ export class ProductComponent implements OnInit {
       }
     });
   }
+
+  onCategoryChange(categoryId: string): void {
+    this.selectedCategoryId = categoryId || null;
+    this.currentPage = 1; // reset pagination
+    this.loadProducts(1);
+  }
+
 
   /**
    * 🔹 Handle pagination click
@@ -121,10 +129,6 @@ export class ProductComponent implements OnInit {
         this.ngZone.run(() => {
           // Expecting backend response shape: { items, totalItems, totalPages, page, size }
           this.categories = response.items || [];
-          this.totalItems = response.totalItems || 0;
-          this.totalPages = response.totalPages || 0;
-          this.currentPage = response.page || 1;
-          this.updateVisiblePages();
           this.loading = false;
           this.cdr.detectChanges();
         });
@@ -132,10 +136,11 @@ export class ProductComponent implements OnInit {
       error: (err: any) => {
         this.ngZone.run(() => {
           this.loading = false;
-          this.errorMessage = 'Failed to load products.';
+          this.errorMessage = 'Failed to load categories.';
         });
-        console.error('❌ Product load error:', err);
+        console.error('❌ Category load error:', err);
       }
     });
   }
+
 }

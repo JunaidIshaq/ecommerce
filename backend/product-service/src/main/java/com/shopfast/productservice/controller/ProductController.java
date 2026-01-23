@@ -47,9 +47,10 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<PagedResponse<ProductDto>> getAllProducts(
             @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+            @RequestParam(name = "categoryId", required = false) String categoryId
     ) {
-        PagedResponse<ProductDto> response = productService.getAllProducts(pageNumber, pageSize);
+        PagedResponse<ProductDto> response = productService.getAllProducts(pageNumber, pageSize, categoryId);
         return ResponseEntity.ok(response);
     }
 

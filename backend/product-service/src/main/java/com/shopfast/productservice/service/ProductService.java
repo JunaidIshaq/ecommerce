@@ -16,6 +16,7 @@ import com.shopfast.productservice.util.ProductMapper;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -112,13 +113,18 @@ public class ProductService {
     @Transactional
     @Cacheable(
             value = "productsPage",
-            key = "'pageNumber_' + #pageNumber + '_pageSize_' + #pageSize"
+            key = "'pageNumber_' + #pageNumber + '_pageSize_' + #pageSize+ '_categoryId_' + #categoryId"
     )
-    public PagedResponse<ProductDto> getAllProducts(int pageNumber, int pageSize) {
+    public PagedResponse<ProductDto> getAllProducts(int pageNumber, int pageSize, String categoryId) {
         log.info("🧠 Inside getAllProducts() -> pageNumber={}, pageSize={}", pageNumber, pageSize);
 
         PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Product> productPage = productRepository.findAll(pageable);
+        Page<Product> productPage;
+        if(StringUtils.isNotBlank(categoryId)) {
+            productPage = productRepository.findByCategoryId(categoryId, pageable);
+        }else {
+            productPage = productRepository.findAll(pageable);
+        }
 
         List<ProductDto> productDtos = productPage.getContent()
                 .stream()

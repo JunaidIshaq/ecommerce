@@ -1,9 +1,13 @@
 <!-- FILTER + SORT SECTION -->
 <section class="filter-bar">
   <div class="filter-left">
-    <select>
-      <option *ngFor="let c of categories">{{ c.name }}</option>
+    <select #categorySelect (change)="onCategoryChange(categorySelect.value)">
+      <option value="">All Categories</option>
+      <option *ngFor="let c of categories" [value]="c.id">
+        {{ c.name }}
+      </option>
     </select>
+
   </div>
 
   <div class="filter-right">
