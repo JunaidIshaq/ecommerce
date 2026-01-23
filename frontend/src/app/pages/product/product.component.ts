@@ -17,6 +17,8 @@ export class ProductComponent implements OnInit {
   products: any[] = [];
   categories: any[] = [];
   selectedCategoryId: string | null = null;
+  sortBy: string | null = null;
+  sortOrder: string | null = null;
   currentPage = 1;
   pageSize = 12;
   totalPages = 0;
@@ -47,7 +49,7 @@ export class ProductComponent implements OnInit {
   loadProducts(page: number): void {
     this.loading = true;
 
-    this.productService.getAllProducts(page, this.pageSize, this.selectedCategoryId).subscribe({
+    this.productService.getAllProducts(page, this.pageSize, this.selectedCategoryId, this.sortBy, this.sortOrder).subscribe({
       next: (response: any) => {
         this.ngZone.run(() => {
           // Expecting backend response shape: { items, totalItems, totalPages, page, size }
@@ -70,9 +72,18 @@ export class ProductComponent implements OnInit {
     });
   }
 
-  onCategoryChange(categoryId: string): void {
+  protected onCategoryChange(categoryId: string): void {
     this.selectedCategoryId = categoryId || null;
     this.currentPage = 1; // reset pagination
+    this.loadProducts(1);
+  }
+
+
+  protected onSortChange(value: string) {
+    if (!value) return;
+    const [sortBy, sortOrder] = value.split(',');
+    this.sortBy = sortBy; // reset pagination
+    this.sortOrder = sortOrder; // reset pagination
     this.loadProducts(1);
   }
 

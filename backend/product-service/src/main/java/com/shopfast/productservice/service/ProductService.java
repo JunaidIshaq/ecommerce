@@ -13,10 +13,10 @@ import com.shopfast.productservice.model.Product;
 import com.shopfast.productservice.repository.ProductRepository;
 import com.shopfast.productservice.search.ElasticProductSearchService;
 import com.shopfast.productservice.util.ProductMapper;
+import io.jsonwebtoken.lang.Strings;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -113,17 +113,23 @@ public class ProductService {
     @Transactional
     @Cacheable(
             value = "productsPage",
-            key = "'pageNumber_' + #pageNumber + '_pageSize_' + #pageSize+ '_categoryId_' + #categoryId"
+            key = "'pageNumber_' + #pageNumber + '_pageSize_' + #pageSize + '_categoryId_' + #categoryId + '_sortBy_' + #sortBy + '_sortOrder_' + #sortOrder"
     )
-    public PagedResponse<ProductDto> getAllProducts(int pageNumber, int pageSize, String categoryId) {
-        log.info("🧠 Inside getAllProducts() -> pageNumber={}, pageSize={}", pageNumber, pageSize);
-
-        PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+    public PagedResponse<ProductDto> getAllProducts(int pageNumber, int pageSize, String categoryId, String sortBy, String sortOrder) {
+        log.info("Class ProductService method getAllProducts() -> pageNumber : {}, pageSize : {}, categoryId : {}, sortBy : {}, sortOrder : {}", pageNumber, pageSize, categoryId, sortBy, sortOrder);
+        PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
         Page<Product> productPage;
-        if(StringUtils.isNotBlank(categoryId)) {
+        Sort defaultSort = Sort.by("createdAt").descending();
+        if(Strings.hasText(sortBy) && Strings.hasText(sortOrder)) {
+            Sort sort = sortOrder.equalsIgnoreCase("desc")
+                    ? Sort.by(sortBy).descending()
+                    : Sort.by(sortBy).ascending();
+            pageable.withSort(sort);
             productPage = productRepository.findByCategoryId(categoryId, pageable);
+        } else if(Strings.hasText(categoryId)) {
+            productPage = productRepository.findByCategoryId(categoryId, pageable.withSort(defaultSort));
         }else {
-            productPage = productRepository.findAll(pageable);
+            productPage = productRepository.findAll(pageable.withSort(defaultSort));
         }
 
         List<ProductDto> productDtos = productPage.getContent()

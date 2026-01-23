@@ -11,11 +11,11 @@
   </div>
 
   <div class="filter-right">
-    <select>
+    <select #sortSelect (change)="onSortChange(sortSelect.value)">
       <option value="">Sort by</option>
-      <option value="priceAsc">Price: Low to High</option>
-      <option value="priceDesc">Price: High to Low</option>
-      <option value="rating">Top Rated</option>
+      <option value="price,asc">Price: Low to High</option>
+      <option value="price,desc">Price: High to Low</option>
+      <option value="rating,desc">Top Rated</option>
     </select>
   </div>
 </section>

@@ -48,9 +48,11 @@ public class ProductController {
     public ResponseEntity<PagedResponse<ProductDto>> getAllProducts(
             @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-            @RequestParam(name = "categoryId", required = false) String categoryId
+            @RequestParam(name = "categoryId", required = false) String categoryId,
+            @RequestParam(name = "sortBy", required = false) String sortBy,
+            @RequestParam(name = "sortOrder", required = false) String sortOrder
     ) {
-        PagedResponse<ProductDto> response = productService.getAllProducts(pageNumber, pageSize, categoryId);
+        PagedResponse<ProductDto> response = productService.getAllProducts(pageNumber, pageSize, categoryId, sortBy, sortOrder);
         return ResponseEntity.ok(response);
     }
 
