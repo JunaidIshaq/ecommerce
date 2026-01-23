@@ -3,6 +3,8 @@ import { isPlatformBrowser, NgForOf, NgIf } from '@angular/common';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { Router, RouterLink } from '@angular/router';
+import {debounceTime, distinctUntilChanged} from 'rxjs';
+import {SearchService} from '../../services/search.service';
 
 @Component({
   selector: 'app-home',
@@ -23,9 +25,11 @@ export class HomeComponent implements OnInit {
   maxVisible = 3;
   loading = true;
   errorMessage = '';
+  private searchKeyword: string | undefined;
 
   constructor(
     private productService: ProductService,
+    private searchService: SearchService,
     private cart: CartService,
     private ngZone: NgZone,
     private router: Router,
@@ -35,6 +39,17 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProducts(this.currentPage);
+
+    this.searchService.search$
+      .pipe(
+        debounceTime(100),
+        distinctUntilChanged()
+      )
+      .subscribe(keyword => {
+        this.searchKeyword = keyword;
+        this.currentPage = 1;
+        this.loadProducts(1);
+      });
   }
 
   /**
@@ -43,7 +58,7 @@ export class HomeComponent implements OnInit {
   loadProducts(page: number): void {
     this.loading = true;
 
-    this.productService.getAllProducts(page, this.pageSize).subscribe({
+    this.productService.getAllProducts(page, this.pageSize, this.searchKeyword).subscribe({
       next: (response: any) => {
         // Expecting backend JSON structure: { items, totalItems, totalPages, page, size }
         this.ngZone.run(() => {
