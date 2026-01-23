@@ -114,9 +114,9 @@ public class ProductService {
     @Transactional
     @Cacheable(
             value = "productsPage",
-            key = "'pageNumber_' + #pageNumber + '_pageSize_' + #pageSize + '_categoryId_' + #categoryId + '_sortBy_' + #sortBy + '_sortOrder_' + #sortOrder"
+            key = "'pageNumber_' + #pageNumber + '_pageSize_' + #pageSize + '_searchKeyword_' + #searchKeyword + '_categoryId_' + #categoryId + '_sortBy_' + #sortBy + '_sortOrder_' + #sortOrder"
     )
-    public PagedResponse<ProductDto> getAllProducts(int pageNumber, int pageSize, String categoryId, String sortBy, String sortOrder) {
+    public PagedResponse<ProductDto> getAllProducts(int pageNumber, int pageSize, String searchKeyword, String categoryId, String sortBy, String sortOrder) {
         log.info("Class ProductService method getAllProducts() -> pageNumber : {}, pageSize : {}, categoryId : {}, sortBy : {}, sortOrder : {}", pageNumber, pageSize, categoryId, sortBy, sortOrder);
         PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
         Page<Product> productPage;
@@ -133,8 +133,12 @@ public class ProductService {
         }else {
             pageable = pageable.withSort(sort);
         }
-        if(Strings.hasText(categoryId)) {
+        if(Strings.hasText(categoryId) && Strings.hasText(searchKeyword)) {
+            productPage = productRepository.findByNameContainingIgnoreCaseAndCategoryId(searchKeyword, categoryId, pageable);
+        }else if(Strings.hasText(categoryId)) {
             productPage = productRepository.findByCategoryId(categoryId, pageable);
+        }else if(Strings.hasText(searchKeyword)) {
+            productPage = productRepository.findByNameContainingIgnoreCase(searchKeyword, pageable);
         }else {
             productPage = productRepository.findAll(pageable);
         }
