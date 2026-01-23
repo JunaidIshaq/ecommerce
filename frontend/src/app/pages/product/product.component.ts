@@ -1,8 +1,9 @@
 import {ChangeDetectorRef, Component, Inject, NgZone, OnInit, PLATFORM_ID} from '@angular/core';
-import { isPlatformBrowser, NgForOf, NgIf } from '@angular/common';
-import { ProductService } from '../../services/product.service';
-import { CartService } from '../../services/cart.service';
-import { Router } from '@angular/router';
+import {isPlatformBrowser, NgForOf, NgIf} from '@angular/common';
+import {ProductService} from '../../services/product.service';
+import {CartService} from '../../services/cart.service';
+import {Router} from '@angular/router';
+import {CategoryService} from '../../services/category.service';
 
 @Component({
   selector: 'app-product',
@@ -12,7 +13,9 @@ import { Router } from '@angular/router';
   styleUrls: ['./product.component.css']
 })
 export class ProductComponent implements OnInit {
+
   products: any[] = [];
+  categories: any[] = [];
   currentPage = 1;
   pageSize = 12;
   totalPages = 0;
@@ -24,6 +27,7 @@ export class ProductComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
+    private categoryService: CategoryService,
     private cart: CartService,
     private ngZone: NgZone,
     private router: Router,
@@ -33,6 +37,7 @@ export class ProductComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProducts(this.currentPage);
+    this.loadCategories();
   }
 
   /**
@@ -108,5 +113,29 @@ export class ProductComponent implements OnInit {
    */
   goToProductDetail(id: string): void {
     this.router.navigate(['/product', id]);
+  }
+
+  private loadCategories() {
+    this.categoryService.getAllCategories(1, 10).subscribe({
+      next: (response: any) => {
+        this.ngZone.run(() => {
+          // Expecting backend response shape: { items, totalItems, totalPages, page, size }
+          this.categories = response.items || [];
+          this.totalItems = response.totalItems || 0;
+          this.totalPages = response.totalPages || 0;
+          this.currentPage = response.page || 1;
+          this.updateVisiblePages();
+          this.loading = false;
+          this.cdr.detectChanges();
+        });
+      },
+      error: (err: any) => {
+        this.ngZone.run(() => {
+          this.loading = false;
+          this.errorMessage = 'Failed to load products.';
+        });
+        console.error('❌ Product load error:', err);
+      }
+    });
   }
 }

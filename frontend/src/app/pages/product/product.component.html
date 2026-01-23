@@ -2,12 +2,7 @@
 <section class="filter-bar">
   <div class="filter-left">
     <select>
-      <option value="">All Categories</option>
-      <option>Electronics</option>
-      <option>Fashion</option>
-      <option>Accessories</option>
-      <option>Fitness</option>
-      <option>Home Appliances</option>
+      <option *ngFor="let c of categories">{{ c.name }}</option>
     </select>
   </div>
 

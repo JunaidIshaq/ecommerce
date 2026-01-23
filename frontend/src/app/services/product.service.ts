@@ -31,7 +31,7 @@ export class ProductService {
     q?: string,
     category?: string,
     sort?: 'priceAsc' | 'priceDesc' | 'rating',
-    pageNumber = 0,
+    pageNumber = 1,
     pageSize = 20
   ): Observable<Product[]> {
     return this.getAllProducts(pageNumber, pageSize).pipe(
