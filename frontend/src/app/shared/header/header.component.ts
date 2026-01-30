@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, NgZone, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, HostListener, NgZone, OnInit} from '@angular/core';
 import {CartService} from '../../services/cart.service';
 import {AuthService} from '../../services/auth.service';
 import {map, take} from 'rxjs/operators';
@@ -41,14 +41,15 @@ export class HeaderComponent implements OnInit {
     private notificationService: NotificationService,
     private searchService: SearchService,
     private cd: ChangeDetectorRef,
-    private zone: NgZone
+    private zone: NgZone,
+    private eRef: ElementRef
   ) {
     this.cartCount$ = this.cart.getCart().pipe(map(() => this.cart.count()));
     this.user$ = this.auth.currentUser();
   }
 
   ngOnInit(): void {
-    this.loadNotifications();
+    // this.loadNotifications();
   }
 
   // Load latest 10 notifications
@@ -93,6 +94,7 @@ export class HeaderComponent implements OnInit {
       this.lastPage = false;
       this.loading = false;
       this.unreadCount = 0;
+      this.notifications = [];
       this.loadNotifications();
     }
 
@@ -136,4 +138,18 @@ export class HeaderComponent implements OnInit {
   closeMenu() {
     this.menuOpen = false;
   }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.isDropdownOpen) return;
+
+    const clickedInside = this.eRef.nativeElement.querySelector('.notif-wrapper')?.contains(event.target);
+
+    if (!clickedInside) {
+      this.isDropdownOpen = false;
+      this.notifications = [];
+      this.unreadCount = 0;
+    }
+  }
+
 }
