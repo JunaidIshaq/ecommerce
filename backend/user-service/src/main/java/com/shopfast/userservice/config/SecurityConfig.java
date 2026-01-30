@@ -45,7 +45,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/user").permitAll()      // registration allowed
                         .requestMatchers("/api/v1/user/**").permitAll()      // registration allowed
-                        .requestMatchers("/api/v1/user/internal/email").permitAll()      // registration allowed
+                        .requestMatchers("/api/v1/user/internal/email/**").permitAll()      // registration allowed
                         .requestMatchers("/actuator/**","/v3/api-docs/**","/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )
