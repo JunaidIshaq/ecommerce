@@ -95,7 +95,7 @@
 
       <!-- Auth -->
       <ng-container *ngIf="(user$ | async) as u; else guest">
-        <span class="user">Hi, {{ u.name }}</span>
+        <span class="user">Hi, {{ u.email }}</span>
         <button (click)="logout()" class="btn-logout">Logout</button>
       </ng-container>
 

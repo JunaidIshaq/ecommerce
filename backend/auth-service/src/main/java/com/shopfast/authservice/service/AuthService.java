@@ -24,33 +24,37 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequestDto request) {
-        UserInternalDto userDto = userClient.findByEmail(request.getEmail());
-        if(userDto == null) {
-            throw new IllegalArgumentException("Invalid credentials");
+        try {
+            UserInternalDto userDto = userClient.findByEmail(request.getEmail());
+            if (userDto == null) {
+                throw new IllegalArgumentException("Invalid credentials");
+            }
+            if (userDto.getStatus() == null || !"ACTIVE".equals(userDto.getStatus().name())) {
+                throw new IllegalArgumentException("User not active !");
+            }
+
+            boolean match = BCrypt.checkpw(request.getPassword(), userDto.getPassword());
+            if (!match) {
+                throw new IllegalArgumentException("Invalid credentials");
+            }
+
+            String userId = userDto.getId().toString();
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("role", userDto.getRole().name());
+            claims.put("email", userDto.getEmail());
+
+            String access = tokenService.createAccessToken(userId, claims);
+            String refresh = tokenService.createRefreshToken(userId, Map.of("email", userDto.getEmail()));
+
+            return AuthResponse.builder()
+                    .accessToken(access)
+                    .accessTokenExpiresIn(tokenService.jwtUtils.getAccessTokenExpiresIn())
+                    .refreshToken(refresh)
+                    .refreshTokenExpiresIn(tokenService.jwtUtils.getRefreshTokenExpiresIn())
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("User not exists with this email : " + request.getEmail() );
         }
-        if(userDto.getStatus() == null || !"ACTIVE".equals(userDto.getStatus().name())) {
-            throw new IllegalArgumentException("User not active !");
-        }
-
-        boolean match = BCrypt.checkpw(request.getPassword(), userDto.getPassword());
-        if(!match) {
-            throw new IllegalArgumentException("Invalid credentials");
-        }
-
-        String userId = userDto.getId().toString();
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", userDto.getRole().name());
-        claims.put("email", userDto.getEmail());
-
-        String access = tokenService.createAccessToken(userId, claims);
-        String refresh = tokenService.createRefreshToken(userId, Map.of("email", userDto.getEmail()));
-
-        return AuthResponse.builder()
-                .accessToken(access)
-                .accessTokenExpiresIn(tokenService.jwtUtils.getAccessTokenExpiresIn())
-                .refreshToken(refresh)
-                .refreshTokenExpiresIn(tokenService.jwtUtils.getRefreshTokenExpiresIn())
-                .build();
     }
 
     public AuthResponse refreshToken(String refreshToken) {

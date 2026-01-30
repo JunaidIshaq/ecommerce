@@ -1,6 +1,5 @@
 import {ChangeDetectorRef, Component, ElementRef, HostListener, NgZone, OnInit} from '@angular/core';
 import {CartService} from '../../services/cart.service';
-import {AuthService} from '../../services/auth.service';
 import {map, take} from 'rxjs/operators';
 import {Observable} from 'rxjs';
 import {User} from '../../models/user.model';
@@ -9,6 +8,7 @@ import {AsyncPipe, CommonModule, DatePipe, NgClass, NgForOf, NgIf} from '@angula
 import {RouterLink} from '@angular/router';
 import {Notification, NotificationService} from '../../services/notification.service';
 import {SearchService} from '../../services/search.service';
+import {AuthService} from '../../services/auth.service';
 
 @Component({
   selector: 'app-header',

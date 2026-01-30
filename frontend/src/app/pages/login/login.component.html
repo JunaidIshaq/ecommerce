@@ -9,13 +9,13 @@
       </div>
 
       <!-- LOGIN FORM -->
-      <form (ngSubmit)="submit()" #loginForm="ngForm" class="form">
+      <form (ngSubmit)="login()" #loginForm="ngForm" class="form">
         <div class="form-group">
           <label>Email Address</label>
           <input
             type="email"
             name="email"
-            ngModel
+            [(ngModel)]="credentials.email"
             required
             placeholder="Enter your email"
           />
@@ -26,7 +26,7 @@
           <input
             type="password"
             name="password"
-            ngModel
+            [(ngModel)]="credentials.password"
             required
             placeholder="Enter your password"
           />
@@ -37,6 +37,7 @@
           <button type="submit" class="btn primary" [disabled]="!loginForm.valid">
             Sign In
           </button>
+          <p class="error" *ngIf="error">{{ error }}</p>
 
           <!-- ✅ Moved here below and centered -->
           <div class="forgot-container">
