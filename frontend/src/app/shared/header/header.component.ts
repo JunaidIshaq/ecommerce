@@ -152,4 +152,10 @@ export class HeaderComponent implements OnInit {
     }
   }
 
+  @HostListener('window:scroll')
+  onWindowScroll() {
+    this.isDropdownOpen = false;
+  }
+
+
 }
