@@ -39,8 +39,8 @@
       <a routerLink="/profile" class="nav-link">Profile</a>
 
       <!-- 🌟 Notification Bell -->
-      <div class="notif-wrapper" (click)="toggleDropdown()">
-        <i class="fa fa-bell notif-icon"></i>
+      <div class="notif-wrapper">
+        <i class="fa fa-bell notif-icon" (click)="toggleDropdown()"></i>
 
         <!-- Unread Count -->
         <span class="notif-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
@@ -52,7 +52,6 @@
             <h4>Notifications</h4>
             <span class="view-all">View All</span>
           </div>
-
           <div class="notif-list" (scroll)="onScroll($event)">
             <div
               class="notif-item"
