@@ -48,7 +48,7 @@ export class HeaderComponent implements OnInit {
     this.notificationService.getUserNotifications(this.userId, 1, 12)
       .subscribe(res => {
         this.notifications = res.content;
-        this.unreadCount = this.notifications.filter(n => n.readAt !== null).length;
+        this.unreadCount = this.notifications.filter(n => n.readAt === null).length;
       });
   }
 
@@ -57,7 +57,7 @@ export class HeaderComponent implements OnInit {
   }
 
   markAsRead(n: Notification) {
-    if (n.readAt === null) return;
+    if (n.readAt !== null) return;
 
     this.notificationService.markAsRead(n.id)
       .subscribe((updated: { status: any; readAt: any; }) => {
