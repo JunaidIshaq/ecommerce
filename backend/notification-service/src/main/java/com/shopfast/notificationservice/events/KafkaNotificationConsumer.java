@@ -33,12 +33,12 @@ public class KafkaNotificationConsumer {
             NotificationEvent event = objectMapper.readValue(message, NotificationEvent.class);
 
             // subject/content not provided, use templates
-            if(event.getSubject() == null) {
+//            if(event.getSubject() == null) {
                 event.setSubject(notificationTemplateService.buildSubject(event));
-            }
-            if(event.getContent() == null) {
+//            }
+//            if(event.getContent() == null) {
                 event.setContent(notificationTemplateService.buildContent(event));
-            }
+//            }
             CreateNotificationRequestDto requestDto = new CreateNotificationRequestDto();
             requestDto.setUserId(event.getUserId());
             requestDto.setRecipient(event.getRecipient());
