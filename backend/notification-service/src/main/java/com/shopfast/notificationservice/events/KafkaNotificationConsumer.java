@@ -25,7 +25,7 @@ public class KafkaNotificationConsumer {
         this.notificationTemplateService = notificationTemplateService;
     }
 
-    @KafkaListener(topics = "notification-topic")
+    @KafkaListener(topics = "notification-topic", groupId = "notification-service-group")
     public void consume(String message) {
         try {
             log.info("Received notification message: {}", message);
