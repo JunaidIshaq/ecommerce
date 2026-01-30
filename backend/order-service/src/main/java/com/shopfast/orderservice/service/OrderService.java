@@ -74,7 +74,20 @@ public class OrderService {
         order.setItems(items);
         Order saved = orderRepository.save(order);
 
+        // Order Producer -> Inventory Service
         kafkaOrderProducer.reserveOrder(order);
+
+        // Notification Producer -> Notification Service
+        NotificationEvent notificationEvent = new NotificationEvent();
+        notificationEvent.setSubject("Order Created");
+        notificationEvent.setNotificationType(NotificationType.ORDER_CREATED);
+        notificationEvent.setNotificationChannel(NotificationChannel.EMAIL);
+        notificationEvent.setContent("Order has been placed");
+        notificationEvent.setRecipient("junaidnumlcs@gmail.com");
+        notificationEvent.setReferenceId(order.getOrderNumber());
+        notificationEvent.setUserId("28e2ac7f-09ef-4e7e-94df-042a987fa9c9");
+        notificationEvent.setEventSource("order-service");
+        kafkaNotificationProducer.send(notificationEvent);
 
         return saved;
     }
