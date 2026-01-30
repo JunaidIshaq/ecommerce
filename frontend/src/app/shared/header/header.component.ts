@@ -29,6 +29,12 @@ export class HeaderComponent implements OnInit {
   isDropdownOpen = false;
   userId = '28e2ac7f-09ef-4e7e-94df-042a987fa9c9';
 
+  // 👉 Pagination fields
+  page = 1;
+  size = 10;
+  loading = false;
+  lastPage = false;
+
   constructor(
     private cart: CartService,
     private auth: AuthService,
@@ -45,16 +51,51 @@ export class HeaderComponent implements OnInit {
 
   // Load latest 10 notifications
   loadNotifications(): void {
-    this.notificationService.getUserNotifications(this.userId, 1, 12)
+    if (this.loading || this.lastPage) return;
+
+    this.loading = true;
+    this.notificationService.getUserNotifications(this.userId, this.page, this.size)
       .subscribe(res => {
-        this.notifications = res.content;
+        const newNotifications = res.content;
+
+        // Append instead of replace
+        this.notifications = [...this.notifications, ...newNotifications];
         this.unreadCount = this.notifications.filter(n => n.readAt === null).length;
+
+        // Check if this was the last page
+        if (newNotifications.length < this.size) {
+          this.lastPage = true;
+        } else {
+          this.page++;
+        }
+
+        this.loading = false;
       });
   }
 
   toggleDropdown() {
     this.isDropdownOpen = !this.isDropdownOpen;
+
+    if (this.isDropdownOpen) {
+      this.page = 1;
+      this.lastPage = false;
+      this.notifications = [];
+      this.loadNotifications();
+    }
+
   }
+
+  onScroll(event: any) {
+    const element = event.target;
+
+    const atBottom =
+      element.scrollHeight - element.scrollTop <= element.clientHeight + 10;
+
+    if (atBottom) {
+      this.loadNotifications();
+    }
+  }
+
 
   markAsRead(n: Notification) {
     if (n.readAt !== null) return;

@@ -53,7 +53,7 @@
             <span class="view-all">View All</span>
           </div>
 
-          <div class="notif-list">
+          <div class="notif-list" (scroll)="onScroll($event)">
             <div
               class="notif-item"
               *ngFor="let n of notifications"
@@ -81,6 +81,10 @@
             </div>
           </div>
 
+          <div class="notif-loading" *ngIf="loading">Loading more...</div>
+          <div class="notif-end" *ngIf="lastPage && notifications.length > 0">
+            No more notifications
+          </div>
         </div>
       </div>
 
