@@ -69,7 +69,7 @@ public class AuthService {
         String newAccess = tokenService.createAccessToken(userId, claims);
         String newRefresh = tokenService.createRefreshToken(userId, Map.of("email", email));
         // revoke old refresh
-        tokenService.revokeRefreshToken(newRefresh);
+        tokenService.revokeRefreshToken(refreshToken);
 
         return AuthResponse.builder()
                 .accessToken(newAccess)

@@ -106,6 +106,18 @@ export class AuthService {
     );
   }
 
+  refreshToken(): Observable<AuthResponse> {
+    const refreshToken = localStorage.getItem('refresh_token');
+
+    return this.http.post<AuthResponse>(
+      `${this.baseUrl}/api/v1/auth/refresh`,
+      { refreshToken }
+    ).pipe(
+      tap(res => this.persistTokens(res))
+    );
+  }
+
+
   signup(userData: any) {
     return this.http.post(`${this.baseUrl}/signup`, userData, {
       headers: { 'Content-Type': 'application/json' }
