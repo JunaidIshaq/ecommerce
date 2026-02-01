@@ -94,16 +94,16 @@ app:
 
 cart:
   service:
-    url: ${CART_SERVICE_URL:http://cart-service}
+    url: ${CART_SERVICE_URL:http://cart-service:8088}
 
 category:
   service:
-    url: ${CATEGORY_SERVICE_URL:http://category-service}
+    url: ${CATEGORY_SERVICE_URL:http://category-service:8082}
 
 product:
   service:
-    url: ${PRODUCT_SERVICE_URL:http://product-service}
+    url: ${PRODUCT_SERVICE_URL:http://product-service:8081}
 
 inventory:
   service:
-    url: ${INVENTORY_SERVICE_URL:http://inventory-service}
+    url: ${INVENTORY_SERVICE_URL:http://inventory-service:8083}
