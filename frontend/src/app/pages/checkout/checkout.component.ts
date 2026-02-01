@@ -1,15 +1,15 @@
-import { Component } from '@angular/core';
-import { CartService } from '../../services/cart.service';
-import { Address } from '../../models/user.model';
-import { Router } from '@angular/router';
-import {DecimalPipe} from '@angular/common';
+import {Component} from '@angular/core';
+import {CartService} from '../../services/cart.service';
+import {Address} from '../../models/user.model';
+import {Router} from '@angular/router';
+import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-checkout',
   templateUrl: './checkout.component.html',
   imports: [
-    DecimalPipe,
+    CommonModule,
     FormsModule
   ],
   styleUrls: ['./checkout.component.css']
@@ -23,11 +23,15 @@ export class CheckoutComponent {
   total() { return this.cart.total(); }
 
   placeOrder() {
+    if (this.placing) return;
+
     this.placing = true;
-    // Mock place order
+
     setTimeout(() => {
       this.cart.clear();
+      alert("🎉 Order placed successfully!");
       this.router.navigate(['/']);
     }, 800);
   }
+
 }

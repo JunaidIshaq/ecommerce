@@ -50,6 +50,7 @@ public class ProductMapper {
                 .title(String.valueOf(product.getName()))
                 .active(product.getIsActive())
                 .price(product.getPrice())
+                .images(product.getImages().stream().toList())
                 .build();
     }
 

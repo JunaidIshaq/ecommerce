@@ -185,16 +185,22 @@ public class ProductService {
         return product.map(ProductMapper::getProductDto).orElseThrow(() -> new ProductNotFoundException(id));
     }
 
-    @Transactional
-    @Cacheable(value = "product", key = "#id")
+    @Transactional()
+    @Cacheable(value = "productInternalSearch", key = "#id")
     public ProductInternalResponseDto getProductByIdInternal(String id) {
-        Optional<Product> product = productRepository.findById(UUID.fromString(id));
-        return product.map(ProductMapper::getProductInternalDto).orElseThrow(() -> new ProductNotFoundException(id));
+        Product product = productRepository.findByIdWithImages(UUID.fromString(id))
+                .orElseThrow(() -> new ProductNotFoundException(id));
+
+        // 🔥 FORCE Hibernate to load images NOW
+        product.getImages().size();
+
+        return ProductMapper.getProductInternalDto(product);
     }
 
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "product", key = "#id"),
+            @CacheEvict(value = "productInternalSearch", key = "#id"),
             @CacheEvict(value = "productsPage", allEntries = true)
     })
     public ProductDto updateProduct(String id, Product updatedProduct) throws InvalidCategoryException {
@@ -243,6 +249,7 @@ public class ProductService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "product", key = "#id"),
+            @CacheEvict(value = "productInternalSearch", key = "#id"),
             @CacheEvict(value = "productsPage", allEntries = true)
     })
     public void deleteProduct(String id) {

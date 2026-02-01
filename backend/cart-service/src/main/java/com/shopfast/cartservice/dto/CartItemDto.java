@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -17,16 +18,18 @@ public class CartItemDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @NotNull
-    @JsonProperty("product_id")
+    @JsonProperty("productId")
     private UUID productId;
 
-    @Min(1)
-    private int quantity;
+    @NotNull
+    private String title;
 
     @NotNull
     private BigDecimal price;
 
-    @NotNull
-    private String title;
+    @Min(1)
+    private int quantity;
+
+    private List<String> images;
 
 }

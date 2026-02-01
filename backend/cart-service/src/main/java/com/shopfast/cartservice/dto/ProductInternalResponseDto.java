@@ -4,6 +4,8 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class ProductInternalResponseDto implements Serializable {
@@ -15,6 +17,8 @@ public class ProductInternalResponseDto implements Serializable {
     private String title;
 
     private BigDecimal price;
+
+    public List<String> images = new ArrayList<>();
 
     private Boolean active;
 

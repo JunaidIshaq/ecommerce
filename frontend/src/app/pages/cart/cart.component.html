@@ -5,23 +5,23 @@
     <div class="cart-items">
       <div class="cart-item" *ngFor="let item of cartItems">
         <div class="cart-image">
-          <img [src]="item.product.images" alt="{{ item.product.name }}" />
+          <img [src]="item.images" alt="{{ item.title }}" />
         </div>
 
         <div class="cart-info">
-          <h3>{{ item.product.name }}</h3>
-          <p class="category">{{ item.product.category }}</p>
-          <p class="price">${{ item.product.price.toFixed(2) }}</p>
+          <h3>{{ item.title }}</h3>
+          <p class="category">{{ item.category }}</p>
+          <p class="price">${{ item.price.toFixed(2) }}</p>
 
           <div class="qty-box">
-            <button (click)="updateQuantity(item.product.id, item.qty - 1)" [disabled]="item.qty <= 1">−</button>
-            <input type="number" [(ngModel)]="item.qty" (change)="updateQuantity(item.product.id, item.qty)" min="1" />
-            <button (click)="updateQuantity(item.product.id, item.qty + 1)">+</button>
+            <button (click)="updateQuantity(item.productId, item.quantity - 1)" [disabled]="item.quantity <= 1">−</button>
+            <input type="number" [(ngModel)]="item.quantity" (change)="updateQuantity(item.productId, item.quantity)" min="1" />
+            <button (click)="updateQuantity(item.productId, item.quantity + 1)">+</button>
           </div>
 
-          <div class="subtotal">Subtotal: ${{ (item.product.price * item.qty).toFixed(2) }}</div>
+          <div class="subtotal">Subtotal: ${{ (item.price * item.quantity).toFixed(2) }}</div>
 
-          <button class="remove" (click)="removeItem(item.product.id)">
+          <button class="remove" (click)="removeItem(item.productId)">
             <i class="fas fa-trash"></i> Remove
           </button>
         </div>
@@ -44,7 +44,7 @@
         <strong>${{ total.toFixed(2) }}</strong>
       </div>
 
-      <button class="btn checkout">Proceed to Checkout</button>
+      <button routerLink="/checkout" class="btn checkout">Proceed to Checkout</button>
       <a routerLink="/product" class="btn continue">Continue Shopping</a>
     </div>
   </div>

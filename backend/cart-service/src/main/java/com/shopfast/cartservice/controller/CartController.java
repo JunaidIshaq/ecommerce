@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -43,6 +45,17 @@ public class CartController {
         map.put("message", "Cart item added successfully !");
         return ResponseEntity.ok(map);
     }
+
+    @PutMapping("/items/{productId}")
+    public ResponseEntity<Map<String, String>> updateItem(@PathVariable String productId, @RequestParam("quantity") Integer quantity, Authentication authentication) throws JsonProcessingException {
+        String userId = authentication.getName();
+        cartService.addOrUpdateUser(userId, productId, quantity);
+        Map<String, String> map = new HashMap<>();
+        map.put("status", "success");
+        map.put("message", "Cart item updated successfully !");
+        return ResponseEntity.ok(map);
+    }
+
 
     @Operation(summary = "Get Cart Items")
     @GetMapping

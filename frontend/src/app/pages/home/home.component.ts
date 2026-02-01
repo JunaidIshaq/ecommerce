@@ -124,7 +124,7 @@ export class HomeComponent implements OnInit {
    * 🛒 Add product to cart
    */
   addToCart(product: any): void {
-    this.cart.add(product, 1);
+    this.cart.addToCart(product.id, 1).subscribe();
   }
 
   /**

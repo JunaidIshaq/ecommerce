@@ -46,6 +46,8 @@ export class HeaderComponent implements OnInit {
   ) {
     this.cartCount$ = this.cart.getCart().pipe(map(() => this.cart.count()));
     this.user$ = this.auth.currentUser();
+    this.user$.pipe(take(1)).subscribe(u => this.userId = u?.id!);
+
   }
 
   ngOnInit(): void {

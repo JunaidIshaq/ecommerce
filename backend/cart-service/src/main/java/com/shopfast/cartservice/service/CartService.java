@@ -139,7 +139,7 @@ public class CartService {
 
         int newQuantity = quantity;
         if (existing != null) {
-            newQuantity += Math.max(0, parse(existing).getQuantity());
+            newQuantity = parse(existing).getQuantity() + quantity;
         }
 
         CartItemDto itemDto = CartItemDto.builder()
@@ -166,7 +166,7 @@ public class CartService {
 
     /*--------------- GUEST CART ----------------*/
 
-    public void addOrUpdateGuest(String anonId, String productId, Integer quantity) throws JsonProcessingException {
+    public void addGuest(String anonId, String productId, Integer quantity) throws JsonProcessingException {
         ProductInternalResponseDto p = productClient.getProduct(productId);
         if (p == null || Boolean.FALSE.equals(p.getActive())) {
             throw new NoSuchElementException("Product not available");
@@ -176,8 +176,8 @@ public class CartService {
         String existing = (String) redisTemplate.opsForHash().get(key, productId);
 
         int  newQuantity = quantity;
-        if(existing != null) {
-            newQuantity += Math.max(0, parse(existing).getQuantity());
+        if (existing != null) {
+            newQuantity = parse(existing).getQuantity() + quantity;
         }
 
         CartItemDto itemDto = CartItemDto.builder()
@@ -185,6 +185,28 @@ public class CartService {
                 .quantity(newQuantity)
                 .price(p.getPrice())
                 .title(p.getTitle())
+                .images(p.getImages())
+                .build();
+
+        redisTemplate.opsForHash().put(key, productId, toJson(itemDto));
+        touchGuestTtl(key);
+    }
+
+    public void updateGuest(String anonId, String productId, Integer quantity) throws JsonProcessingException {
+        ProductInternalResponseDto p = productClient.getProduct(productId);
+        if (p == null || Boolean.FALSE.equals(p.getActive())) {
+            throw new NoSuchElementException("Product not available");
+        }
+
+        String key = keyGuest(anonId);
+        int  newQuantity = quantity;
+
+        CartItemDto itemDto = CartItemDto.builder()
+                .productId(UUID.fromString(productId))
+                .quantity(newQuantity)
+                .price(p.getPrice())
+                .title(p.getTitle())
+                .images(p.getImages())
                 .build();
 
         redisTemplate.opsForHash().put(key, productId, toJson(itemDto));

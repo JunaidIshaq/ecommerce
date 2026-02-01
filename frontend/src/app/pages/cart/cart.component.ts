@@ -31,12 +31,12 @@ export class CartComponent implements OnInit {
 
   updateQuantity(id: string, qty: number): void {
     if (qty < 1) return;
-    this.cartService.update(id, qty);
+    this.cartService.updateQuantity(id, qty).subscribe();
     this.updateTotal();
   }
 
   removeItem(id: string): void {
-    this.cartService.remove(id);
+    this.cartService.removeFromCart(id).subscribe();
     this.updateTotal();
   }
 
