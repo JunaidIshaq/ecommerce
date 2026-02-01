@@ -1,12 +1,13 @@
 import {Component} from '@angular/core';
 import {CartService} from '../../services/cart.service';
-import {Address, User} from '../../models/user.model';
+import {User} from '../../models/user.model';
 import {Router} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {AuthService} from '../../services/auth.service';
 import {Observable} from 'rxjs';
 import {take} from 'rxjs/operators';
+import {Address} from '../../models/address.model';
 
 @Component({
   selector: 'app-checkout',
