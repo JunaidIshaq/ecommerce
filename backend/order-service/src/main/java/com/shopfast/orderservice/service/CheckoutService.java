@@ -65,8 +65,9 @@ public class CheckoutService {
                 .sum();
         double discount = 0.0;
         double total = Math.max(9, subTotal - discount);
-
-        if(checkoutRequestDto.getCouponCode() != null && !checkoutRequestDto.getCouponCode().isBlank()) {
+        // 3) Persist order + items
+        Order order = new Order();
+        if(checkoutRequestDto != null && checkoutRequestDto.getCouponCode() != null && !checkoutRequestDto.getCouponCode().isBlank()) {
             CouponValidateRequestDto requestDto = new CouponValidateRequestDto();
             requestDto.setUserId(userId);
             requestDto.setCode(checkoutRequestDto.getCouponCode());
@@ -85,11 +86,20 @@ public class CheckoutService {
             }else {
                 throw new IllegalArgumentException("Coupon code is invalid");
             }
+            ShippingAddress shippingAddress = ShippingAddress.builder()
+                    .fullName(checkoutRequestDto.getFullName())
+                    .street(checkoutRequestDto.getStreet())
+                    .city(checkoutRequestDto.getCity())
+                    .state(checkoutRequestDto.getState())
+                    .zip(checkoutRequestDto.getZip())
+                    .country(checkoutRequestDto.getCountry())
+                    .phone(checkoutRequestDto.getPhone())
+                    .build();
+            order.setShippingAddress(shippingAddress);
         }
         String orderNumber = "Order-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
-        // 3) Persist order + items
-        Order order = new Order();
+
         order.setUserId(userId);
         order.setOrderNumber(orderNumber);
         order.setStatus(OrderStatus.CREATED);
@@ -109,16 +119,7 @@ public class CheckoutService {
 
         orderItemRepository.saveAll(items);
         order.setItems(items);
-        ShippingAddress shippingAddress = ShippingAddress.builder()
-                .fullName(checkoutRequestDto.getFullName())
-                .street(checkoutRequestDto.getStreet())
-                .city(checkoutRequestDto.getCity())
-                .state(checkoutRequestDto.getState())
-                .zip(checkoutRequestDto.getZip())
-                .country(checkoutRequestDto.getCountry())
-                .phone(checkoutRequestDto.getPhone())
-                .build();
-        order.setShippingAddress(shippingAddress);
+
         order = orderRepository.save(order);
 
         // 4) Publish RESERVE command for each item (or aggregated payload)
