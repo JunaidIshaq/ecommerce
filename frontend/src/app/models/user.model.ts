@@ -1,3 +1,5 @@
+import {Address} from './address.model';
+
 export interface User {
   id?: string;
   name?: string;
@@ -7,12 +9,3 @@ export interface User {
   role? : string;
 }
 
-export interface Address {
-  fullName: string;
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-  phone?: string;
-}

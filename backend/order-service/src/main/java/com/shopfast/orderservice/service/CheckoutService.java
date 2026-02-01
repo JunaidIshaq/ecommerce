@@ -9,17 +9,18 @@ import com.shopfast.common.events.NotificationEvent;
 import com.shopfast.common.events.OrderCommand;
 import com.shopfast.orderservice.client.CartClient;
 import com.shopfast.orderservice.client.CouponClient;
+import com.shopfast.orderservice.dto.CheckoutRequestDto;
 import com.shopfast.orderservice.enums.OrderStatus;
 import com.shopfast.orderservice.events.KafkaNotificationProducer;
 import com.shopfast.orderservice.events.KafkaOrderProducer;
 import com.shopfast.orderservice.model.Order;
 import com.shopfast.orderservice.model.OrderItem;
 import com.shopfast.orderservice.model.ProcessedCommand;
+import com.shopfast.orderservice.model.ShippingAddress;
 import com.shopfast.orderservice.repository.OrderItemRepository;
 import com.shopfast.orderservice.repository.OrderRepository;
 import com.shopfast.orderservice.repository.ProcessedCommandRepository;
 import jakarta.transaction.Transactional;
-import org.apache.commons.configuration.AbstractFileConfiguration;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -52,7 +53,7 @@ public class CheckoutService {
     }
 
     @Transactional
-    public Order checkout (String userId, String couponCode) {
+    public Order checkout (String userId, CheckoutRequestDto checkoutRequestDto) {
         // 1) Load Cart
         var cartItems = cartClient.getCartInternal(userId);
         if(cartItems == null || cartItems.isEmpty()) {
@@ -65,10 +66,10 @@ public class CheckoutService {
         double discount = 0.0;
         double total = Math.max(9, subTotal - discount);
 
-        if(couponCode != null && !couponCode.isBlank()) {
+        if(checkoutRequestDto.getCouponCode() != null && !checkoutRequestDto.getCouponCode().isBlank()) {
             CouponValidateRequestDto requestDto = new CouponValidateRequestDto();
             requestDto.setUserId(userId);
-            requestDto.setCode(couponCode);
+            requestDto.setCode(checkoutRequestDto.getCouponCode());
             requestDto.setSubTotal(subTotal);
             requestDto.setItems(cartItems.stream().map(ci -> {
                 CouponLineItemDto couponLineItemDto = new CouponLineItemDto();
@@ -108,6 +109,16 @@ public class CheckoutService {
 
         orderItemRepository.saveAll(items);
         order.setItems(items);
+        ShippingAddress shippingAddress = ShippingAddress.builder()
+                .fullName(checkoutRequestDto.getFullName())
+                .street(checkoutRequestDto.getStreet())
+                .city(checkoutRequestDto.getCity())
+                .state(checkoutRequestDto.getState())
+                .zip(checkoutRequestDto.getZip())
+                .country(checkoutRequestDto.getCountry())
+                .phone(checkoutRequestDto.getPhone())
+                .build();
+        order.setShippingAddress(shippingAddress);
         order = orderRepository.save(order);
 
         // 4) Publish RESERVE command for each item (or aggregated payload)

@@ -39,7 +39,6 @@ public class NotificationServiceImpl implements NotificationService {
                 .content(createNotificationRequestDto.getContent())
                 .type(createNotificationRequestDto.getType())
                 .channel(createNotificationRequestDto.getChannel())
-                .channel(createNotificationRequestDto.getChannel())
                 .status(NotificationStatus.PENDING)
                 .build();
 

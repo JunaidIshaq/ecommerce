@@ -25,7 +25,7 @@ public class CheckoutController {
     public ResponseEntity<OrderResponseDto> checkout(@RequestHeader("X-User-Id") String userId,
                                                      @RequestBody(required = false) CheckoutRequestDto checkoutRequestDto) {
         String coupon = (checkoutRequestDto != null) ? checkoutRequestDto.getCouponCode() : null;
-        Order order = checkoutService.checkout(userId, coupon);
+        Order order = checkoutService.checkout(userId, checkoutRequestDto);
         return ResponseEntity.ok(OrderResponseDto.from(order));
     }
 }

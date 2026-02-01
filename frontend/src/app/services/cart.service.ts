@@ -5,6 +5,7 @@ import {safeLocalStorageSet} from '../utils/browser-storage';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {AuthService} from './auth.service';
 import {isPlatformBrowser} from '@angular/common';
+import {Address} from '../models/address.model';
 
 const STORAGE_KEY = 'ecom_cart_v1';
 
@@ -57,11 +58,24 @@ export class CartService {
   }
 
 
-  checkout(userId: string, couponCode?: string) {
+  checkout(userId: string, couponCode?: string, address?: Address) {
     const headers = new HttpHeaders().set('X-User-Id', userId);
 
-    const body = couponCode ? { couponCode } : null;
+    const body: any = {};
 
+    if (couponCode) {
+      body.couponCode = couponCode;
+    }
+
+    if (address) {
+      body.fullName = address.fullName;
+      body.street = address.street;
+      body.city = address.city;
+      body.state = address.state;
+      body.zip = address.zip;
+      body.country = address.country;
+      body.phone = address.phone;
+    }
     return this.http.post<any>(`${this.baseUrlCheckout}/api/v1/order/checkout`, body, { headers });
   }
 

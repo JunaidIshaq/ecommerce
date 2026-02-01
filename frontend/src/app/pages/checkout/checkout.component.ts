@@ -44,7 +44,7 @@ export class CheckoutComponent {
           return;
         }
 
-        this.cart.checkout(user.id, this.couponCode).subscribe({
+        this.cart.checkout(user.id, this.couponCode, this.address).subscribe({
           next: (order) => {
             this.cart.clear().subscribe();
             alert("🎉 Order placed Successfully ! Order ID: " + order.order_number);

@@ -11,4 +11,18 @@ public class CheckoutRequestDto implements Serializable {
 
     private String couponCode;
 
+    private String fullName;
+
+    private String street;
+
+    private String city;
+
+    private String state;
+
+    private String zip;
+
+    private String country;
+
+    private String phone;
+
 }
