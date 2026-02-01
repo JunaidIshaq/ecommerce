@@ -95,6 +95,7 @@ export class AuthService {
         const payload = JSON.parse(atob(res.accessToken.split('.')[1]));
 
         const user: User = {
+          id: payload.sub,
           email: payload.email,
           role: payload.role
         };
@@ -159,4 +160,5 @@ export class AuthService {
     if (!isPlatformBrowser(this.platformId)) return null;
     return localStorage.getItem('access_token');
   }
+
 }

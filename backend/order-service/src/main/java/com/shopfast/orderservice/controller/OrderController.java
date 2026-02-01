@@ -42,6 +42,7 @@ public class OrderController {
         this.cartClient = cartClient;
     }
 
+    // For Manual Orders Only
     @Operation(summary = "Place an order")
     @PostMapping
     public ResponseEntity<Order> placeOrder(@Valid @RequestBody OrderRequestDto dto) {

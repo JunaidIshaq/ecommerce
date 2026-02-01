@@ -2,7 +2,7 @@ import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
 import {BehaviorSubject, switchMap, tap} from 'rxjs';
 import {CartItem} from '../models/cart-item.model';
 import {safeLocalStorageSet} from '../utils/browser-storage';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {AuthService} from './auth.service';
 import {isPlatformBrowser} from '@angular/common';
 
@@ -13,8 +13,12 @@ const STORAGE_KEY = 'ecom_cart_v1';
 @Injectable({ providedIn: 'root' })
 export class CartService {
 
-  private baseUrl = 'https://shopfast.live'; // ✅ plural endpoint
-  // private baseUrl = 'http://localhost:8088'; // ✅ plural endpoint
+  private baseUrlCart = 'https://shopfast.live'; // ✅ plural endpoint
+  // private baseUrlCart = 'http://localhost:8088'; // ✅ plural endpoint
+
+
+  private baseUrlCheckout = 'https://shopfast.live'; // ✅ plural endpoint
+  // private baseUrlCheckout = 'http://localhost:8084'; // ✅ plural endpoint
 
   private cartItems$ = new BehaviorSubject<CartItem[]>([]);
 
@@ -52,14 +56,23 @@ export class CartService {
     return this.cartItems$.asObservable();
   }
 
+
+  checkout(userId: string, couponCode?: string) {
+    const headers = new HttpHeaders().set('X-User-Id', userId);
+
+    const body = couponCode ? { couponCode } : null;
+
+    return this.http.post<any>(`${this.baseUrlCheckout}/api/v1/order/checkout`, body, { headers });
+  }
+
   // 🔹 Load cart from backend
   loadCart() {
     if (this.isLoggedIn()) {
-      return this.http.get<CartItem[]>(`${this.baseUrl}/api/v1/cart`)
+      return this.http.get<CartItem[]>(`${this.baseUrlCart}/api/v1/cart`)
         .pipe(tap(items => this.cartItems$.next(items)));
     } else {
       const anonId = this.getOrCreateAnonId();
-      return this.http.get<CartItem[]>(`${this.baseUrl}/api/v1/cart/guest`, { params: { anonId } })
+      return this.http.get<CartItem[]>(`${this.baseUrlCart}/api/v1/cart/guest`, { params: { anonId } })
         .pipe(tap(items => this.cartItems$.next(items)));
     }
   }
@@ -67,11 +80,11 @@ export class CartService {
   // 🔹 Add item
   addToCart(productId: string, quantity: number = 1) {
     if (this.isLoggedIn()) {
-      return this.http.post(`${this.baseUrl}/api/v1/cart/items`, { productId, quantity })
+      return this.http.post(`${this.baseUrlCart}/api/v1/cart/items`, { productId, quantity })
         .pipe(tap(() => this.loadCart().subscribe()));
     } else {
       const anonId = this.getOrCreateAnonId();
-      return this.http.post(`${this.baseUrl}/api/v1/cart/guest/items?anonId=${anonId}`, { productId, quantity })
+      return this.http.post(`${this.baseUrlCart}/api/v1/cart/guest/items?anonId=${anonId}`, { productId, quantity })
         .pipe(tap(() => this.loadCart().subscribe()));
     }
   }
@@ -80,11 +93,11 @@ export class CartService {
   // 🔹 Remove item
   removeFromCart(productId: string) {
     if (this.isLoggedIn()) {
-      return this.http.delete(`${this.baseUrl}/api/v1/cart/items/${productId}`)
+      return this.http.delete(`${this.baseUrlCart}/api/v1/cart/items/${productId}`)
         .pipe(tap(() => this.loadCart().subscribe()));
     } else {
       const anonId = this.getOrCreateAnonId();
-      return this.http.delete(`${this.baseUrl}/api/v1/cart/guest/items/${productId}?anonId=${anonId}`)
+      return this.http.delete(`${this.baseUrlCart}/api/v1/cart/guest/items/${productId}?anonId=${anonId}`)
         .pipe(tap(() => this.loadCart().subscribe()));
     }
   }
@@ -93,11 +106,11 @@ export class CartService {
   // 🔹 Clear cart
   clear() {
     if (this.isLoggedIn()) {
-      return this.http.delete(`${this.baseUrl}/api/v1/cart`)
+      return this.http.delete(`${this.baseUrlCart}/api/v1/cart`)
         .pipe(tap(() => this.cartItems$.next([])));
     } else {
       const anonId = this.getOrCreateAnonId();
-      return this.http.delete(`${this.baseUrl}/api/v1/cart/guest?anonId=${anonId}`)
+      return this.http.delete(`${this.baseUrlCart}/api/v1/cart/guest?anonId=${anonId}`)
         .pipe(tap(() => this.cartItems$.next([])));
     }
   }
@@ -106,7 +119,7 @@ export class CartService {
     const anonId = localStorage.getItem('anon_cart_id');
     if (!anonId) return;
 
-    this.http.post(`${this.baseUrl}/api/v1/cart/merge`, { anonId }).subscribe(() => {
+    this.http.post(`${this.baseUrlCart}/api/v1/cart/merge`, { anonId }).subscribe(() => {
       localStorage.removeItem('anon_cart_id');
       this.loadCart().subscribe();
     });
@@ -128,14 +141,14 @@ export class CartService {
   updateQuantity(productId: string, quantity: number) {
     if (this.isLoggedIn()) {
       return this.http.put(
-        `${this.baseUrl}/api/v1/cart/items/${productId}`,
+        `${this.baseUrlCart}/api/v1/cart/items/${productId}`,
         {},
         { params: { quantity } }
       ).pipe(switchMap(() => this.loadCart()));
     } else {
       const anonId = this.getOrCreateAnonId();
       return this.http.put(
-        `${this.baseUrl}/api/v1/cart/guest/items/${productId}`,
+        `${this.baseUrlCart}/api/v1/cart/guest/items/${productId}`,
         {},
         { params: { anonId, quantity } }
       ).pipe(switchMap(() => this.loadCart()));

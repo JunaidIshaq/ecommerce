@@ -92,14 +92,18 @@ management:
 app:
   seed-order: true
 
+cart:
+  service:
+    url: ${CART_SERVICE_URL:http://cart-service}
+
 category:
   service:
-    url: ${CATEGORY_SERVICE_URL:http://category-service:8082/api/v1/category}
+    url: ${CATEGORY_SERVICE_URL:http://category-service}
 
 product:
   service:
-    url: ${PRODUCT_SERVICE_URL:http://product-service:8081/api/v1/product}
+    url: ${PRODUCT_SERVICE_URL:http://product-service}
 
 inventory:
   service:
-    url: ${INVENTORY_SERVICE_URL:http://inventory-service:8083/api/v1/inventory}
+    url: ${INVENTORY_SERVICE_URL:http://inventory-service}

@@ -14,7 +14,9 @@
         <label>Country <input [(ngModel)]="address.country" name="country" required></label>
       </div>
       <label>Phone <input [(ngModel)]="address.phone" name="phone"></label>
-
+      <label>Coupon Code
+        <input [(ngModel)]="couponCode" name="couponCode" placeholder="Enter coupon (optional)">
+      </label>
       <button class="place" [disabled]="placing" type="submit">
         {{ placing ? 'Placing...' : 'Place Order' }}
       </button>

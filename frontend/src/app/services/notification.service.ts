@@ -1,6 +1,8 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
+import {AuthService} from './auth.service';
+import {User} from '../models/user.model';
 
 export interface Notification {
   id: number;
@@ -35,13 +37,19 @@ export class NotificationService {
   private baseUrl = 'https://shopfast.live/api/v1/notification';
   // private baseUrl = 'http://localhost:8091/api/v1/notification';
 
-  constructor(private http: HttpClient) {}
+  user$: Observable<User | null>;
+
+
+  constructor(private http: HttpClient, private authService: AuthService) {
+    this.user$ = this.authService.currentUser();
+
+  }
 
   /**
    * Fetch a user's notifications (paginated)
    */
   getUserNotifications(
-    userId: string = '28e2ac7f-09ef-4e7e-94df-042a987fa9c9',
+    userId: string | undefined,
     page: number = 1,
     size: number = 10
   ): Observable<Page<Notification>> {

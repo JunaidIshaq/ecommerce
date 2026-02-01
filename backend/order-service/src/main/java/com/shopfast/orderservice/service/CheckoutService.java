@@ -1,12 +1,16 @@
 package com.shopfast.orderservice.service;
 
+import com.shopfast.common.enums.NotificationChannel;
+import com.shopfast.common.enums.NotificationType;
 import com.shopfast.common.events.CartItemDto;
 import com.shopfast.common.events.CouponLineItemDto;
 import com.shopfast.common.events.CouponValidateRequestDto;
+import com.shopfast.common.events.NotificationEvent;
 import com.shopfast.common.events.OrderCommand;
 import com.shopfast.orderservice.client.CartClient;
 import com.shopfast.orderservice.client.CouponClient;
 import com.shopfast.orderservice.enums.OrderStatus;
+import com.shopfast.orderservice.events.KafkaNotificationProducer;
 import com.shopfast.orderservice.events.KafkaOrderProducer;
 import com.shopfast.orderservice.model.Order;
 import com.shopfast.orderservice.model.OrderItem;
@@ -35,14 +39,16 @@ public class CheckoutService {
     private final KafkaOrderProducer kafkaOrderProducer;
     private final ProcessedCommandRepository processedCommandRepository;
     private final CouponClient couponClient;
+    private final KafkaNotificationProducer kafkaNotificationProducer;
 
-    public CheckoutService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, CartClient cartClient, KafkaOrderProducer kafkaOrderProducer, ProcessedCommandRepository processedCommandRepository, CouponClient couponClient) {
+    public CheckoutService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, CartClient cartClient, KafkaOrderProducer kafkaOrderProducer, ProcessedCommandRepository processedCommandRepository, CouponClient couponClient, KafkaNotificationProducer kafkaNotificationProducer) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.cartClient = cartClient;
         this.kafkaOrderProducer = kafkaOrderProducer;
         this.processedCommandRepository = processedCommandRepository;
         this.couponClient = couponClient;
+        this.kafkaNotificationProducer = kafkaNotificationProducer;
     }
 
     @Transactional
@@ -79,15 +85,16 @@ public class CheckoutService {
                 throw new IllegalArgumentException("Coupon code is invalid");
             }
         }
+        String orderNumber = "Order-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         // 3) Persist order + items
         Order order = new Order();
         order.setUserId(userId);
+        order.setOrderNumber(orderNumber);
         order.setStatus(OrderStatus.CREATED);
         order.setSubTotal(BigDecimal.valueOf(subTotal));
         order.setDiscount(BigDecimal.valueOf(discount));
         order.setTotalAmount(BigDecimal.valueOf(total));
-        order = orderRepository.save(order);
 
         List<OrderItem> items = new ArrayList<>();
         for(CartItemDto cartItem : cartItems) {
@@ -100,6 +107,8 @@ public class CheckoutService {
         }
 
         orderItemRepository.saveAll(items);
+        order.setItems(items);
+        order = orderRepository.save(order);
 
         // 4) Publish RESERVE command for each item (or aggregated payload)
         String commandId = UUID.randomUUID().toString();
@@ -125,6 +134,20 @@ public class CheckoutService {
                 .build());
 
         kafkaOrderProducer.publishOrderCommand(orderCommand);
+        // Order Producer -> Inventory Service
+        kafkaOrderProducer.reserveOrder(order);
+
+        // Notification Producer -> Notification Service
+        NotificationEvent notificationEvent = new NotificationEvent();
+        notificationEvent.setSubject("Order Created");
+        notificationEvent.setNotificationType(NotificationType.ORDER_CREATED);
+        notificationEvent.setNotificationChannel(NotificationChannel.EMAIL);
+        notificationEvent.setContent("Order has been placed");
+        notificationEvent.setRecipient("junaidnumlcs@gmail.com");
+        notificationEvent.setReferenceId(order.getOrderNumber());
+        notificationEvent.setUserId(userId);
+        notificationEvent.setEventSource("order-service");
+        kafkaNotificationProducer.send(notificationEvent);
 
         // 5) Move to CREATED (Inventory will update to RESERVED via events listener you already have)
         return order;

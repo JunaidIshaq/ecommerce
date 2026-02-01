@@ -36,9 +36,10 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/orders").authenticated()
-                        .requestMatchers("/api/orders/**").authenticated()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/api/v1/order").permitAll()
+                        .requestMatchers("/api/v1/order/**").permitAll()
+                        .requestMatchers("/api/v1/order/checkout/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -57,7 +58,7 @@ public class SecurityConfig {
                 "https://www.shopfast.live"       // ✅ WWW version
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
+        config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 

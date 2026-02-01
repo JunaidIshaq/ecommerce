@@ -28,7 +28,7 @@ export class HeaderComponent implements OnInit {
   notifications: Notification[] = [];
   unreadCount = 0;
   isDropdownOpen = false;
-  userId = '28e2ac7f-09ef-4e7e-94df-042a987fa9c9';
+  userId: string | undefined;
 
   // 👉 Pagination fields
   page = 1;
