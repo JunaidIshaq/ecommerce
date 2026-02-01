@@ -1,20 +1,13 @@
-import {Injectable} from '@angular/core';
+import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
 import {BehaviorSubject, switchMap, tap} from 'rxjs';
 import {CartItem} from '../models/cart-item.model';
 import {safeLocalStorageSet} from '../utils/browser-storage';
 import {HttpClient} from '@angular/common/http';
 import {AuthService} from './auth.service';
+import {isPlatformBrowser} from '@angular/common';
 
 const STORAGE_KEY = 'ecom_cart_v1';
 
-function getOrCreateAnonId(): string {
-  let id = localStorage.getItem('anon_cart_id');
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem('anon_cart_id', id);
-  }
-  return id;
-}
 
 
 @Injectable({ providedIn: 'root' })
