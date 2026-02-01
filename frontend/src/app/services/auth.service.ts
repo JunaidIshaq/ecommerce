@@ -143,7 +143,8 @@ export class AuthService {
     return this.isBrowser() && !!localStorage.getItem(this.AUTH_KEY);
   }
 
-  getAccessToken() {
+  getAccessToken(): string | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
     return localStorage.getItem('access_token');
   }
 }

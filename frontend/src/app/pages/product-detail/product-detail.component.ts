@@ -7,6 +7,7 @@ import {Product} from '../../models/product.model';
 
 @Component({
   selector: 'app-product-detail',
+  standalone: true,
   templateUrl: './product-detail.component.html',
   imports: [
     NgIf,

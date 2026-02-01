@@ -1,8 +1,8 @@
 import {ChangeDetectorRef, Component, ElementRef, Inject, NgZone, OnInit, PLATFORM_ID, ViewChild} from '@angular/core';
-import { isPlatformBrowser, NgForOf, NgIf } from '@angular/common';
-import { ProductService } from '../../services/product.service';
-import { CartService } from '../../services/cart.service';
-import { Router, RouterLink } from '@angular/router';
+import {isPlatformBrowser, NgForOf, NgIf} from '@angular/common';
+import {ProductService} from '../../services/product.service';
+import {CartService} from '../../services/cart.service';
+import {Router, RouterLink} from '@angular/router';
 import {debounceTime, distinctUntilChanged} from 'rxjs';
 import {SearchService} from '../../services/search.service';
 

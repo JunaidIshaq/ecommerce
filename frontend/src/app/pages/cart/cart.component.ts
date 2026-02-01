@@ -7,6 +7,7 @@ import {NgForOf, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-cart',
+  standalone: true,
   templateUrl: './cart.component.html',
   imports: [
     FormsModule,

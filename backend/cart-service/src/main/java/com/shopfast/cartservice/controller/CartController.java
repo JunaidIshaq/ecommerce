@@ -39,7 +39,7 @@ public class CartController {
     @PostMapping("/items")
     public ResponseEntity<Map<String, String>> addItem(@Valid @RequestBody CartItemRequestDto cartItemRequestDto, Authentication authentication) throws JsonProcessingException {
         String userId = authentication.getName();
-        cartService.addOrUpdateUser(userId, cartItemRequestDto.getProductId(), cartItemRequestDto.getQuantity());
+        cartService.addUser(userId, cartItemRequestDto.getProductId(), cartItemRequestDto.getQuantity());
         Map<String, String> map = new HashMap<>();
         map.put("status", "success");
         map.put("message", "Cart item added successfully !");
@@ -49,7 +49,7 @@ public class CartController {
     @PutMapping("/items/{productId}")
     public ResponseEntity<Map<String, String>> updateItem(@PathVariable String productId, @RequestParam("quantity") Integer quantity, Authentication authentication) throws JsonProcessingException {
         String userId = authentication.getName();
-        cartService.addOrUpdateUser(userId, productId, quantity);
+        cartService.updateUser(userId, productId, quantity);
         Map<String, String> map = new HashMap<>();
         map.put("status", "success");
         map.put("message", "Cart item updated successfully !");

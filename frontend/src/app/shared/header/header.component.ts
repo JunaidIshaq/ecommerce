@@ -12,6 +12,7 @@ import {AuthService} from '../../services/auth.service';
 
 @Component({
   selector: 'app-header',
+  standalone: true,
   templateUrl: './header.component.html',
   imports: [CommonModule, FormsModule, AsyncPipe, NgIf, RouterLink, DatePipe, NgForOf, NgClass],
   styleUrls: ['./header.component.css']

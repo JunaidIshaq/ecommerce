@@ -127,7 +127,7 @@ public class CartService {
         }
     }
 
-    public void addOrUpdateUser(String userId, String productId, Integer quantity) throws JsonProcessingException {
+    public void addUser(String userId, String productId, Integer quantity) throws JsonProcessingException {
         ProductInternalResponseDto p = productClient.getProduct(productId);
         if (p == null || Boolean.FALSE.equals(p.getActive())) {
             throw new NoSuchElementException("Product not available");
@@ -147,6 +147,25 @@ public class CartService {
                 .quantity(newQuantity)
                 .price(p.getPrice())
                 .title(p.getTitle())
+                .images(p.getImages())
+                .build();
+        redisTemplate.opsForHash().put(cartKey(userId), productId, toJson(itemDto));
+    }
+
+    public void updateUser(String userId, String productId, Integer quantity) throws JsonProcessingException {
+        ProductInternalResponseDto p = productClient.getProduct(productId);
+        if (p == null || Boolean.FALSE.equals(p.getActive())) {
+            throw new NoSuchElementException("Product not available");
+        }
+
+        int newQuantity = quantity;
+
+        CartItemDto itemDto = CartItemDto.builder()
+                .productId(UUID.fromString(productId))
+                .quantity(newQuantity)
+                .price(p.getPrice())
+                .title(p.getTitle())
+                .images(p.getImages())
                 .build();
         redisTemplate.opsForHash().put(cartKey(userId), productId, toJson(itemDto));
     }

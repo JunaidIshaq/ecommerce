@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-profile',
+  standalone: true,
   imports: [CommonModule],       // ✅ Add this
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']

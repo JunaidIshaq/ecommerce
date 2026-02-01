@@ -29,7 +29,10 @@ export class CartService {
     // Optional: sync localStorage to BehaviorSubject changes
     // this.items$.subscribe(() => this.persist());
   // }
-  constructor(private http: HttpClient, private auth: AuthService) {}
+  constructor(private http: HttpClient,
+              private auth: AuthService,
+              @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   private isLoggedIn(): boolean {
     return !!this.auth.getAccessToken(); // or auth.isLoggedIn()
@@ -38,6 +41,17 @@ export class CartService {
   /** Save cart to localStorage */
   private persist(): void {
     safeLocalStorageSet(STORAGE_KEY, JSON.stringify(this.cartItems$.value));
+  }
+
+
+   getOrCreateAnonId(): string | '' {
+    if (!isPlatformBrowser(this.platformId)) return '';
+    let id = localStorage.getItem('anon_cart_id');
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem('anon_cart_id', id);
+    }
+    return id;
   }
 
   /** Observable stream for components to subscribe */
@@ -51,7 +65,7 @@ export class CartService {
       return this.http.get<CartItem[]>(`${this.baseUrl}/api/v1/cart`)
         .pipe(tap(items => this.cartItems$.next(items)));
     } else {
-      const anonId = getOrCreateAnonId();
+      const anonId = this.getOrCreateAnonId();
       return this.http.get<CartItem[]>(`${this.baseUrl}/api/v1/cart/guest`, { params: { anonId } })
         .pipe(tap(items => this.cartItems$.next(items)));
     }
@@ -63,7 +77,7 @@ export class CartService {
       return this.http.post(`${this.baseUrl}/api/v1/cart/items`, { productId, quantity })
         .pipe(tap(() => this.loadCart().subscribe()));
     } else {
-      const anonId = getOrCreateAnonId();
+      const anonId = this.getOrCreateAnonId();
       return this.http.post(`${this.baseUrl}/api/v1/cart/guest/items?anonId=${anonId}`, { productId, quantity })
         .pipe(tap(() => this.loadCart().subscribe()));
     }
@@ -76,7 +90,7 @@ export class CartService {
       return this.http.delete(`${this.baseUrl}/api/v1/cart/items/${productId}`)
         .pipe(tap(() => this.loadCart().subscribe()));
     } else {
-      const anonId = getOrCreateAnonId();
+      const anonId = this.getOrCreateAnonId();
       return this.http.delete(`${this.baseUrl}/api/v1/cart/guest/items/${productId}?anonId=${anonId}`)
         .pipe(tap(() => this.loadCart().subscribe()));
     }
@@ -89,7 +103,7 @@ export class CartService {
       return this.http.delete(`${this.baseUrl}/api/v1/cart`)
         .pipe(tap(() => this.cartItems$.next([])));
     } else {
-      const anonId = getOrCreateAnonId();
+      const anonId = this.getOrCreateAnonId();
       return this.http.delete(`${this.baseUrl}/api/v1/cart/guest?anonId=${anonId}`)
         .pipe(tap(() => this.cartItems$.next([])));
     }
@@ -126,7 +140,7 @@ export class CartService {
         { params: { quantity } }
       ).pipe(switchMap(() => this.loadCart()));
     } else {
-      const anonId = getOrCreateAnonId();
+      const anonId = this.getOrCreateAnonId();
       return this.http.put(
         `${this.baseUrl}/api/v1/cart/guest/items/${productId}`,
         {},
