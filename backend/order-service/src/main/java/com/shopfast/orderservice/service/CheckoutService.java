@@ -67,7 +67,8 @@ public class CheckoutService {
         double total = Math.max(9, subTotal - discount);
         // 3) Persist order + items
         Order order = new Order();
-        if(checkoutRequestDto != null && checkoutRequestDto.getCouponCode() != null && !checkoutRequestDto.getCouponCode().isBlank()) {
+        if(checkoutRequestDto != null) {
+            if(checkoutRequestDto.getCouponCode() != null && !checkoutRequestDto.getCouponCode().isBlank()){
             CouponValidateRequestDto requestDto = new CouponValidateRequestDto();
             requestDto.setUserId(userId);
             requestDto.setCode(checkoutRequestDto.getCouponCode());
@@ -80,12 +81,13 @@ public class CheckoutService {
                 return couponLineItemDto;
             }).toList());
             var response = couponClient.validate(requestDto);
-            if(response.isValid()) {
+            if (response.isValid()) {
                 discount = response.getDiscount();
                 total = Math.max(total, subTotal - discount);
-            }else {
+            } else {
                 throw new IllegalArgumentException("Coupon code is invalid");
             }
+        }
             ShippingAddress shippingAddress = ShippingAddress.builder()
                     .fullName(checkoutRequestDto.getFullName())
                     .street(checkoutRequestDto.getStreet())
