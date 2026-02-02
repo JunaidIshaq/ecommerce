@@ -287,8 +287,7 @@ server {
     # 🌐 Angular Frontend SPA Fallback
     # =====================================================
     location / {
-        try_files $uri $uri/ /index.html;
-        add_header Cache-Control "public, max-age=31536000, immutable";
+        try_files $uri /index.html;
     }
 
     # =====================================================
