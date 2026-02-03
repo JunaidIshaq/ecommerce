@@ -172,7 +172,9 @@ public class CartService {
 
     public List<CartItemDto> getUserCart(String userId) {
         Map<Object, Object> map = redisTemplate.opsForHash().entries(keyUser(userId));
-        return map.values().stream().map(o -> parse(o.toString())).toList();
+        return map.values().stream().map(o -> {
+          return  parse(o.toString());
+        }).toList();
     }
 
     public void removeUserItem(String userId, String productId) {

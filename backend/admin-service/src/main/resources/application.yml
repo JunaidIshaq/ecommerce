@@ -1,0 +1,115 @@
+spring:
+  application:
+    name: admin-service
+
+  datasource:
+    url: ${POSTGRES_URI:jdbc:postgresql://host.docker.internal:5432/admin_db}
+    username: postgres
+    password: postgres
+
+    hikari:
+      maximum-pool-size: 10        # Max connections per service
+      minimum-idle: 5              # Idle connections
+      idle-timeout: 30000          # 30 seconds
+      max-lifetime: 1800000        # 30 minutes
+      connection-timeout: 30000    # 30 seconds
+      pool-name: ${spring.application.name}-pool
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:admin-service-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
+
+#  data:
+#    redis:
+#      host: ${REDIS_HOST:redis}
+#      port: ${REDIS_PORT:6379}
+#      timeout: 6000
+#      connect-timeout: 6000
+#  cache:
+#    type: redis
+
+  elasticsearch:
+    uris: ${ELASTIC_URI:http://elasticsearch:9200}
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/eureka/
+
+server:
+  port: ${SERVER_PORT:8092}
+
+  forward-headers-strategy: framework
+
+jwt:
+  secret: ${JWT_SECRET:supersecretkeythatshouldbereplacedandstoredsecurely}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.data.redis: WARN
+    org.springframework.cache.interceptor: DEBUG
+
+
+elastic:
+  host:
+    name: elasticsearch
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: admin-service
+
+
+user:
+  service:
+    url: ${USER_SERVICE_URL:http://user-service:8086}
+
+order:
+  service:
+    url: ${ORDER_SERVICE_URL:http://order-service:8084}
+
+cart:
+  service:
+    url: ${CART_SERVICE_URL:http://cart-service:8088}
+
+category:
+  service:
+    url: ${CATEGORY_SERVICE_URL:http://category-service:8082}
+
+product:
+  service:
+    url: ${PRODUCT_SERVICE_URL:http://product-service:8081}
+
+inventory:
+  service:
+    url: ${INVENTORY_SERVICE_URL:http://inventory-service:8083}
