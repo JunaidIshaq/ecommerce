@@ -59,7 +59,7 @@ eureka:
       defaultZone: http://eureka-server:8761/eureka/eureka/
 
 server:
-  port: ${SERVER_PORT:8092}
+  port: ${SERVER_PORT:8093}
 
   forward-headers-strategy: framework
 
