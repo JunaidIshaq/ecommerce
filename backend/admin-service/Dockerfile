@@ -6,8 +6,8 @@ COPY common-lib ./common-lib
 RUN mvn -f common-lib/pom.xml install -DskipTests
 
 # Copy inventory-service sources from subfolder
-COPY order-service/pom.xml ./pom.xml
-COPY order-service/src ./src
+COPY admin-service/pom.xml ./pom.xml
+COPY admin-service/src ./src
 
 RUN mvn clean package -DskipTests
 
