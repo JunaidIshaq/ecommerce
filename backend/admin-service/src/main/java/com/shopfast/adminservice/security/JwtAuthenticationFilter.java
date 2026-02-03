@@ -27,7 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // ✅ List of endpoints to ignore for JWT validation
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/api/v1/order",
+            "/api/v1/admin",
             "/api/v1/order/",
             "/actuator/health",
             "/api/v1/auth",
@@ -41,12 +41,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-//        String path = request.getServletPath();
-//
-//        if (isPublicEndpoint(path)) {
-//            filterChain.doFilter(request, response);
-//            return;
-//        }
+        String path = request.getServletPath();
+
+        if (isPublicEndpoint(path)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
