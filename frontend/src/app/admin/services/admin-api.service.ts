@@ -1,0 +1,45 @@
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+
+@Injectable({ providedIn: 'root' })
+export class AdminApiService {
+
+  // private baseUrl = environment.apiUrl + '/admin';
+
+  private baseUrl = 'https://shopfast.live/admin'; // ✅ plural endpoint
+
+  constructor(private http: HttpClient) {}
+
+  getUsers() {
+    return this.http.get(`${this.baseUrl}/users`);
+  }
+
+  blockUser(id: number) {
+    return this.http.put(`${this.baseUrl}/users/${id}/block`, {});
+  }
+
+  unblockUser(id: number) {
+    return this.http.put(`${this.baseUrl}/users/${id}/unblock`, {});
+  }
+
+  getOrders() {
+    return this.http.get(`${this.baseUrl}/orders`);
+  }
+
+  updateOrderStatus(id: number, status: string) {
+    return this.http.put(`${this.baseUrl}/orders/${id}/status?status=${status}`, {});
+  }
+
+  getOrderById(id: string) {
+    return this.http.get(`${this.baseUrl}/orders/${id}`);
+  }
+
+  refundOrder(orderId: number, amount: number, reason: string) {
+    return this.http.post(`${this.baseUrl}/payments/refund`, {
+      orderId,
+      amount,
+      reason
+    });
+  }
+
+}

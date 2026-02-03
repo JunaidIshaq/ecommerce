@@ -1,0 +1,14 @@
+<div class="dialog">
+  <h3>Refund Order #{{ orderId }}</h3>
+
+  <label>Refund Amount</label>
+  <input type="number" [(ngModel)]="amount" />
+
+  <label>Reason</label>
+  <textarea [(ngModel)]="reason"></textarea>
+
+  <div class="actions">
+    <button class="btn-primary" (click)="submit()">Confirm Refund</button>
+    <button (click)="close()">Cancel</button>
+  </div>
+</div>

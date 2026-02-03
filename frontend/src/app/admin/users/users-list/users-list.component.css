@@ -1,0 +1,27 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+input, select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--brand-border);
+}
+
+.active {
+  color: var(--brand-success);
+  font-weight: 600;
+}
+
+.blocked {
+  color: var(--brand-danger);
+  font-weight: 600;
+}

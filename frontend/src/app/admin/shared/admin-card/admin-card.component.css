@@ -1,0 +1,7 @@
+.admin-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--brand-border);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}

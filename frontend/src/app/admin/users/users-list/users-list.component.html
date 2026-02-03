@@ -1,0 +1,52 @@
+<admin-card>
+  <div class="page-header">
+    <h2>Users Management</h2>
+
+    <div class="actions">
+      <input type="text" placeholder="Search by email..." [(ngModel)]="searchTerm" />
+      <select [(ngModel)]="roleFilter">
+        <option value="">All Roles</option>
+        <option value="ADMIN">Admin</option>
+        <option value="USER">User</option>
+      </select>
+    </div>
+  </div>
+
+  <table class="admin-table">
+    <thead>
+    <tr>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Status</th>
+      <th style="width:150px;">Actions</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let user of filteredUsers()">
+      <td>{{ user.email }}</td>
+      <td>{{ user.role }}</td>
+      <td>
+          <span [class.active]="user.active" [class.blocked]="!user.active">
+            {{ user.active ? 'Active' : 'Blocked' }}
+          </span>
+      </td>
+      <td>
+        <button class="btn-primary" (click)="viewUser(user)">View</button>
+        <button
+          class="btn-danger"
+          *ngIf="user.active"
+          (click)="blockUser(user.id)">
+          Block
+        </button>
+        <button
+          class="btn-primary"
+          *ngIf="!user.active"
+          (click)="unblockUser(user.id)">
+          Unblock
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</admin-card>

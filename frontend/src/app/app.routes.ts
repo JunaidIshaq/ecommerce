@@ -21,5 +21,12 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'signup', component: SignupComponent },
   { path: 'profile', component: ProfileComponent },
+
+  // 🛡 ADMIN PANEL (Lazy Loaded)
+  {
+    path: 'admin',
+    loadChildren: () =>
+      import('./admin/admin-routing-module').then(m => m.ADMIN_ROUTES)
+  },
   { path: '**', redirectTo: '' }
 ];

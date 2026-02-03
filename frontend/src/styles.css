@@ -12,3 +12,56 @@ nav a {
 nav a.active {
   font-weight: bold;
 }
+
+:root {
+  --brand-primary: #6C63FF;
+  --brand-accent: #FFB703;
+  --brand-dark: #1F2937;
+  --brand-light: #F9FAFB;
+  --brand-border: #E5E7EB;
+  --brand-success: #16A34A;
+  --brand-danger: #DC2626;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.admin-table thead {
+  background: #f3f4f6;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--brand-border);
+  text-align: left;
+}
+
+.admin-table th {
+  font-weight: 600;
+  color: var(--brand-dark);
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f9fafb;
+  transition: background 0.2s ease;
+}
+
+.btn-primary {
+  background: var(--brand-primary);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+
+.btn-danger {
+  background: var(--brand-danger);
+  color: white;
+}

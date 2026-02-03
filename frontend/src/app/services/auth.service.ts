@@ -95,6 +95,7 @@ export class AuthService {
         const payload = JSON.parse(atob(res.accessToken.split('.')[1]));
 
         const user: User = {
+          name: '',
           id: payload.sub,
           email: payload.email,
           role: payload.role
@@ -161,4 +162,7 @@ export class AuthService {
     return localStorage.getItem('access_token');
   }
 
+  getUserRoles() {
+    return ['SUPER_ADMIN'];
+  }
 }

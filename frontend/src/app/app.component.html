@@ -1,5 +1,15 @@
-<app-header></app-header>
-<main class="main">
+<!-- STORE LAYOUT -->
+<ng-container *ngIf="!isAdminRoute(); else adminLayout">
+  <app-header></app-header>
+
+  <main class="main">
+    <router-outlet></router-outlet>
+  </main>
+
+  <app-footer></app-footer>
+</ng-container>
+
+<!-- ADMIN LAYOUT (NO STORE HEADER/FOOTER) -->
+<ng-template #adminLayout>
   <router-outlet></router-outlet>
-</main>
-<app-footer></app-footer>
+</ng-template>

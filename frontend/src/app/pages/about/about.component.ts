@@ -1,10 +1,10 @@
 // import { Component } from '@angular/core';
 //
 // @Component({
-//   selector: 'app-about',
+//   selector: 'app-admin-layout',
 //   imports: [],
-//   templateUrl: './about.component.html',
-//   styleUrl: './about.component.css'
+//   templateUrl: './header.component.html',
+//   styleUrl: './header.component.css'
 // })
 // export class AboutComponent {
 //

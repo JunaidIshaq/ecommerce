@@ -1,0 +1,64 @@
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background-color: #151f35; /* solid dark slate */
+  color: #ffffff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 30px;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+.sidebar a {
+  padding: 14px 22px;
+  text-decoration: none;
+  color: #e5e7eb;   /* brighter text */
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-left: 4px solid transparent;
+}
+
+.sidebar a:hover {
+  background-color: #1f2937;
+  color: #ffffff;
+}
+
+.sidebar a.active {
+  background-color: #6C63FF;  /* your brand purple */
+  color: white;
+  border-left: 4px solid #ffffff;
+}
+
+
+.sidebar a:hover {
+  background: rgba(255,255,255,0.06);
+  color: white;
+}
+
+.sidebar a.active {
+  background: var(--brand-primary);
+  color: white;
+  border-left: 3px solid white;
+}
+
+.sidebar {
+  overflow-y: auto;
+}
+
+.sidebar {
+  box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+}
