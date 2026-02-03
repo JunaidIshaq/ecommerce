@@ -1,0 +1,6 @@
+02-Feb-2026
+
+
+1) Develop admin service to handle orders and update order status
+
+2) Develop payment service to handle orders and payments
