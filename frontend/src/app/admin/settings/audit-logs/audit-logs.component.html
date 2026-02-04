@@ -1,0 +1,28 @@
+<app-admin-card>
+  <div class="page-header">
+    <h2>Admin Activity Logs</h2>
+
+    <input type="text" placeholder="Search action..." [(ngModel)]="searchTerm" />
+  </div>
+
+  <table class="admin-table">
+    <thead>
+    <tr>
+      <th>Admin</th>
+      <th>Action</th>
+      <th>Entity</th>
+      <th>Entity ID</th>
+      <th>Date</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let log of filteredLogs()">
+      <td>{{ log.adminEmail }}</td>
+      <td>{{ log.action }}</td>
+      <td>{{ log.entityType }}</td>
+      <td>#{{ log.entityId }}</td>
+      <td>{{ log.timestamp | date:'short' }}</td>
+    </tr>
+    </tbody>
+  </table>
+</app-admin-card>

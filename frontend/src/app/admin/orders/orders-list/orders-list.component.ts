@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule, NgFor, NgIf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminApiService } from '../../services/admin-api.service';
-import { AdminCardComponent } from '../../shared/admin-card/admin-card.component';
 import {RouterLink} from '@angular/router';
+import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
 
 @Component({
   selector: 'app-orders-list',

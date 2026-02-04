@@ -1,0 +1,22 @@
+<div class="dialog-backdrop">
+  <div class="dialog">
+    <h3>Send Notification</h3>
+
+    <label>Title</label>
+    <input [(ngModel)]="form.title" />
+
+    <label>Message</label>
+    <textarea [(ngModel)]="form.message"></textarea>
+
+    <label>Audience</label>
+    <select [(ngModel)]="form.audience">
+      <option value="ALL">All Users</option>
+      <option value="ACTIVE">Active Users</option>
+    </select>
+
+    <div class="actions">
+      <button class="btn-primary" (click)="send()">Send</button>
+      <button (click)="close()">Cancel</button>
+    </div>
+  </div>
+</div>

@@ -1,1 +1,36 @@
-<p>products-list works!</p>
+<app-admin-card>
+  <div class="page-header">
+    <h2>Product Management</h2>
+    <input type="text" placeholder="Search product..." [(ngModel)]="searchTerm" />
+  </div>
+
+  <table class="admin-table">
+    <thead>
+    <tr>
+      <th>Name</th>
+      <th>Category</th>
+      <th>Price</th>
+      <th>Status</th>
+      <th style="width:160px;">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let p of filteredProducts()">
+      <td>{{ p.name }}</td>
+      <td>{{ p.categoryName }}</td>
+      <td>${{ p.price }}</td>
+      <td>
+          <span [class.active]="p.active" [class.blocked]="!p.active">
+            {{ p.active ? 'Active' : 'Disabled' }}
+          </span>
+      </td>
+      <td>
+        <button class="btn-primary" (click)="editProduct(p)">Edit</button>
+        <button class="btn-danger" (click)="toggleProduct(p)">
+          {{ p.active ? 'Disable' : 'Enable' }}
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</app-admin-card>

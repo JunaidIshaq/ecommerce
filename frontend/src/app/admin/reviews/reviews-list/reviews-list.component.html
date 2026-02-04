@@ -1,1 +1,49 @@
-<p>reviews-list works!</p>
+<app-admin-card>
+  <div class="page-header">
+    <h2>Review Moderation</h2>
+
+    <select [(ngModel)]="statusFilter">
+      <option value="">All</option>
+      <option value="PENDING">Pending</option>
+      <option value="APPROVED">Approved</option>
+      <option value="REPORTED">Reported</option>
+    </select>
+  </div>
+
+  <table class="admin-table">
+    <thead>
+    <tr>
+      <th>Product</th>
+      <th>User</th>
+      <th>Rating</th>
+      <th>Comment</th>
+      <th>Status</th>
+      <th style="width:150px;">Actions</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let review of filteredReviews()">
+      <td>{{ review.productName }}</td>
+      <td>{{ review.userEmail }}</td>
+      <td>⭐ {{ review.rating }}</td>
+      <td>{{ review.comment }}</td>
+      <td>
+          <span [class.pending]="review.status==='PENDING'"
+                [class.approved]="review.status==='APPROVED'"
+                [class.reported]="review.status==='REPORTED'">
+            {{ review.status }}
+          </span>
+      </td>
+      <td>
+        <button class="btn-primary"
+                *ngIf="review.status==='PENDING'"
+                (click)="approve(review.id)">Approve</button>
+
+        <button class="btn-danger"
+                (click)="deleteReview(review.id)">Delete</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</app-admin-card>

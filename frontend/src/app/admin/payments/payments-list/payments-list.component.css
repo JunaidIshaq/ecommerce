@@ -1,0 +1,3 @@
+.success { color: var(--brand-success); font-weight: 600; }
+.failed { color: var(--brand-danger); font-weight: 600; }
+.refunded { color: #2563eb; font-weight: 600; }

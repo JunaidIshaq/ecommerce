@@ -1,1 +1,39 @@
-<p>payments-list works!</p>
+<app-admin-card>
+  <div class="page-header">
+    <h2>Payment Transactions</h2>
+
+    <select [(ngModel)]="statusFilter">
+      <option value="">All</option>
+      <option value="SUCCESS">Success</option>
+      <option value="FAILED">Failed</option>
+      <option value="REFUNDED">Refunded</option>
+    </select>
+  </div>
+
+  <table class="admin-table">
+    <thead>
+    <tr>
+      <th>Order ID</th>
+      <th>User</th>
+      <th>Amount</th>
+      <th>Status</th>
+      <th>Date</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let p of filteredPayments()">
+      <td>#{{ p.orderId }}</td>
+      <td>{{ p.userEmail }}</td>
+      <td>${{ p.amount }}</td>
+      <td>
+          <span [class.success]="p.status==='SUCCESS'"
+                [class.failed]="p.status==='FAILED'"
+                [class.refunded]="p.status==='REFUNDED'">
+            {{ p.status }}
+          </span>
+      </td>
+      <td>{{ p.createdAt | date:'short' }}</td>
+    </tr>
+    </tbody>
+  </table>
+</app-admin-card>

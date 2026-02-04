@@ -1,0 +1,28 @@
+<div class="dialog-backdrop">
+  <div class="dialog">
+    <h3>{{ coupon ? 'Edit Coupon' : 'Create Coupon' }}</h3>
+
+    <label>Code</label>
+    <input [(ngModel)]="form.code" placeholder="SUMMER25" />
+
+    <label>Discount Type</label>
+    <select [(ngModel)]="form.type">
+      <option value="PERCENT">Percent (%)</option>
+      <option value="FIXED">Fixed Amount ($)</option>
+    </select>
+
+    <label>Value</label>
+    <input type="number" [(ngModel)]="form.value" />
+
+    <label>Max Usage</label>
+    <input type="number" [(ngModel)]="form.maxUsage" />
+
+    <label>Expiry Date</label>
+    <input type="date" [(ngModel)]="form.expiry" />
+
+    <div class="actions">
+      <button class="btn-primary" (click)="submit()">Save</button>
+      <button (click)="close()">Cancel</button>
+    </div>
+  </div>
+</div>

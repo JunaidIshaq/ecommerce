@@ -1,1 +1,36 @@
-<p>notifications-list works!</p>
+<app-admin-card>
+  <div class="page-header">
+    <h2>Notifications</h2>
+    <button class="btn-primary" (click)="openForm()">+ Send Notification</button>
+  </div>
+
+  <table class="admin-table">
+    <thead>
+    <tr>
+      <th>Title</th>
+      <th>Message</th>
+      <th>Audience</th>
+      <th>Date</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let n of notifications">
+      <td>{{ n.title }}</td>
+      <td>{{ n.message }}</td>
+      <td>
+        <span class="audience-badge" [ngClass]="'audience-' + n.audience">
+          {{ n.audience }}
+        </span>
+      </td>
+
+      <td>{{ n.createdAt | date:'short' }}</td>
+    </tr>
+    </tbody>
+  </table>
+</app-admin-card>
+
+<app-notification-form
+  *ngIf="showForm"
+  (closed)="closeForm()"
+  (sent)="reload()">
+</app-notification-form>

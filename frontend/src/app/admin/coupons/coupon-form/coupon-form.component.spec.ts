@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CouponForm } from './coupon-form';
+import { CouponFormComponent } from './coupon-form.component';
 
-describe('CouponForm', () => {
-  let component: CouponForm;
-  let fixture: ComponentFixture<CouponForm>;
+describe('CouponFormComponent', () => {
+  let component: CouponFormComponent;
+  let fixture: ComponentFixture<CouponFormComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CouponForm]
+      imports: [CouponFormComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CouponForm);
+    fixture = TestBed.createComponent(CouponFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

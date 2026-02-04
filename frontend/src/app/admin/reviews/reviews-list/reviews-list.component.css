@@ -1,0 +1,3 @@
+.pending { color: #d97706; font-weight: 600; }
+.approved { color: var(--brand-success); font-weight: 600; }
+.reported { color: var(--brand-danger); font-weight: 600; }

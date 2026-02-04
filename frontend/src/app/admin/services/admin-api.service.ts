@@ -72,6 +72,41 @@ export class AdminApiService {
     return this.http.put(`${this.baseUrl}/coupons/${id}/toggle`, {});
   }
 
+  getReviews() {
+    return this.http.get<any[]>(`${this.baseUrl}/reviews`);
+  }
+
+  approveReview(id: number) {
+    return this.http.put(`${this.baseUrl}/reviews/${id}/approve`, {});
+  }
+
+  deleteReview(id: number) {
+    return this.http.delete(`${this.baseUrl}/reviews/${id}`);
+  }
+
+  getNotifications() {
+    return this.http.get<any[]>(`${this.baseUrl}/notifications`);
+  }
+
+  sendNotification(data: any) {
+    return this.http.post(`${this.baseUrl}/notifications`, data);
+  }
+
+  getAuditLogs() {
+    return this.http.get<any[]>(`${this.baseUrl}/audit-logs`);
+  }
+
+  getProducts() {
+    return this.http.get<any[]>(`${this.baseUrl}/products`);
+  }
+
+  toggleProduct(id: number) {
+    return this.http.put(`${this.baseUrl}/products/${id}/toggle`, {});
+  }
+
+  getPayments() {
+    return this.http.get<any[]>(`${this.baseUrl}/payments`);
+  }
 
 
 }
