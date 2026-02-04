@@ -28,7 +28,7 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'payments', component: PaymentsListComponent },
       { path: 'notifications', component: NotificationsListComponent },
       { path: 'orders/:id', component: OrderDetailsComponent },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+      { path: '', redirectTo: '/'}
     ]
   }
 ];
