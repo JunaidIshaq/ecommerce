@@ -15,18 +15,18 @@
     <p class="metric">{{ metrics.newUsers }}</p>
   </app-admin-card>
 
+  <app-admin-card>
+    <h3>Sales Trend</h3>
+    <canvas #salesCanvas></canvas>
+  </app-admin-card>
+
+  <app-admin-card>
+    <h3>Top Products</h3>
+    <ul>
+      <li *ngFor="let p of metrics?.topProducts">
+        {{ p.name }} — {{ p.sales }} sold
+      </li>
+    </ul>
+  </app-admin-card>
+
 </div>
-
-<app-admin-card>
-  <h3>Sales Trend</h3>
-  <canvas id="salesChart"></canvas>
-</app-admin-card>
-
-<app-admin-card>
-  <h3>Top Products</h3>
-  <ul>
-    <li *ngFor="let p of metrics?.topProducts">
-      {{ p.name }} — {{ p.sales }} sold
-    </li>
-  </ul>
-</app-admin-card>

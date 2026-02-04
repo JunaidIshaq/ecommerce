@@ -4,6 +4,15 @@ import {FormsModule} from '@angular/forms';
 import {AdminApiService} from '../../services/admin-api.service';
 import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
 
+const MOCK_USERS = [
+  { id: 1, email: 'admin@shop.com', role: 'ADMIN', active: true },
+  { id: 2, email: 'john.doe@gmail.com', role: 'USER', active: true },
+  { id: 3, email: 'sara.khan@yahoo.com', role: 'USER', active: false },
+  { id: 4, email: 'manager@shop.com', role: 'ADMIN', active: true },
+  { id: 5, email: 'alex123@gmail.com', role: 'USER', active: true },
+];
+
+
 @Component({
   selector: 'app-users-list',
   standalone: true,
@@ -19,11 +28,18 @@ export class UsersListComponent {
   constructor(private adminApi: AdminApiService) {}
 
   ngOnInit() {
-    this.loadUsers();
+    // show dummy data instantly
+    this.users = MOCK_USERS;
   }
 
   loadUsers() {
-    this.adminApi.getUsers().subscribe(data => this.users = data);
+    this.adminApi.getUsers().subscribe({
+      next: data => this.users = data,
+      error: () => {
+        console.warn('Using mock users data');
+        this.users = MOCK_USERS;
+      }
+    });
   }
 
   filteredUsers() {

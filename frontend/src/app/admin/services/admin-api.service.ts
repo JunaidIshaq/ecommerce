@@ -1,6 +1,7 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {DashboardMetrics} from '../model/dashboard-metrics.model';
+import {User} from '../../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminApiService {
@@ -12,7 +13,7 @@ export class AdminApiService {
   constructor(private http: HttpClient) {}
 
   getUsers() {
-    return this.http.get(`${this.baseUrl}/users`);
+    return this.http.get<User>(`${this.baseUrl}/users`);
   }
 
   blockUser(id: number) {

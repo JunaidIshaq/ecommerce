@@ -1,12 +1,22 @@
 .admin-container {
   display: flex;
+  min-height: 100vh;
+  background: #f3f4f6;
 }
 
+/* 🔒 Lock sidebar size so it never repaints */
+app-admin-sidebar {
+  width: 240px;
+  min-width: 240px;
+  max-width: 240px;
+  flex-shrink: 0;
+  background: #111827; /* or your sidebar color */
+}
+
+/* Main content area */
 .admin-main {
-  margin-left: 250px;   /* same as sidebar width */
   flex: 1;
-  min-height: 100vh;
-  background: var(--brand-light);
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }

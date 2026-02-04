@@ -1,8 +1,9 @@
+/* Header section */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .actions {
@@ -10,12 +11,58 @@
   gap: 10px;
 }
 
-input, select {
-  padding: 8px 10px;
+.actions input,
+.actions select {
+  padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid var(--brand-border);
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
 }
 
+.actions input:focus,
+.actions select:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.15);
+}
+
+/* Table base */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+/* Header row */
+.admin-table thead {
+  background: #f3f4f6;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 12px 14px;
+  font-weight: 600;
+  color: var(--brand-dark);
+  border-bottom: 1px solid var(--brand-border);
+}
+
+/* Body rows */
+.admin-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--brand-border);
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f9fafb;
+  transition: background 0.2s ease;
+}
+
+/* Status badges */
 .active {
   color: var(--brand-success);
   font-weight: 600;
@@ -24,4 +71,21 @@ input, select {
 .blocked {
   color: var(--brand-danger);
   font-weight: 600;
+}
+
+/* Buttons inside table */
+.admin-table button {
+  margin-right: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+/* Responsive scroll */
+@media (max-width: 768px) {
+  .admin-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
 }

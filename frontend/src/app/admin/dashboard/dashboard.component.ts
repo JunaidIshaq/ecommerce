@@ -1,11 +1,24 @@
-import { Component, AfterViewInit } from '@angular/core';
-import { CommonModule, NgIf, NgFor } from '@angular/common';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
 import { AdminApiService } from '../services/admin-api.service';
 import { AdminCardComponent } from '../shared/admin-card/admin-card.component';
 import { DashboardMetrics } from '../model/dashboard-metrics.model';
 
 Chart.register(...registerables);
+
+const MOCK_METRICS: DashboardMetrics = {
+  todaySales: 12450,
+  totalOrders: 328,
+  newUsers: 57,
+  salesTrend: [1200, 1500, 1700, 2100, 1900],
+  topProducts: [
+    { name: 'iPhone 15', sales: 120 },
+    { name: 'AirPods Pro', sales: 95 },
+    { name: 'Samsung S24', sales: 88 },
+    { name: 'Gaming Mouse', sales: 76 }
+  ]
+};
 
 @Component({
   selector: 'app-dashboard',
@@ -14,21 +27,40 @@ Chart.register(...registerables);
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements AfterViewInit {
+export class DashboardComponent implements OnInit {
+
+  @ViewChild('salesCanvas') salesCanvas!: ElementRef<HTMLCanvasElement>;
 
   metrics!: DashboardMetrics;
+  chart: Chart | null = null;
 
   constructor(private adminApi: AdminApiService) {}
 
-  ngAfterViewInit() {
-    this.adminApi.getDashboardMetrics().subscribe(data => {
-      this.metrics = data;
-      this.renderChart(data.salesTrend);
+  ngOnInit() {
+    this.setMetrics(MOCK_METRICS);
+
+    this.adminApi.getDashboardMetrics().subscribe({
+      next: data => this.setMetrics(data),
+      error: () => console.warn('Using mock dashboard data')
     });
   }
 
+  setMetrics(data: DashboardMetrics) {
+    this.metrics = data;
+    setTimeout(() => this.renderChart(data.salesTrend));
+  }
+
   renderChart(trend: number[]) {
-    new Chart('salesChart', {
+    if (!this.salesCanvas) return;
+
+    if (this.chart) {
+      this.chart.destroy();
+    }
+
+    const ctx = this.salesCanvas.nativeElement.getContext('2d');
+    if (!ctx) return;
+
+    this.chart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
@@ -43,9 +75,7 @@ export class DashboardComponent implements AfterViewInit {
       },
       options: {
         responsive: true,
-        plugins: {
-          legend: { display: true }
-        }
+        plugins: { legend: { display: true } }
       }
     });
   }

@@ -20,7 +20,14 @@
       <td>{{ c.code }}</td>
       <td>{{ c.type === 'PERCENT' ? c.value + '%' : '$' + c.value }}</td>
       <td>{{ c.expiry | date }}</td>
-      <td>{{ c.usedCount }} / {{ c.maxUsage }}</td>
+      <td>
+        {{ c.usedCount }} / {{ c.maxUsage }}
+        <div class="usage-bar">
+          <div class="usage-bar-fill"
+               [style.width.%]="(c.usedCount / c.maxUsage) * 100"></div>
+        </div>
+      </td>
+
       <td>
           <span [class.active]="c.active" [class.blocked]="!c.active">
             {{ c.active ? 'Active' : 'Disabled' }}

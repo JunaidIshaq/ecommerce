@@ -1,3 +1,116 @@
-.pending { color: #d97706; font-weight: 600; }
-.approved { color: var(--brand-success); font-weight: 600; }
-.reported { color: var(--brand-danger); font-weight: 600; }
+/* Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.page-header select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--brand-border);
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.page-header select:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.15);
+}
+
+/* Table Base */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+/* Header Row */
+.admin-table thead {
+  background: #f3f4f6;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 12px 14px;
+  font-weight: 600;
+  color: var(--brand-dark);
+  border-bottom: 1px solid var(--brand-border);
+}
+
+/* Body Rows */
+.admin-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--brand-border);
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f9fafb;
+  transition: background 0.2s ease;
+}
+
+/* Rating Stars */
+.admin-table td:nth-child(3) {
+  font-weight: 600;
+  color: #f59e0b;
+}
+
+/* Comment column formatting */
+.admin-table td:nth-child(4) {
+  max-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #374151;
+}
+
+/* Status badges */
+.pending {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.approved {
+  background: #dcfce7;
+  color: #166534;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.reported {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Action buttons */
+.admin-table button {
+  margin-right: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+/* Responsive Support */
+@media (max-width: 768px) {
+  .admin-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

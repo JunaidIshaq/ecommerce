@@ -1,10 +1,68 @@
+/* Header */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
+/* Table Base */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+/* Table Header */
+.admin-table thead {
+  background: #f3f4f6;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 12px 14px;
+  font-weight: 600;
+  color: var(--brand-dark);
+  border-bottom: 1px solid var(--brand-border);
+}
+
+/* Table Body */
+.admin-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--brand-border);
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f9fafb;
+  transition: background 0.2s ease;
+}
+
+/* Coupon Code Style */
+.admin-table td:first-child {
+  font-weight: 600;
+  color: var(--brand-primary);
+  letter-spacing: 0.5px;
+}
+
+/* Usage Progress Look */
+.usage-bar {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.usage-bar-fill {
+  height: 100%;
+  background: var(--brand-primary);
+}
+
+/* Status badges */
 .active {
   color: var(--brand-success);
   font-weight: 600;
@@ -13,4 +71,21 @@
 .blocked {
   color: var(--brand-danger);
   font-weight: 600;
+}
+
+/* Buttons */
+.admin-table button {
+  margin-right: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
 }
