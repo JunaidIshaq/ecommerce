@@ -1,1 +1,38 @@
-<p>coupons-list works!</p>
+<admin-card>
+  <div class="page-header">
+    <h2>Coupon Management</h2>
+    <button class="btn-primary" (click)="openCreate()">+ Create Coupon</button>
+  </div>
+
+  <table class="admin-table">
+    <thead>
+    <tr>
+      <th>Code</th>
+      <th>Discount</th>
+      <th>Expiry</th>
+      <th>Usage</th>
+      <th>Status</th>
+      <th style="width:140px;">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let c of coupons">
+      <td>{{ c.code }}</td>
+      <td>{{ c.type === 'PERCENT' ? c.value + '%' : '$' + c.value }}</td>
+      <td>{{ c.expiry | date }}</td>
+      <td>{{ c.usedCount }} / {{ c.maxUsage }}</td>
+      <td>
+          <span [class.active]="c.active" [class.blocked]="!c.active">
+            {{ c.active ? 'Active' : 'Disabled' }}
+          </span>
+      </td>
+      <td>
+        <button class="btn-primary" (click)="editCoupon(c)">Edit</button>
+        <button class="btn-danger" (click)="toggleCoupon(c)">
+          {{ c.active ? 'Disable' : 'Enable' }}
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</admin-card>

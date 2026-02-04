@@ -1,6 +1,32 @@
 <div class="dashboard-grid">
-  <admin-card>Total Sales</admin-card>
-  <admin-card>Total Orders</admin-card>
-  <admin-card>New Users</admin-card>
-  <admin-card>Pending Reviews</admin-card>
+
+  <admin-card>
+    <h3>Today's Sales</h3>
+    <p class="metric">${{ metrics.todaySales }}</p>
+  </admin-card>
+
+  <admin-card>
+    <h3>Total Orders</h3>
+    <p class="metric">{{ metrics.totalOrders }}</p>
+  </admin-card>
+
+  <admin-card>
+    <h3>New Users</h3>
+    <p class="metric">{{ metrics.newUsers }}</p>
+  </admin-card>
+
 </div>
+
+<admin-card>
+  <h3>Sales Trend</h3>
+  <canvas id="salesChart"></canvas>
+</admin-card>
+
+<admin-card>
+  <h3>Top Products</h3>
+  <ul>
+    <li *ngFor="let p of metrics?.topProducts">
+      {{ p.name }} — {{ p.sales }} sold
+    </li>
+  </ul>
+</admin-card>

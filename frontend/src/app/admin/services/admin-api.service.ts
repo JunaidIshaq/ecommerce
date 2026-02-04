@@ -1,5 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
+import {DashboardMetrics} from '../model/dashboard-metrics.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminApiService {
@@ -41,5 +42,36 @@ export class AdminApiService {
       reason
     });
   }
+
+
+  getDashboardMetrics() {
+    return this.http.get<DashboardMetrics>(`${this.baseUrl}/dashboard/metrics`);
+  }
+
+  getInventory() {
+    return this.http.get<any[]>(`${this.baseUrl}/inventory`);
+  }
+
+  updateStock(productId: number, quantity: number) {
+    return this.http.put(`${this.baseUrl}/inventory/${productId}/stock?quantity=${quantity}`, {});
+  }
+
+  getCoupons() {
+    return this.http.get<any[]>(`${this.baseUrl}/coupons`);
+  }
+
+  createCoupon(data: any) {
+    return this.http.post(`${this.baseUrl}/coupons`, data);
+  }
+
+  updateCoupon(id: number, data: any) {
+    return this.http.put(`${this.baseUrl}/coupons/${id}`, data);
+  }
+
+  toggleCoupon(id: number) {
+    return this.http.put(`${this.baseUrl}/coupons/${id}/toggle`, {});
+  }
+
+
 
 }

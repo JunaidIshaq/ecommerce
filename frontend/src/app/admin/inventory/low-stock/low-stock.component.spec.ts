@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { StockAdjustmentDialog } from './stock-adjustment-dialog';
+import { LowStockComponent } from './low-stock.component';
 
-describe('StockAdjustmentDialog', () => {
-  let component: StockAdjustmentDialog;
-  let fixture: ComponentFixture<StockAdjustmentDialog>;
+describe('LowStockComponent', () => {
+  let component: LowStockComponent;
+  let fixture: ComponentFixture<LowStockComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [StockAdjustmentDialog]
+      imports: [LowStockComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(StockAdjustmentDialog);
+    fixture = TestBed.createComponent(LowStockComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

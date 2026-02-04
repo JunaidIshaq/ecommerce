@@ -1,0 +1,9 @@
+.low {
+  color: var(--brand-danger);
+  font-weight: 600;
+}
+
+.ok {
+  color: var(--brand-success);
+  font-weight: 600;
+}

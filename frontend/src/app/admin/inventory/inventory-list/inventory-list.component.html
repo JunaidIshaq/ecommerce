@@ -1,1 +1,42 @@
-<p>inventory-list works!</p>
+<admin-card>
+  <div class="page-header">
+    <h2>Inventory Management</h2>
+    <input type="text" placeholder="Search product..." [(ngModel)]="searchTerm" />
+  </div>
+
+  <table class="admin-table">
+    <thead>
+    <tr>
+      <th>Product</th>
+      <th>SKU</th>
+      <th>Stock</th>
+      <th>Status</th>
+      <th style="width:160px;">Actions</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let item of filteredInventory()">
+      <td>{{ item.productName }}</td>
+      <td>{{ item.sku }}</td>
+      <td>{{ item.stock }}</td>
+      <td>
+          <span [class.low]="item.stock < 5" [class.ok]="item.stock >= 5">
+            {{ item.stock < 5 ? 'Low Stock' : 'In Stock' }}
+          </span>
+      </td>
+      <td>
+        <button class="btn-primary" (click)="adjustStock(item)">Adjust</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</admin-card>
+
+<!-- 👇 ADD DIALOG HERE (OUTSIDE THE CARD) -->
+<stock-adjustment-dialog
+  *ngIf="showDialog"
+  [item]="selectedItem"
+  (close)="closeDialog()"
+  (updated)="onStockUpdated()">
+</stock-adjustment-dialog>
