@@ -28,10 +28,5 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./admin/admin-routing-module').then(m => m.ADMIN_ROUTES)
   },
-  {
-    path: 'admin/dashboard',
-    loadChildren: () =>
-      import('./admin/admin-routing-module').then(m => m.ADMIN_ROUTES)
-  },
   { path: '**', redirectTo: '' }
 ];
