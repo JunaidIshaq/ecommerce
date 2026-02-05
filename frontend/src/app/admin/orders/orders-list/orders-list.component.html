@@ -32,7 +32,7 @@
     <tr *ngFor="let order of orders">
       <td>{{ order.order_number }}</td>
       <td>{{ order.user_id}}</td>
-      <td>${{ order.total }}</td>
+      <td>${{ order.total_amount }}</td>
       <td>
           <span class="status" [class]="order.status.toLowerCase()">
             {{ order.status }}
