@@ -17,7 +17,7 @@ import java.util.List;
 public interface OrderAdminClient {
 
     @GetMapping("/internal/admin/orders/{id}")
-    ResponseEntity<PagedResponse<AdminOrderDto>> getAllOrders(@PathVariable String id, @RequestParam Integer Number, @RequestParam Integer pageSize, @RequestParam String status);
+    Object getAllOrders(@PathVariable String id, @RequestParam Integer Number, @RequestParam Integer pageSize, @RequestParam String status);
 
     @PutMapping("/{id}/status")
     void updateOrderStatus(@PathVariable Long id,

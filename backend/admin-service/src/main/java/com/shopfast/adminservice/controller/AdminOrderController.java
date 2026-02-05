@@ -4,7 +4,6 @@ import com.shopfast.adminservice.client.OrderAdminClient;
 import com.shopfast.adminservice.dto.AdminOrderDto;
 import com.shopfast.adminservice.dto.PagedResponse;
 import com.shopfast.adminservice.service.AdminOrderService;
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +27,7 @@ public class AdminOrderController {
     private final OrderAdminClient orderAdminClient;
 
     @GetMapping("/orders/{id}")
-    public ResponseEntity<PagedResponse<AdminOrderDto>> getAllOrders(@PathVariable UUID id,
+    public Object getAllOrders(@PathVariable UUID id,
                                                                      @RequestParam(required = false) Integer pageNumber,
                                                                      @RequestParam(required = false) Integer pageSize,
                                                                      @RequestParam(required = false) String status,
