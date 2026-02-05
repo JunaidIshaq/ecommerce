@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +34,7 @@ public class AdminOrderController {
             @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
             @RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize,
             @RequestParam(name = "status", required = false) String status) {
-        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<AdminOrderStatusDto> orderPage = orderRepository.findByUserId(id, pageable)
                 .map(AdminOrderStatusDto::from);
 
