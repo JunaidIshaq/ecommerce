@@ -22,22 +22,24 @@
       <th>User</th>
       <th>Total</th>
       <th>Status</th>
-      <th>Date</th>
+      <th>Created Date</th>
+      <th>Updated Date</th>
       <th style="width:160px;">Actions</th>
     </tr>
     </thead>
 
     <tbody>
-    <tr *ngFor="let order of filteredOrders()">
+    <tr *ngFor="let order of orders">
       <td>#{{ order.id }}</td>
-      <td>{{ order.userEmail }}</td>
+      <td>{{ order.user_id}}</td>
       <td>${{ order.total }}</td>
       <td>
           <span class="status" [class]="order.status.toLowerCase()">
             {{ order.status }}
           </span>
       </td>
-      <td>{{ order.createdAt | date:'short' }}</td>
+      <td>{{ order.created_at | date:'short' }}</td>
+      <td>{{ order.updated_at | date:'short' }}</td>
       <td>
         <button class="btn-primary" [routerLink]="['/admin/orders', order.id]">View</button>
         <button class="btn-danger" *ngIf="order.status !== 'CANCELLED'" (click)="cancelOrder(order.id)">

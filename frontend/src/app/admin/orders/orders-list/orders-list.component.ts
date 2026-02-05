@@ -97,12 +97,12 @@ export class OrdersListComponent implements OnInit{
   }
 
 
-  filteredOrders() {
-    return this.orders.filter((order: { id: { toString: () => string | string[]; }; status: string; }) =>
-      order.id.toString().includes(this.searchTerm) &&
-      (this.statusFilter ? order.status === this.statusFilter : true)
-    );
-  }
+  // filteredOrders() {
+  //   return this.orders.filter((order: { id: { toString: () => string | string[]; }; status: string; }) =>
+  //     order.id.toString().includes(this.searchTerm) &&
+  //     (this.statusFilter ? order.status === this.statusFilter : true)
+  //   );
+  // }
 
   cancelOrder(id: number) {
     if (confirm('Are you sure you want to cancel this order?')) {
