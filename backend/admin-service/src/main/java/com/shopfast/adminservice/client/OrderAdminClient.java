@@ -1,7 +1,11 @@
 package com.shopfast.adminservice.client;
 
+import com.shopfast.adminservice.dto.AdminOrderDto;
 import com.shopfast.adminservice.dto.OrderDto;
+import com.shopfast.adminservice.dto.PagedResponse;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,7 +17,7 @@ import java.util.List;
 public interface OrderAdminClient {
 
     @GetMapping("/internal/admin/orders/{id}")
-    List<OrderDto> getAllOrders(@PathVariable String id, @RequestParam Integer Number, @RequestParam Integer pageSize, @RequestParam String status);
+    ResponseEntity<PagedResponse<AdminOrderDto>> getAllOrders(@PathVariable String id, @RequestParam Integer Number, @RequestParam Integer pageSize, @RequestParam String status);
 
     @PutMapping("/{id}/status")
     void updateOrderStatus(@PathVariable Long id,

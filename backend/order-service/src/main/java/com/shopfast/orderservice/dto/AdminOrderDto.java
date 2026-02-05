@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -15,7 +16,9 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminOrderStatusDto {
+public class AdminOrderDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @JsonProperty("id")
     private UUID id;
@@ -44,8 +47,8 @@ public class AdminOrderStatusDto {
     @JsonProperty("updated_at")
     private Instant updatedAt;
 
-    public static AdminOrderStatusDto from(Order order) {
-        return AdminOrderStatusDto.builder()
+    public static AdminOrderDto from(Order order) {
+        return AdminOrderDto.builder()
                 .id(order.getId())
                 .userId(order.getUserId())
                 .orderNumber(order.getOrderNumber())

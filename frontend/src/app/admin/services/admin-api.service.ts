@@ -33,7 +33,7 @@ export class AdminApiService {
     let params = new HttpParams()
       .set('pageNumber', pageNumber)
       .set('pageSize', pageSize);
-    return this.http.get(`${this.baseUrlOrder}/api/v1/order/internal/admin/orders/${id}/status`, {params});
+    return this.http.get(`${this.baseUrlOrder}/api/v1/admin/orders/${id}`, {params});
   }
 
   updateOrderStatus(id: number, status: string) {

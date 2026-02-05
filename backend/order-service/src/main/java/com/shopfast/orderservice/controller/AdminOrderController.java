@@ -1,6 +1,6 @@
 package com.shopfast.orderservice.controller;
 
-import com.shopfast.orderservice.dto.AdminOrderStatusDto;
+import com.shopfast.orderservice.dto.AdminOrderDto;
 import com.shopfast.orderservice.dto.PagedResponse;
 import com.shopfast.orderservice.repository.OrderRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Admin Orders", description = "Admin Order APIs")
 @RestController
-@RequestMapping("/api/v1/order/internal/admin")
+@RequestMapping("/api/v1/order")
 public class AdminOrderController {
 
     private final OrderRepository orderRepository;
@@ -28,17 +28,17 @@ public class AdminOrderController {
     }
 
     @Operation(summary = "Get order status by ID for admin")
-    @GetMapping("/orders/{id}")
-    public ResponseEntity<PagedResponse<AdminOrderStatusDto>> getOrderStatus(
+    @GetMapping("/internal/admin/orders/{id}")
+    public ResponseEntity<PagedResponse<AdminOrderDto>> getOrderStatus(
             @PathVariable("id") String id,
             @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
             @RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize,
             @RequestParam(name = "status", required = false) String status) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<AdminOrderStatusDto> orderPage = orderRepository.findByUserId(id, pageable)
-                .map(AdminOrderStatusDto::from);
+        Page<AdminOrderDto> orderPage = orderRepository.findByUserId(id, pageable)
+                .map(AdminOrderDto::from);
 
-        PagedResponse<AdminOrderStatusDto> response = new PagedResponse<>(
+        PagedResponse<AdminOrderDto> response = new PagedResponse<>(
                 orderPage.getContent(),
                 orderPage.getTotalElements(),
                 orderPage.getTotalPages(),
