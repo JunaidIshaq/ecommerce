@@ -28,7 +28,7 @@ public class AdminOrderController {
     }
 
     @Operation(summary = "Get order status by ID for admin")
-    @GetMapping("/orders/{id}/status")
+    @GetMapping("/orders/{id}")
     public ResponseEntity<PagedResponse<AdminOrderStatusDto>> getOrderStatus(
             @PathVariable("id") String id,
             @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,

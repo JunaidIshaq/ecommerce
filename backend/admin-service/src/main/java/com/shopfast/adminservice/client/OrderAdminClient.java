@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name = "order-service", url="${order.service.url}", path = "/internal/admin/orders")
+@FeignClient(name = "order-service", url="${order.service.url}", path = "/api/v1/order")
 public interface OrderAdminClient {
 
-    @GetMapping
-    List<OrderDto> getAllOrders();
+    @GetMapping("/internal/admin/orders/{id}")
+    List<OrderDto> getAllOrders(@PathVariable String id, @RequestParam Integer Number, @RequestParam Integer pageSize, @RequestParam String status);
 
     @PutMapping("/{id}/status")
     void updateOrderStatus(@PathVariable Long id,
