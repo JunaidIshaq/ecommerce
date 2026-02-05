@@ -26,10 +26,10 @@ export class AdminApiService {
     return this.http.put(`${this.baseUrl}/users/${id}/unblock`, {});
   }
 
-  getOrders(id: string | undefined) {
+  getOrders(id: string | undefined, pageNumber: number = 1, pageSize: number = 10) {
     let params = new HttpParams()
-      .set('pageNumber', 1)
-      .set('pageSize', 10);
+      .set('pageNumber', pageNumber)
+      .set('pageSize', pageSize);
     return this.http.get(`${this.baseUrl}/api/v1/order/internal/admin/orders/${id}/status`, {params});
   }
 

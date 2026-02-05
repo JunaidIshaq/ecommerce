@@ -62,6 +62,12 @@ export class OrdersListComponent implements OnInit{
   user$: Observable<User | null>;
   userId: string | undefined;
 
+  // Pagination
+  currentPage = 1;
+  pageSize = 10;
+  totalOrders = 0;
+  totalPages = 0;
+
   constructor(private adminApi: AdminApiService, private authService: AuthService, private zone: NgZone, private cdr: ChangeDetectorRef) {
     console.error('OrdersListComponent: Constructor called');
     this.user$ = this.authService.currentUser();
@@ -83,7 +89,7 @@ export class OrdersListComponent implements OnInit{
 
       console.log('Calling orders API with userId:', this.userId);
 
-      this.adminApi.getOrders(this.userId).subscribe({
+      this.adminApi.getOrders(this.userId, this.currentPage, this.pageSize).subscribe({
         next: (data: any)=> {
           this.zone.run(() => {
           console.log('Orders API success:', data);
@@ -91,9 +97,13 @@ export class OrdersListComponent implements OnInit{
           // Check if data is wrapped in a response object
           if (data && data.items && Array.isArray(data.items)) {
             this.orders = data.items;
-          } else {
+            this.totalOrders = data.totalItems;
+            this.totalPages = data.totalPages;
+          }  else {
             console.warn('Unexpected data format:', data);
             this.orders = [];
+            this.totalOrders = 0;
+            this.totalPages = 0;
           }
 
             this.cdr.detectChanges();
@@ -102,9 +112,49 @@ export class OrdersListComponent implements OnInit{
         error: err => {
           console.warn('Orders API failed, using mock data', err);
           this.orders = MOCK_ORDERS;
+          this.totalOrders = this.orders.length;
+          this.totalPages = Math.ceil(this.totalOrders / this.pageSize);
         }
       });
     });
+  }
+
+  // Pagination methods
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+      this.currentPage = page;
+      this.loadOrders();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadOrders();
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadOrders();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 
 
