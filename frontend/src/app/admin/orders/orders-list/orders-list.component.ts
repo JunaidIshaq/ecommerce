@@ -56,13 +56,13 @@ const MOCK_ORDERS = [
   styleUrls: ['./orders-list.component.css']
 })
 export class OrdersListComponent implements OnInit{
-  orders: any;  // Initialize as empty array
+  orders: any[] = [];  // Initialize as empty array
   searchTerm = '';
   statusFilter = '';
   user$: Observable<User | null>;
   userId: string | undefined;
 
-  constructor(private adminApi: AdminApiService, private authService: AuthService, private zone: NgZone, private cd: ChangeDetectorRef) {
+  constructor(private adminApi: AdminApiService, private authService: AuthService, private zone: NgZone, private cdr: ChangeDetectorRef) {
     console.error('OrdersListComponent: Constructor called');
     this.user$ = this.authService.currentUser();
     this.user$.pipe(take(1)).subscribe(u => this.userId = u?.id!);
@@ -84,11 +84,19 @@ export class OrdersListComponent implements OnInit{
       console.log('Calling orders API with userId:', this.userId);
 
       this.adminApi.getOrders(this.userId).subscribe({
-        next: data => {
+        next: (data: any)=> {
           this.zone.run(() => {
-            console.log('Orders API success:', data);
-            this.orders = data;
-            this.cd.detectChanges();
+          console.log('Orders API success:', data);
+          console.log('Data type:', typeof data, 'Is array:', Array.isArray(data));
+          // Check if data is wrapped in a response object
+          if (data && data.items && Array.isArray(data.items)) {
+            this.orders = data.items;
+          } else {
+            console.warn('Unexpected data format:', data);
+            this.orders = [];
+          }
+
+            this.cdr.detectChanges();
           });
         },
         error: err => {
