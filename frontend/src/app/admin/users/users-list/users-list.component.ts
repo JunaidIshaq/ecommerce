@@ -29,6 +29,7 @@ export class UsersListComponent {
 
   ngOnInit() {
     // show dummy data instantly
+    console.log('UsersListComponent ngOnInit called');
     this.users = MOCK_USERS;
   }
 

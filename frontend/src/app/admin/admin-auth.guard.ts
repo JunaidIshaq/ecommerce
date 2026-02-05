@@ -6,15 +6,18 @@ export const AdminAuthGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  const roles = auth.getUserRoles();
+  console.log('ADMIN GUARD: Checking access');
 
-  console.log('ADMIN GUARD ROLES:', roles); // 👈 check browser console
+  const roles = auth.getUserRoles();
+  console.log('ADMIN GUARD ROLES:', roles);
 
   if (roles?.includes('ADMIN') || roles?.includes('SUPER_ADMIN') ||
     roles?.includes('ROLE_ADMIN') || roles?.includes('ROLE_SUPER_ADMIN')) {
+    console.log('ADMIN GUARD: Access granted');
     return true;
   }
 
+  console.log('ADMIN GUARD: Access denied, redirecting to /');
   router.navigate(['/']);
   return false;
 };

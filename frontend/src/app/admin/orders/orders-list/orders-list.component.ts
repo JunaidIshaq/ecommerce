@@ -1,9 +1,13 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { CommonModule, NgFor, NgIf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminApiService } from '../../services/admin-api.service';
 import {RouterLink} from '@angular/router';
 import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
+import {Observable} from 'rxjs';
+import {User} from '../../../models/user.model';
+import {take} from 'rxjs/operators';
+import {AuthService} from '../../../services/auth.service';
 
 const MOCK_ORDERS = [
   {
@@ -51,22 +55,47 @@ const MOCK_ORDERS = [
   templateUrl: './orders-list.component.html',
   styleUrls: ['./orders-list.component.css']
 })
-export class OrdersListComponent {
-  orders: any;
+export class OrdersListComponent implements OnInit{
+  orders: any;  // Initialize as empty array
   searchTerm = '';
   statusFilter = '';
+  user$: Observable<User | null>;
+  userId: string | undefined;
 
-  constructor(private adminApi: AdminApiService) {}
+  constructor(private adminApi: AdminApiService, private authService: AuthService) {
+    console.error('OrdersListComponent: Constructor called');
+    this.user$ = this.authService.currentUser();
+    this.user$.pipe(take(1)).subscribe(u => this.userId = u?.id!);
+  }
 
   ngOnInit() {
-
-    this.orders = MOCK_ORDERS;
+    console.error('OrdersListComponent: ngOnInit called');
     this.loadOrders();
   }
 
   loadOrders() {
-    this.adminApi.getOrders().subscribe(data =>  this.orders = data);
+    console.log('loadOrders called');
+
+    this.authService.currentUser().pipe(take(1)).subscribe(user => {
+      console.log('currentUser subscription fired, user:', user);
+      // Use user ID if available, otherwise use a default or skip user ID
+      this.userId = user?.id;
+
+      console.log('Calling orders API with userId:', this.userId);
+
+      this.adminApi.getOrders(this.userId).subscribe({
+        next: data => {
+          console.log('Orders API success:', data);
+          this.orders = data;
+        },
+        error: err => {
+          console.warn('Orders API failed, using mock data', err);
+          this.orders = MOCK_ORDERS;
+        }
+      });
+    });
   }
+
 
   filteredOrders() {
     return this.orders.filter((order: { id: { toString: () => string | string[]; }; status: string; }) =>

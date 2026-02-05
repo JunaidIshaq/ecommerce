@@ -1,10 +1,14 @@
 import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {AdminRoutingModule} from './admin-routing-module';
 
+console.log('AdminModule: Importing module');
 
 @NgModule({
   declarations: [],
-  imports: [
-    CommonModule]
+  imports: [AdminRoutingModule]
 })
-export class AdminModule { }
+export class AdminModule {
+  constructor() {
+    console.log('AdminModule: Module constructed');
+  }
+}

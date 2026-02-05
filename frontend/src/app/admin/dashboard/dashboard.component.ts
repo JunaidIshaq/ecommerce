@@ -1,3 +1,4 @@
+console.log('Dashboard component file loaded');
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
@@ -37,6 +38,8 @@ export class DashboardComponent implements OnInit {
   constructor(private adminApi: AdminApiService) {}
 
   ngOnInit() {
+    console.log('DashboardComponent ngOnInit called');
+    alert('Dashboard ngOnInit called!');
     this.setMetrics(MOCK_METRICS);
 
     this.adminApi.getDashboardMetrics().subscribe({

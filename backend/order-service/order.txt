@@ -17,8 +17,36 @@ public interface OrderAdminClient {
 
     @PutMapping("/{id}/status")
     void updateOrderStatus(@PathVariable Long id,
-                           @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
-                           @RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize,
                            @RequestParam String status);
 
 }
+
+
+package com.shopfast.adminservice.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+
+@Data
+public class OrderDto {
+
+    @JsonProperty("id")
+    private String Id;
+
+    @JsonProperty("user_id")
+    private String userId;
+
+    @JsonProperty("user_email")
+    private String userEmail;
+
+    @JsonProperty("status")
+    private String status;
+
+    @JsonProperty("created_at")
+    private String created_at;
+
+    @JsonProperty("updated_at")
+    private String updated_at;
+
+}
+

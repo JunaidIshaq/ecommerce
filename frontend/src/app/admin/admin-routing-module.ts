@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import {RouterModule, Routes} from '@angular/router';
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { UsersListComponent } from './users/users-list/users-list.component';
@@ -11,6 +11,9 @@ import { PaymentsListComponent } from './payments/payments-list/payments-list.co
 import { NotificationsListComponent } from './notifications/notifications-list/notifications-list.component';
 import { AdminAuthGuard } from './admin-auth.guard';
 import {OrderDetailsComponent} from './orders/order-details/order-details.component';
+import {NgModule} from '@angular/core';
+
+console.log('AdminRoutingModule: Importing module');
 
 export const ADMIN_ROUTES: Routes = [
   {
@@ -21,14 +24,24 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'users', component: UsersListComponent },
       { path: 'orders', component: OrdersListComponent },
+      { path: 'orders/:id', component: OrderDetailsComponent },
       { path: 'products', component: ProductsListComponent },
       { path: 'inventory', component: InventoryListComponent },
       { path: 'coupons', component: CouponsListComponent },
       { path: 'reviews', component: ReviewsListComponent },
       { path: 'payments', component: PaymentsListComponent },
       { path: 'notifications', component: NotificationsListComponent },
-      { path: 'orders/:id', component: OrderDetailsComponent },
       { path: '**', redirectTo: 'dashboard'}
     ]
   }
 ];
+
+@NgModule({
+  imports: [RouterModule.forChild(ADMIN_ROUTES)],
+  exports: [RouterModule]
+})
+export class AdminRoutingModule {
+  constructor() {
+    console.log('AdminRoutingModule: Module constructed');
+  }
+}

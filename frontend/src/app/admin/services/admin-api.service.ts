@@ -1,4 +1,4 @@
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {DashboardMetrics} from '../model/dashboard-metrics.model';
 import {User} from '../../models/user.model';
@@ -9,6 +9,8 @@ export class AdminApiService {
   // private baseUrl = environment.apiUrl + '/admin';
 
   private baseUrl = 'https://shopfast.live/admin'; // ✅ plural endpoint
+
+  private baseUrlOrder = 'http://localhost:8084/api/v1/order';
 
   constructor(private http: HttpClient) {}
 
@@ -24,8 +26,11 @@ export class AdminApiService {
     return this.http.put(`${this.baseUrl}/users/${id}/unblock`, {});
   }
 
-  getOrders() {
-    return this.http.get(`${this.baseUrl}/orders`);
+  getOrders(id: string | undefined) {
+    let params = new HttpParams()
+      .set('pageNumber', 1)
+      .set('pageSize', 10);
+    return this.http.get(`${this.baseUrl}/internal/admin/orders/${id}/status/`, {params});
   }
 
   updateOrderStatus(id: number, status: string) {
