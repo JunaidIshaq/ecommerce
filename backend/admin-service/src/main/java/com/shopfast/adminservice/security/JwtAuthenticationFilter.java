@@ -51,6 +51,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
             final String token = authHeader.substring(7);
             try {
@@ -73,7 +76,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 // Invalid token: skip authentication
             }
-        }
 
         filterChain.doFilter(request, response);
     }
