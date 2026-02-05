@@ -28,10 +28,10 @@ public class AdminOrderController {
 
     @GetMapping("/orders/{id}")
     public Object getAllOrders(@PathVariable UUID id,
-                                                                     @RequestParam(required = false) Integer pageNumber,
-                                                                     @RequestParam(required = false) Integer pageSize,
-                                                                     @RequestParam(required = false) String status,
-                                                                     Authentication auth) {
+                             @RequestParam(required = false) Integer pageNumber,
+                             @RequestParam(required = false) Integer pageSize,
+                             @RequestParam(required = false) String status,
+                             Authentication auth) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         if(StringUtils.isEmpty(userId)) {
             throw new RuntimeException("Not an Admin User");
