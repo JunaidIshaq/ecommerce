@@ -30,7 +30,7 @@ export class AdminApiService {
     let params = new HttpParams()
       .set('pageNumber', 1)
       .set('pageSize', 10);
-    return this.http.get(`${this.baseUrl}/api/v1/order/internal/admin/orders/${id}/status/`, {params});
+    return this.http.get(`${this.baseUrl}/api/v1/order/internal/admin/orders/${id}/status`, {params});
   }
 
   updateOrderStatus(id: number, status: string) {
