@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/admin/orders")
+@RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
 public class AdminOrderController {
 
@@ -27,7 +27,7 @@ public class AdminOrderController {
 
     private final OrderAdminClient orderAdminClient;
 
-    @GetMapping("/{id}")
+    @GetMapping("/orders/{id}")
     public ResponseEntity<PagedResponse<AdminOrderDto>> getAllOrders(@PathVariable UUID id,
                                                                      @RequestParam(required = false) Integer pageNumber,
                                                                      @RequestParam(required = false) Integer pageSize,
