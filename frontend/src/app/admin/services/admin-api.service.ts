@@ -8,9 +8,9 @@ export class AdminApiService {
 
   // private baseUrl = environment.apiUrl + '/admin';
 
-  private baseUrl = 'https://shopfast.live/admin'; // ✅ plural endpoint
+  private baseUrl = 'https://shopfast.live'; // ✅ plural endpoint
 
-  private baseUrlOrder = 'http://localhost:8084/api/v1/order';
+  private baseUrlOrder = 'http://localhost:8084';
 
   constructor(private http: HttpClient) {}
 
@@ -30,7 +30,7 @@ export class AdminApiService {
     let params = new HttpParams()
       .set('pageNumber', 1)
       .set('pageSize', 10);
-    return this.http.get(`${this.baseUrl}/internal/admin/orders/${id}/status/`, {params});
+    return this.http.get(`${this.baseUrl}/api/v1/order/internal/admin/orders/${id}/status/`, {params});
   }
 
   updateOrderStatus(id: number, status: string) {
