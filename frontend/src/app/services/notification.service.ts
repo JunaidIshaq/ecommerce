@@ -3,6 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {AuthService} from './auth.service';
 import {User} from '../models/user.model';
+import {environment} from '../../environments/environment';
 
 export interface Notification {
   id: number;
@@ -33,9 +34,10 @@ export interface Page<T> {
 })
 export class NotificationService {
 
-  // TODO: Update if your backend port changes
-  private baseUrl = 'https://shopfast.live/api/v1/notification';
-  // private baseUrl = 'http://localhost:8091/api/v1/notification';
+  // Uses environment-based URL
+  private baseUrl = environment.baseDomain
+    ? `${environment.baseDomain}/api/v1/notification`
+    : `http://localhost:${environment.notificationPort}/api/v1/notification`;
 
   user$: Observable<User | null>;
 

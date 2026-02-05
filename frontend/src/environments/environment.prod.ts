@@ -1,4 +1,11 @@
-export const environment_prod = {
+export const environment = {
   production: true,
-  apiUrl: 'https://venzora.io'
+  authPort: null, // Use domain directly
+  adminPort: null,
+  categoryPort: null,
+  productPort: null,
+  notificationPort: null,
+  cartPort: null,
+  checkoutPort: null,
+  baseDomain: 'https://shopfast.live'
 };

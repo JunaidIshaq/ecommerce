@@ -47,13 +47,15 @@ import {AuthResponse} from '../models/auth-response.model';
 import {BehaviorSubject, Observable, tap} from 'rxjs';
 import {User} from '../models/user.model';
 import {safeLocalStorageGet} from '../utils/browser-storage';
+import {environment} from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'https://shopfast.live'; // ✅ plural endpoint
-  // private baseUrl = 'http://localhost:8087'; // ✅ plural endpoint
+  private baseUrl = environment.baseDomain
+    ? `${environment.baseDomain}`
+    : `http://localhost:${environment.authPort}`; // Uses environment-based URL
 
 
   // 🔥 Holds current logged in user

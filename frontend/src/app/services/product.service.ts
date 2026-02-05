@@ -3,12 +3,14 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Product } from '../models/product.model';
+import {environment} from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
 
-  private apiUrl = 'https://shopfast.live/api/v1/product'; // ✅ plural endpoint
-  // private apiUrl = 'http://localhost:8081/api/v1/product'; // ✅ plural endpoint
+  private apiUrl = environment.baseDomain
+    ? `${environment.baseDomain}/api/v1/product`
+    : `http://localhost:${environment.productPort}/api/v1/product`;
 
   constructor(private http: HttpClient) {}
 

@@ -6,6 +6,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {AuthService} from './auth.service';
 import {isPlatformBrowser} from '@angular/common';
 import {Address} from '../models/address.model';
+import {environment} from '../../environments/environment';
 
 const STORAGE_KEY = 'ecom_cart_v1';
 
@@ -14,12 +15,13 @@ const STORAGE_KEY = 'ecom_cart_v1';
 @Injectable({ providedIn: 'root' })
 export class CartService {
 
-  private baseUrlCart = 'https://shopfast.live'; // ✅ plural endpoint
-  // private baseUrlCart = 'http://localhost:8088'; // ✅ plural endpoint
+  private baseUrlCart = environment.baseDomain
+    ? `${environment.baseDomain}`
+    : `http://localhost:${environment.cartPort}`;
 
-
-  private baseUrlCheckout = 'https://shopfast.live'; // ✅ plural endpoint
-  // private baseUrlCheckout = 'http://localhost:8084'; // ✅ plural endpoint
+  private baseUrlCheckout = environment.baseDomain
+    ? `${environment.baseDomain}`
+    : `http://localhost:${environment.checkoutPort}`;
 
   private cartItems$ = new BehaviorSubject<CartItem[]>([]);
 

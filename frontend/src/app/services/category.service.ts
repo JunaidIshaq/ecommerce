@@ -2,12 +2,14 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Category} from '../models/category.model';
+import {environment} from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {
 
-  private apiUrl = 'https://shopfast.live/api/v1/category'; // ✅ plural endpoint
-  // private apiUrl = 'http://localhost:8081/api/v1/product'; // ✅ plural endpoint
+  private apiUrl = environment.baseDomain
+    ? `${environment.baseDomain}/api/v1/category`
+    : `http://localhost:${environment.categoryPort}/api/v1/category`;
 
   constructor(private http: HttpClient) {}
 

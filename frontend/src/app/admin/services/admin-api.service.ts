@@ -2,15 +2,18 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {DashboardMetrics} from '../model/dashboard-metrics.model';
 import {User} from '../../models/user.model';
+import {environment} from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AdminApiService {
 
-  // private baseUrl = environment.apiUrl + '/admin';
+  private baseUrl = environment.baseDomain
+    ? `${environment.baseDomain}`
+    : `http://localhost:${environment.adminPort}`;
 
-  private baseUrl = 'https://shopfast.live'; // ✅ plural endpoint
-
-  private baseUrlOrder = 'http://localhost:8084';
+  private baseUrlOrder = environment.baseDomain
+    ? `${environment.baseDomain}`
+    : `http://localhost:${environment.checkoutPort}`;
 
   constructor(private http: HttpClient) {}
 
@@ -30,7 +33,7 @@ export class AdminApiService {
     let params = new HttpParams()
       .set('pageNumber', pageNumber)
       .set('pageSize', pageSize);
-    return this.http.get(`${this.baseUrl}/api/v1/order/internal/admin/orders/${id}/status`, {params});
+    return this.http.get(`${this.baseUrlOrder}/api/v1/order/internal/admin/orders/${id}/status`, {params});
   }
 
   updateOrderStatus(id: number, status: string) {

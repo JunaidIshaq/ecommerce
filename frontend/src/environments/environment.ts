@@ -6,5 +6,6 @@ export const environment = {
   productPort: 8081,
   notificationPort: 8091,
   cartPort: 8088,
-  checkoutPort: 8084
+  checkoutPort: 8084,
+  baseDomain: null
 };
