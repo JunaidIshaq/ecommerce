@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, NgZone, OnInit} from '@angular/core';
 import { CommonModule, NgFor, NgIf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminApiService } from '../../services/admin-api.service';
@@ -62,7 +62,7 @@ export class OrdersListComponent implements OnInit{
   user$: Observable<User | null>;
   userId: string | undefined;
 
-  constructor(private adminApi: AdminApiService, private authService: AuthService) {
+  constructor(private adminApi: AdminApiService, private authService: AuthService, private zone: NgZone, private cd: ChangeDetectorRef) {
     console.error('OrdersListComponent: Constructor called');
     this.user$ = this.authService.currentUser();
     this.user$.pipe(take(1)).subscribe(u => this.userId = u?.id!);
@@ -85,8 +85,11 @@ export class OrdersListComponent implements OnInit{
 
       this.adminApi.getOrders(this.userId).subscribe({
         next: data => {
-          console.log('Orders API success:', data);
-          this.orders = data;
+          this.zone.run(() => {
+            console.log('Orders API success:', data);
+            this.orders = data;
+            this.cd.detectChanges();
+          });
         },
         error: err => {
           console.warn('Orders API failed, using mock data', err);
