@@ -17,11 +17,11 @@ export class AdminApiService {
 
   constructor(private http: HttpClient) {}
 
-  getUsers(id: string | undefined, pageNumber: number = 1, pageSize: number = 10) {
+  getUsers(pageNumber: number = 1, pageSize: number = 10) {
     let params = new HttpParams()
       .set('pageNumber', pageNumber)
       .set('pageSize', pageSize);
-    return this.http.get(`${this.baseUrlOrder}/api/v1/admin/users/${id}`, {params});
+    return this.http.get(`${this.baseUrlOrder}/api/v1/admin/users`, {params});
   }
 
   blockUser(id: number) {
@@ -32,11 +32,11 @@ export class AdminApiService {
     return this.http.put(`${this.baseUrl}/users/${id}/unblock`, {});
   }
 
-  getOrders(id: string | undefined, pageNumber: number = 1, pageSize: number = 10) {
+  getOrders(pageNumber: number = 1, pageSize: number = 10) {
     let params = new HttpParams()
       .set('pageNumber', pageNumber)
       .set('pageSize', pageSize);
-    return this.http.get(`${this.baseUrlOrder}/api/v1/admin/orders/${id}`, {params});
+    return this.http.get(`${this.baseUrlOrder}/api/v1/admin/orders`, {params});
   }
 
   updateOrderStatus(id: number, status: string) {

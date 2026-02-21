@@ -4,10 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { AdminApiService } from '../../services/admin-api.service';
 import {RouterLink} from '@angular/router';
 import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
-import {Observable} from 'rxjs';
-import {User} from '../../../models/user.model';
-import {take} from 'rxjs/operators';
-import {AuthService} from '../../../services/auth.service';
 
 const MOCK_ORDERS = [
   {
@@ -59,8 +55,6 @@ export class OrdersListComponent implements OnInit{
   orders: any[] = [];  // Initialize as empty array
   searchTerm = '';
   statusFilter = '';
-  user$: Observable<User | null>;
-  userId: string | undefined;
 
   // Pagination
   currentPage = 1;
@@ -68,10 +62,8 @@ export class OrdersListComponent implements OnInit{
   totalOrders = 0;
   totalPages = 0;
 
-  constructor(private adminApi: AdminApiService, private authService: AuthService, private zone: NgZone, private cdr: ChangeDetectorRef) {
+  constructor(private adminApi: AdminApiService, private zone: NgZone, private cdr: ChangeDetectorRef) {
     console.error('OrdersListComponent: Constructor called');
-    this.user$ = this.authService.currentUser();
-    this.user$.pipe(take(1)).subscribe(u => this.userId = u?.id!);
   }
 
   ngOnInit() {
@@ -82,14 +74,7 @@ export class OrdersListComponent implements OnInit{
   loadOrders() {
     console.log('loadOrders called');
 
-    this.authService.currentUser().pipe(take(1)).subscribe(user => {
-      console.log('currentUser subscription fired, user:', user);
-      // Use user ID if available, otherwise use a default or skip user ID
-      this.userId = user?.id;
-
-      console.log('Calling orders API with userId:', this.userId);
-
-      this.adminApi.getOrders(this.userId, this.currentPage, this.pageSize).subscribe({
+    this.adminApi.getOrders(this.currentPage, this.pageSize).subscribe({
         next: (data: any)=> {
           this.zone.run(() => {
           console.log('Orders API success:', data);
@@ -116,7 +101,6 @@ export class OrdersListComponent implements OnInit{
           this.totalPages = Math.ceil(this.totalOrders / this.pageSize);
         }
       });
-    });
   }
 
   // Pagination methods

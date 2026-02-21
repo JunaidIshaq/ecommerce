@@ -32,14 +32,13 @@ export class DashboardComponent implements OnInit {
 
   @ViewChild('salesCanvas') salesCanvas!: ElementRef<HTMLCanvasElement>;
 
-  metrics!: DashboardMetrics;
+  metrics: DashboardMetrics = MOCK_METRICS;
   chart: Chart | null = null;
 
   constructor(private adminApi: AdminApiService) {}
 
   ngOnInit() {
     console.log('DashboardComponent ngOnInit called');
-    alert('Dashboard ngOnInit called!');
     this.setMetrics(MOCK_METRICS);
 
     this.adminApi.getDashboardMetrics().subscribe({

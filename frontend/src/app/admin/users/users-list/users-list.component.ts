@@ -3,8 +3,6 @@ import {CommonModule, NgFor, NgIf} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {AdminApiService} from '../../services/admin-api.service';
 import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
-import {take} from 'rxjs/operators';
-import {AuthService} from '../../../services/auth.service';
 import {Observable} from 'rxjs';
 import {User} from '../../../models/user.model';
 
@@ -25,11 +23,9 @@ const MOCK_USERS = [
   styleUrls: ['./users-list.component.css']
 })
 export class UsersListComponent implements OnInit {
-  users: any;
+  users: any[] = [];
   searchTerm = '';
   roleFilter = '';
-  user$: Observable<User | null>;
-  userId: string | undefined;
 
   // Pagination
   currentPage = 1;
@@ -37,10 +33,8 @@ export class UsersListComponent implements OnInit {
   totalUsers = 0;
   totalPages = 0;
 
-  constructor(private adminApi: AdminApiService, private authService : AuthService, private zone: NgZone, private cdr: ChangeDetectorRef) {
+  constructor(private adminApi: AdminApiService, private cdr: ChangeDetectorRef, private zone: NgZone) {
     console.error('UsersListComponent: Constructor called');
-    this.user$ = this.authService.currentUser();
-    this.user$.pipe(take(1)).subscribe(u => this.userId = u?.id!)
   }
 
   ngOnInit() {
@@ -52,14 +46,7 @@ export class UsersListComponent implements OnInit {
   loadUsers() {
     console.log('loadUsers called');
 
-    this.authService.currentUser().pipe(take(1)).subscribe(user => {
-      console.log('currentUser subscription fired, user:', user);
-      // Use user ID if available, otherwise use a default or skip user ID
-      this.userId = user?.id;
-
-      console.log('Calling users API with userId:', this.userId);
-
-      this.adminApi.getUsers(this.userId, this.currentPage, this.pageSize).subscribe({
+    this.adminApi.getUsers(this.currentPage, this.pageSize).subscribe({
         next: (data: any)=> {
           this.zone.run(() => {
             console.log('Users API success:', data);
@@ -86,7 +73,6 @@ export class UsersListComponent implements OnInit {
           this.totalPages = Math.ceil(this.totalUsers / this.pageSize);
         }
       });
-    });
   }
 
   // Pagination methods
