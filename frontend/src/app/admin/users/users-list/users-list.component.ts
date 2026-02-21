@@ -52,10 +52,10 @@ export class UsersListComponent implements OnInit {
 
       console.log('Calling orders API with userId:', this.userId);
 
-      this.adminApi.getOrders(this.userId, this.currentPage, this.pageSize).subscribe({
+      this.adminApi.getUsers(this.userId, this.currentPage, this.pageSize).subscribe({
         next: (data: any)=> {
           this.zone.run(() => {
-            console.log('Orders API success:', data);
+            console.log('Users API success:', data);
             console.log('Data type:', typeof data, 'Is array:', Array.isArray(data));
             // Check if data is wrapped in a response object
             if (data && data.items && Array.isArray(data.items)) {
