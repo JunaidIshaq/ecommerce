@@ -50,7 +50,7 @@ export class UsersListComponent implements OnInit {
   }
 
   loadUsers() {
-    console.log('loadOrders called');
+    console.log('loadUsers called');
 
     this.authService.currentUser().pipe(take(1)).subscribe(user => {
       console.log('currentUser subscription fired, user:', user);
@@ -80,7 +80,7 @@ export class UsersListComponent implements OnInit {
           });
         },
         error: err => {
-          console.warn('Orders API failed, using mock data', err);
+          console.warn('Users API failed, using mock data', err);
           this.users = MOCK_USERS;
           this.totalUsers = this.users.length;
           this.totalPages = Math.ceil(this.totalUsers / this.pageSize);
