@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, NgZone} from '@angular/core';
+import {ChangeDetectorRef, Component, NgZone, OnInit} from '@angular/core';
 import {CommonModule, NgFor, NgIf} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {AdminApiService} from '../../services/admin-api.service';
@@ -22,7 +22,7 @@ const MOCK_USERS = [
   templateUrl: './users-list.component.html',
   styleUrls: ['./users-list.component.css']
 })
-export class UsersListComponent {
+export class UsersListComponent implements OnInit {
   users: any;
   searchTerm = '';
   roleFilter = '';
