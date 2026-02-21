@@ -3,8 +3,8 @@ import {CommonModule, NgFor, NgIf} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {AdminApiService} from '../../services/admin-api.service';
 import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
-import {Observable} from 'rxjs';
-import {User} from '../../../models/user.model';
+import {AuthService} from '../../../services/auth.service';
+import {take} from 'rxjs/operators';
 
 const MOCK_USERS = [
   { id: 1, email: 'admin@shop.com', role: 'ADMIN', active: true },
@@ -26,6 +26,7 @@ export class UsersListComponent implements OnInit {
   users: any[] = [];
   searchTerm = '';
   roleFilter = '';
+  userId: string | undefined;
 
   // Pagination
   currentPage = 1;
@@ -33,7 +34,7 @@ export class UsersListComponent implements OnInit {
   totalUsers = 0;
   totalPages = 0;
 
-  constructor(private adminApi: AdminApiService, private cdr: ChangeDetectorRef, private zone: NgZone) {
+  constructor(private adminApi: AdminApiService, private authService: AuthService, private cdr: ChangeDetectorRef, private zone: NgZone) {
     console.error('UsersListComponent: Constructor called');
   }
 
@@ -46,7 +47,11 @@ export class UsersListComponent implements OnInit {
   loadUsers() {
     console.log('loadUsers called');
 
-    this.adminApi.getUsers(this.currentPage, this.pageSize).subscribe({
+    this.authService.currentUser().pipe(take(1)).subscribe(user => {
+      this.userId = user?.id;
+      console.log('Calling users API with userId:', this.userId);
+
+      this.adminApi.getUsers(this.currentPage, this.pageSize, this.userId).subscribe({
         next: (data: any)=> {
           this.zone.run(() => {
             console.log('Users API success:', data);
@@ -73,6 +78,7 @@ export class UsersListComponent implements OnInit {
           this.totalPages = Math.ceil(this.totalUsers / this.pageSize);
         }
       });
+    });
   }
 
   // Pagination methods

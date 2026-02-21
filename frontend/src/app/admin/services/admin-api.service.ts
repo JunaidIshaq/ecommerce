@@ -17,11 +17,10 @@ export class AdminApiService {
 
   constructor(private http: HttpClient) {}
 
-  getUsers(pageNumber: number = 1, pageSize: number = 10) {
-    let params = new HttpParams()
-      .set('pageNumber', pageNumber)
-      .set('pageSize', pageSize);
-    return this.http.get(`${this.baseUrlOrder}/api/v1/admin/users`, {params});
+  getUsers(pageNumber: number = 1, pageSize: number = 10, userId?: string) {
+    return this.http.get(`${this.baseUrlOrder}/api/v1/admin/users/pageNumber/${pageNumber}/pageSize/${pageSize}`, {
+      headers: userId ? { 'userId': userId } : {}
+    });
   }
 
   blockUser(id: number) {
@@ -32,11 +31,10 @@ export class AdminApiService {
     return this.http.put(`${this.baseUrl}/users/${id}/unblock`, {});
   }
 
-  getOrders(pageNumber: number = 1, pageSize: number = 10) {
-    let params = new HttpParams()
-      .set('pageNumber', pageNumber)
-      .set('pageSize', pageSize);
-    return this.http.get(`${this.baseUrlOrder}/api/v1/admin/orders`, {params});
+  getOrders(pageNumber: number = 1, pageSize: number = 10, userId?: string) {
+    return this.http.get(`${this.baseUrlOrder}/api/v1/admin/orders/pageNumber/${pageNumber}/pageSize/${pageSize}`, {
+      headers: userId ? { 'userId': userId } : {}
+    });
   }
 
   updateOrderStatus(id: number, status: string) {

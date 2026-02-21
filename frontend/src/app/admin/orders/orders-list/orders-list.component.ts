@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { AdminApiService } from '../../services/admin-api.service';
 import {RouterLink} from '@angular/router';
 import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
+import {AuthService} from '../../../services/auth.service';
+import {take} from 'rxjs/operators';
 
 const MOCK_ORDERS = [
   {
@@ -55,6 +57,7 @@ export class OrdersListComponent implements OnInit{
   orders: any[] = [];  // Initialize as empty array
   searchTerm = '';
   statusFilter = '';
+  userId: string | undefined;
 
   // Pagination
   currentPage = 1;
@@ -62,7 +65,7 @@ export class OrdersListComponent implements OnInit{
   totalOrders = 0;
   totalPages = 0;
 
-  constructor(private adminApi: AdminApiService, private zone: NgZone, private cdr: ChangeDetectorRef) {
+  constructor(private adminApi: AdminApiService, private authService: AuthService, private zone: NgZone, private cdr: ChangeDetectorRef) {
     console.error('OrdersListComponent: Constructor called');
   }
 
@@ -74,7 +77,11 @@ export class OrdersListComponent implements OnInit{
   loadOrders() {
     console.log('loadOrders called');
 
-    this.adminApi.getOrders(this.currentPage, this.pageSize).subscribe({
+    this.authService.currentUser().pipe(take(1)).subscribe(user => {
+      this.userId = user?.id;
+      console.log('Calling orders API with userId:', this.userId);
+
+      this.adminApi.getOrders(this.currentPage, this.pageSize, this.userId).subscribe({
         next: (data: any)=> {
           this.zone.run(() => {
           console.log('Orders API success:', data);
@@ -101,6 +108,7 @@ export class OrdersListComponent implements OnInit{
           this.totalPages = Math.ceil(this.totalOrders / this.pageSize);
         }
       });
+    });
   }
 
   // Pagination methods
