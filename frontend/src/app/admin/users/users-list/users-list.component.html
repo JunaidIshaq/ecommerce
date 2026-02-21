@@ -49,4 +49,25 @@
     </tr>
     </tbody>
   </table>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button class="btn-page" (click)="previousPage()" [disabled]="currentPage === 1">
+      &laquo; Previous
+    </button>
+
+    <button class="btn-page" *ngFor="let page of getPageNumbers()"
+            (click)="goToPage(page)"
+            [class.active]="page === currentPage">
+      {{ page }}
+    </button>
+
+    <button class="btn-page" (click)="nextPage()" [disabled]="currentPage === totalPages">
+      Next &raquo;
+    </button>
+
+    <span class="page-info">
+      Page {{ currentPage }} of {{ totalPages }} ({{ totalUsers }} total users)
+    </span>
+  </div>
 </app-admin-card>

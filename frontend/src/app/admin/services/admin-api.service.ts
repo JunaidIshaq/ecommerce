@@ -17,8 +17,11 @@ export class AdminApiService {
 
   constructor(private http: HttpClient) {}
 
-  getUsers() {
-    return this.http.get<User>(`${this.baseUrl}/users`);
+  getUsers(id: string | undefined, pageNumber: number = 1, pageSize: number = 10) {
+    let params = new HttpParams()
+      .set('pageNumber', pageNumber)
+      .set('pageSize', pageSize);
+    return this.http.get(`${this.baseUrlOrder}/api/v1/admin/users/${id}`, {params});
   }
 
   blockUser(id: number) {

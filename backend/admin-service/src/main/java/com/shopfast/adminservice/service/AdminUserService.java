@@ -16,9 +16,6 @@ public class AdminUserService {
     private final UserAdminClient userClient;
     private final AuditService auditService;
 
-    public List<UserDto> getUsers() {
-        return userClient.getAllUsers();
-    }
 
     public void blockUser(Long id, String adminEmail) {
         userClient.blockUser(id);

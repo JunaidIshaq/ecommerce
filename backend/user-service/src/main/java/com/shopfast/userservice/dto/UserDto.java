@@ -3,6 +3,7 @@ package com.shopfast.userservice.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.shopfast.userservice.enums.Role;
 import com.shopfast.userservice.enums.UserStatus;
+import com.shopfast.userservice.model.User;
 import lombok.Builder;
 import lombok.Data;
 
@@ -43,4 +44,17 @@ public class UserDto implements Serializable {
     @JsonProperty("updated_at")
     private Instant updatedAt;
 
+    public static UserDto from(User user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .password(user.getPassword())
+                .status(user.getStatus())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
+    }
 }

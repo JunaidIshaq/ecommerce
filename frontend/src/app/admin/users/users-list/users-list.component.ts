@@ -1,8 +1,10 @@
-import {Component} from '@angular/core';
+import {ChangeDetectorRef, Component, NgZone} from '@angular/core';
 import {CommonModule, NgFor, NgIf} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {AdminApiService} from '../../services/admin-api.service';
 import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
+import {take} from 'rxjs/operators';
+import {AuthService} from '../../../services/auth.service';
 
 const MOCK_USERS = [
   { id: 1, email: 'admin@shop.com', role: 'ADMIN', active: true },
@@ -24,23 +26,82 @@ export class UsersListComponent {
   users: any;
   searchTerm = '';
   roleFilter = '';
+  userId: string | undefined;
 
-  constructor(private adminApi: AdminApiService) {}
+  // Pagination
+  currentPage = 1;
+  pageSize = 10;
+  totalUsers = 0;
+  totalPages = 0;
+
+  constructor(private adminApi: AdminApiService, private authService : AuthService, private zone: NgZone, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     // show dummy data instantly
     console.log('UsersListComponent ngOnInit called');
-    this.users = MOCK_USERS;
+    this.loadUsers();
   }
 
   loadUsers() {
-    this.adminApi.getUsers().subscribe({
-      next: data => this.users = data,
-      error: () => {
-        console.warn('Using mock users data');
-        this.users = MOCK_USERS;
-      }
+    console.log('loadOrders called');
+
+    this.authService.currentUser().pipe(take(1)).subscribe(user => {
+      console.log('currentUser subscription fired, user:', user);
+      // Use user ID if available, otherwise use a default or skip user ID
+      this.userId = user?.id;
+
+      console.log('Calling orders API with userId:', this.userId);
+
+      this.adminApi.getOrders(this.userId, this.currentPage, this.pageSize).subscribe({
+        next: (data: any)=> {
+          this.zone.run(() => {
+            console.log('Orders API success:', data);
+            console.log('Data type:', typeof data, 'Is array:', Array.isArray(data));
+            // Check if data is wrapped in a response object
+            if (data && data.items && Array.isArray(data.items)) {
+              this.users = data.items;
+              this.totalUsers = data.totalItems;
+              this.totalPages = data.totalPages;
+            }  else {
+              console.warn('Unexpected data format:', data);
+              this.users = [];
+              this.totalUsers = 0;
+              this.totalPages = 0;
+            }
+
+            this.cdr.detectChanges();
+          });
+        },
+        error: err => {
+          console.warn('Orders API failed, using mock data', err);
+          this.users = MOCK_USERS;
+          this.totalUsers = this.users.length;
+          this.totalPages = Math.ceil(this.totalUsers / this.pageSize);
+        }
+      });
     });
+  }
+
+  // Pagination methods
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+      this.currentPage = page;
+      this.loadUsers();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadUsers();
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadUsers();
+    }
   }
 
   filteredUsers() {
@@ -60,5 +121,21 @@ export class UsersListComponent {
 
   viewUser(user: any) {
     console.log('View user', user);
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 }
