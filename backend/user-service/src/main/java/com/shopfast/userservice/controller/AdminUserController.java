@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,11 +29,11 @@ public class AdminUserController {
     }
 
     @Operation(summary = "Get order status by ID for admin")
-    @GetMapping("/internal/admin/users/{id}")
+    @GetMapping("/internal/admin/users/pageNumber/{pageNumber}/pageSize/{pageSize}")
     public ResponseEntity<PagedResponse<UserDto>> getOrderStatus(
-            @PathVariable("id") String id,
-            @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
-            @RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize,
+            @RequestHeader("userId") String userId,
+            @PathVariable(name = "pageNumber", required = false) Integer pageNumber,
+            @PathVariable(name = "pageSize", required = false) Integer pageSize,
             @RequestParam(name = "status", required = false) String status) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<UserDto> orderPage = userRepository.findAll(pageable)

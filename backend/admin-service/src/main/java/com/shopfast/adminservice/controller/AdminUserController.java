@@ -2,6 +2,7 @@ package com.shopfast.adminservice.controller;
 
 import com.shopfast.adminservice.client.UserAdminClient;
 import com.shopfast.adminservice.service.AdminUserService;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.HeaderParam;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;
@@ -11,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,10 +30,10 @@ public class AdminUserController {
     private UserAdminClient userAdminClient;
 
     //  @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/users")
-    public Object getAllUsers( @HeaderParam("userId") UUID id,
-                               @RequestParam(required = false) Integer pageNumber,
-                               @RequestParam(required = false) Integer pageSize,
+    @GetMapping("/users/pageNumber/{pageNumber}/pageSize/{pageSize}")
+    public Object getAllUsers( @RequestHeader("userId") @NotNull(message =  "userId is required") String id,
+                               @PathVariable(required = false) Integer pageNumber,
+                               @PathVariable(required = false) Integer pageSize,
                                @RequestParam(required = false) String role,
                                Authentication auth) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -39,7 +41,7 @@ public class AdminUserController {
             throw new RuntimeException("Not an Admin User");
         }
 
-        return userAdminClient.getAllUsers(id.toString(), pageNumber, pageSize, role);
+        return userAdminClient.getAllUsers(id, pageNumber, pageSize, role);
 
     }
 
