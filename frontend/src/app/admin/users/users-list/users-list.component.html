@@ -34,21 +34,21 @@
       <td>{{ user.email }}</td>
       <td>{{ user.role }}</td>
       <td>
-          <span [class.active]="user.active" [class.blocked]="!user.active">
-            {{ user.active ? 'Active' : 'Blocked' }}
+          <span [class.active]="user.status == 'ACTIVE'" [class.blocked]="user.status == 'INACTIVE'">
+            {{ user.status }}
           </span>
       </td>
       <td>
         <button class="btn-primary" (click)="viewUser(user)">View</button>
         <button
           class="btn-danger"
-          *ngIf="user.active"
+          *ngIf="user.status == 'ACTIVE'"
           (click)="blockUser(user.id)">
           Block
         </button>
         <button
           class="btn-primary"
-          *ngIf="!user.active"
+          *ngIf="user.status == 'INACTIVE'"
           (click)="unblockUser(user.id)">
           Unblock
         </button>
