@@ -5,6 +5,8 @@ import {AdminApiService} from '../../services/admin-api.service';
 import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
 import {take} from 'rxjs/operators';
 import {AuthService} from '../../../services/auth.service';
+import {Observable} from 'rxjs';
+import {User} from '../../../models/user.model';
 
 const MOCK_USERS = [
   { id: 1, email: 'admin@shop.com', role: 'ADMIN', active: true },
@@ -26,6 +28,7 @@ export class UsersListComponent implements OnInit {
   users: any;
   searchTerm = '';
   roleFilter = '';
+  user$: Observable<User | null>;
   userId: string | undefined;
 
   // Pagination
@@ -34,7 +37,11 @@ export class UsersListComponent implements OnInit {
   totalUsers = 0;
   totalPages = 0;
 
-  constructor(private adminApi: AdminApiService, private authService : AuthService, private zone: NgZone, private cdr: ChangeDetectorRef) {}
+  constructor(private adminApi: AdminApiService, private authService : AuthService, private zone: NgZone, private cdr: ChangeDetectorRef) {
+    console.error('UsersListComponent: Constructor called');
+    this.user$ = this.authService.currentUser();
+    this.user$.pipe(take(1)).subscribe(u => this.userId = u?.id!)
+  }
 
   ngOnInit() {
     // show dummy data instantly
@@ -50,7 +57,7 @@ export class UsersListComponent implements OnInit {
       // Use user ID if available, otherwise use a default or skip user ID
       this.userId = user?.id;
 
-      console.log('Calling orders API with userId:', this.userId);
+      console.log('Calling users API with userId:', this.userId);
 
       this.adminApi.getUsers(this.userId, this.currentPage, this.pageSize).subscribe({
         next: (data: any)=> {
