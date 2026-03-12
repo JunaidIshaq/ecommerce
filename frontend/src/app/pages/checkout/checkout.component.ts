@@ -8,6 +8,7 @@ import {AuthService} from '../../services/auth.service';
 import {Observable} from 'rxjs';
 import {take} from 'rxjs/operators';
 import {Address} from '../../models/address.model';
+import {ToastService} from '../../services/toast.service';
 
 @Component({
   selector: 'app-checkout',
@@ -26,7 +27,7 @@ export class CheckoutComponent {
   user$: Observable<User | null>;
 
 
-  constructor(private cart: CartService, private router: Router, private authService: AuthService) {
+  constructor(private cart: CartService, private router: Router, private authService: AuthService, private toast: ToastService) {
     this.user$ = this.authService.currentUser();
   }
 
@@ -40,7 +41,7 @@ export class CheckoutComponent {
     this.user$.pipe(take(1)).subscribe({
       next: (user) => {
         if (!user || !user.id) {
-          alert("User not logged in !");
+          this.toast.error('User not logged in !');
           this.placing = false;
           return;
         }
@@ -48,18 +49,18 @@ export class CheckoutComponent {
         this.cart.checkout(user.id, this.couponCode, this.address).subscribe({
           next: (order) => {
             this.cart.clear().subscribe();
-            alert("🎉 Order placed Successfully ! Order ID: " + order.order_number);
+            this.toast.success('🎉 Order placed Successfully ! Order ID: ' + order.order_number);
             this.router.navigate(['/']);
           },
           error: (err) => {
             console.error(err);
-            alert(err.error?.message || "Checkout failed");
+            this.toast.error(err.error?.message || 'Checkout failed');
             this.placing = false;
           }
         });
       },
       error: () => {
-        alert("Could not get user info");
+        this.toast.error('Could not get user info');
         this.placing = false;
       }
     });

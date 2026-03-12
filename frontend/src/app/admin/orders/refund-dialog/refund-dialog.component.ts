@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApiService } from '../../services/admin-api.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-refund-dialog',
@@ -14,12 +15,12 @@ export class RefundDialogComponent {
   amount!: number;
   reason = '';
 
-  constructor(private adminApi: AdminApiService) {}
+  constructor(private adminApi: AdminApiService, private toast: ToastService) {}
 
   submit() {
     this.adminApi.refundOrder(this.orderId, this.amount, this.reason)
       .subscribe(() => {
-        alert('Refund successful');
+        this.toast.success('Refund successful');
         this.close();
       });
   }

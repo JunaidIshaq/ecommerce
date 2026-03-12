@@ -3,6 +3,7 @@ import {FormsModule} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {AuthService} from '../../services/auth.service';
+import {ToastService} from '../../services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,7 @@ export class LoginComponent {
   error = '';
   loading = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router, private toast: ToastService) {}
 
   login() {
     if (!this.credentials.email || !this.credentials.password) return;
@@ -29,7 +30,7 @@ export class LoginComponent {
     this.authService.login(this.credentials).subscribe({
       next: res => {
         this.router.navigate(['/']);
-        alert('Login successful');
+        this.toast.success('Login successful');
       },
       error: (err) => {
         this.error = err?.error?.message || 'Invalid email or password';
