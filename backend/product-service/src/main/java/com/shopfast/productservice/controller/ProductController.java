@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -64,6 +65,17 @@ public class ProductController {
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
     ) {
         PagedResponse<UUID> response = productService.getAllProductIds(pageNumber, pageSize);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get all products (paginated)")
+    @GetMapping("/internal/admin/product/pageNumber/{pageNumber}/pageSize/{pageSize}")
+    public ResponseEntity<PagedResponse<ProductDto>> getAllProducts(
+            @RequestHeader("userId") String userId,
+            @PathVariable(name = "pageNumber") int pageNumber,
+            @PathVariable(name = "pageSize") int pageSize
+    ) {
+        PagedResponse<ProductDto> response = productService.getAllProducts(pageNumber, pageSize);
         return ResponseEntity.ok(response);
     }
 

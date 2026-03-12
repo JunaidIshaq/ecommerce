@@ -1,33 +1,21 @@
 package com.shopfast.adminservice.client;
 
-import com.shopfast.adminservice.dto.PagedResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-import java.util.Objects;
+@FeignClient(name = "product-service", url="${product.service.url}", path = "/api/v1/product")
+public interface ProductAdminClient {
 
-@Slf4j
-@Component
-public class ProductAdminClient {
+    @GetMapping("/internal/admin/product/pageNumber/{pageNumber}/pageSize/{pageSize}")
+    Object getAllProducts(@RequestHeader("userId") String id, @PathVariable Integer pageNumber, @PathVariable Integer pageSize);
 
-    @Autowired
-    private final RestTemplate restTemplate;
-
-    public ProductAdminClient(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
-
-    @Value("${product.service.url:http://localhost:8080/api/v1/product}")
-    private String productServiceUrl;
-
-    public List<String> fetchAllProducts() {
-        log.info("Fetching all products from Product Service...");
-        ResponseEntity<PagedResponse> response = restTemplate.getForEntity(productServiceUrl + "/ids?pageNumber=1&pageSize=1000", PagedResponse.class);
-        return Objects.requireNonNull(response.getBody()).getItems();
-    }
+    @PutMapping("/{id}/status")
+    void updateProductStatus(@PathVariable Long id,
+                           @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
+                           @RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize,
+                           @RequestParam String status);
 }

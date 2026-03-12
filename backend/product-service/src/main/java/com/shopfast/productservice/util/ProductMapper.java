@@ -12,15 +12,15 @@ public class ProductMapper {
 
     public static Product getProduct(ProductDto dto) {
         Product product = new Product();
-        product.setId(UUID.fromString(dto.getId()));
+        product.setId(dto.getId());
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
         product.setCategoryId(dto.getCategoryId());
         product.setPrice(dto.getPrice());
         product.setStock(dto.getStock());
         product.setImages(dto.getImages());
-        product.setCreatedAt(Instant.parse(dto.getCreatedAt()));
-        product.setUpdatedAt(Instant.parse(dto.getUpdatedAt()));
+        product.setCreatedAt(dto.getCreatedAt());
+        product.setUpdatedAt(dto.getUpdatedAt());
         product.setCreatedBy(dto.getCreatedBy());
         product.setUpdatedBy(dto.getUpdatedBy());
         return product;
@@ -28,7 +28,7 @@ public class ProductMapper {
 
     public static ProductDto getProductDto(Product product) {
         ProductDto dto = new ProductDto();
-        dto.setId(String.valueOf(product.getId()));
+        dto.setId(product.getId());
         dto.setName(product.getName());
         dto.setSlug(product.getSlug());
         dto.setDescription(product.getDescription());
@@ -37,8 +37,8 @@ public class ProductMapper {
         dto.setRating(product.getRating());
         dto.setStock(product.getStock());
         dto.setImages(product.getImages().stream().toList());
-        dto.setCreatedAt(String.valueOf(product.getCreatedAt()));
-        dto.setUpdatedAt(String.valueOf(product.getUpdatedAt()));
+        dto.setCreatedAt(product.getCreatedAt());
+        dto.setUpdatedAt(product.getUpdatedAt());
         dto.setCreatedBy(product.getCreatedBy());
         dto.setUpdatedBy(product.getUpdatedBy());
         return dto;

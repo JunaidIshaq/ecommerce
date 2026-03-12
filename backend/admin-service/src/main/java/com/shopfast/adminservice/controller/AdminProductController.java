@@ -1,6 +1,7 @@
 package com.shopfast.adminservice.controller;
 
 import com.shopfast.adminservice.client.OrderAdminClient;
+import com.shopfast.adminservice.client.ProductAdminClient;
 import com.shopfast.adminservice.service.AdminOrderService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -17,24 +18,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
-public class AdminOrderController {
+public class AdminProductController {
+
 
     private final AdminOrderService service;
 
-    private final OrderAdminClient orderAdminClient;
+    private final ProductAdminClient productAdminClient;
 
-    @GetMapping("/orders/pageNumber/{pageNumber}/pageSize/{pageSize}")
-    public Object getAllOrders( @RequestHeader("userId") @NotNull String id,
+    @GetMapping("/product/pageNumber/{pageNumber}/pageSize/{pageSize}")
+    public Object getAllProducts( @RequestHeader("userId") @NotNull String id,
                                 @PathVariable Integer pageNumber,
                                 @PathVariable Integer pageSize,
-                                @RequestParam(required = false) String status,
                                 Authentication auth) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         if(StringUtils.isEmpty(userId)) {
             throw new RuntimeException("Not an Admin User");
         }
 
-        return orderAdminClient.getAllOrders(id, pageNumber, pageSize, status);
+        return productAdminClient.getAllProducts(id, pageNumber, pageSize);
 
     }
 }

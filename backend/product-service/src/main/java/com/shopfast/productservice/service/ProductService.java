@@ -60,7 +60,7 @@ public class ProductService {
 
     private ProductDto toDto(Product p) {
         ProductDto d = new ProductDto();
-        d.id = p.getId().toString();
+        d.id = p.getId();
         d.slug = p.getSlug();
         d.name = p.getName();
         d.description = p.getDescription();
@@ -176,6 +176,24 @@ public class ProductService {
                 pageNumber,
                 pageSize
         );
+    }
+
+    @Transactional
+    public PagedResponse<ProductDto> getAllProducts(int pageNumber, int pageSize) {
+        log.info("🧠 Inside getAllProductIds() -> pageNumber={}, pageSize={}", pageNumber, pageSize);
+
+        PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<ProductDto> productPage = productRepository.findAll(pageable).map(ProductDto::from);
+
+        PagedResponse<ProductDto> response = new PagedResponse<>(
+                productPage.getContent(),
+                productPage.getTotalElements(),
+                productPage.getTotalPages(),
+                productPage.getNumber(),
+                productPage.getSize()
+        );
+        
+        return response;
     }
 
     @Transactional

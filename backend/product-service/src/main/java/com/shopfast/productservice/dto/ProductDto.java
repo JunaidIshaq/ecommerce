@@ -2,6 +2,7 @@ package com.shopfast.productservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.shopfast.productservice.model.Product;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -14,8 +15,10 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -26,7 +29,7 @@ public class ProductDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public String id;
+    public UUID id;
 
     public String slug;
 
@@ -57,12 +60,35 @@ public class ProductDto implements Serializable {
 
     public List<String> tags = new ArrayList<>();
 
-    private String createdAt;
+    private Instant createdAt;
 
-    private String updatedAt;
+    private Instant updatedAt;
 
     private String createdBy;
 
     private String updatedBy;
+
+    public static ProductDto from(Product product) {
+        return ProductDto.builder()
+                .id(product.getId())
+                .slug(product.getSlug())
+                .name(product.getName())
+                .description(product.getDescription())
+                .categoryId(product.getCategoryId())
+                .price(product.getPrice())
+                .currency(product.getCurrency())
+                .stock(product.getStock())
+                .rating(product.getRating())
+                .images(product.getImages())
+                .tags(product.getTags())
+                .createdAt(product.getCreatedAt())
+                .createdBy(product.getCreatedBy())
+                .updatedAt(product.getUpdatedAt())
+                .updatedBy(product.getUpdatedBy())
+                .build();
+
+
+
+    }
 
 }
