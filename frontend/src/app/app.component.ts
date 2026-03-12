@@ -21,6 +21,9 @@ export class AppComponent implements OnInit {
   constructor(private cart: CartService, private auth: AuthService, private router: Router) {}
 
   ngOnInit() {
+    // Initialize auth from localStorage (works with SSR)
+    this.auth.initializeAuth();
+
     this.auth.currentUser().subscribe(user => {
       this.cart.loadCart().subscribe();
     });

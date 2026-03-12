@@ -1,6 +1,6 @@
 console.log('Dashboard component file loaded');
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild, ElementRef, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Chart, registerables } from 'chart.js';
 import { AdminApiService } from '../services/admin-api.service';
 import { AdminCardComponent } from '../shared/admin-card/admin-card.component';
@@ -34,8 +34,11 @@ export class DashboardComponent implements OnInit {
 
   metrics: DashboardMetrics = MOCK_METRICS;
   chart: Chart | null = null;
+  private isBrowser: boolean;
 
-  constructor(private adminApi: AdminApiService) {}
+  constructor(private adminApi: AdminApiService, @Inject(PLATFORM_ID) platformId: Object) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   ngOnInit() {
     console.log('DashboardComponent ngOnInit called');
@@ -49,36 +52,48 @@ export class DashboardComponent implements OnInit {
 
   setMetrics(data: DashboardMetrics) {
     this.metrics = data;
-    setTimeout(() => this.renderChart(data.salesTrend));
+    if (this.isBrowser) {
+      setTimeout(() => this.renderChart(data.salesTrend));
+    }
   }
 
   renderChart(trend: number[]) {
-    if (!this.salesCanvas) return;
-
-    if (this.chart) {
-      this.chart.destroy();
+    if (!this.salesCanvas) {
+      console.log('Sales canvas not ready, skipping chart render');
+      return;
     }
 
-    const ctx = this.salesCanvas.nativeElement.getContext('2d');
-    if (!ctx) return;
-
-    this.chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-        datasets: [{
-          label: 'Sales',
-          data: trend,
-          borderColor: '#6C63FF',
-          backgroundColor: 'rgba(108,99,255,0.1)',
-          fill: true,
-          tension: 0.4
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: true } }
+    try {
+      if (this.chart) {
+        this.chart.destroy();
       }
-    });
+
+      const ctx = this.salesCanvas.nativeElement.getContext('2d');
+      if (!ctx) {
+        console.warn('Could not get 2d context for chart');
+        return;
+      }
+
+      this.chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+          datasets: [{
+            label: 'Sales',
+            data: trend,
+            borderColor: '#6C63FF',
+            backgroundColor: 'rgba(108,99,255,0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: true } }
+        }
+      });
+    } catch (error) {
+      console.warn('Error rendering chart:', error);
+    }
   }
 }

@@ -155,6 +155,20 @@ export class AuthService {
     this.userSubject.next(null);
   }
 
+  // Call this after app stabilizes to restore user from localStorage (works with SSR)
+  initializeAuth(): void {
+    console.log('initializeAuth called');
+    if (!this.isBrowser()) {
+      console.log('initializeAuth: not browser, skipping');
+      return;
+    }
+    const user = this.getUserFromStorage();
+    console.log('initializeAuth: user from storage:', user);
+    if (user) {
+      this.userSubject.next(user);
+    }
+  }
+
   isLoggedIn(): boolean {
     return this.isBrowser() && !!localStorage.getItem(this.AUTH_KEY);
   }

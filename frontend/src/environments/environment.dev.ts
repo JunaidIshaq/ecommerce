@@ -1,10 +1,11 @@
 export const environment = {
-  production: false,
-  authPort: 8087,
-  adminPort: 8093,
-  categoryPort: 8082,
-  productPort: 8081,
-  notificationPort: 8091,
-  cartPort: 8088,
-  checkoutPort: 8084
+  production: true,
+  authPort: null, // Use domain directly
+  adminPort: null,
+  categoryPort: null,
+  productPort: null,
+  notificationPort: null,
+  cartPort: null,
+  checkoutPort: null,
+  baseDomain: 'https://shopfast.live'
 };

@@ -70,44 +70,49 @@ export class OrdersListComponent implements OnInit{
   }
 
   ngOnInit() {
-    console.error('OrdersListComponent: ngOnInit called');
+    console.log('OrdersListComponent: ngOnInit called');
     this.loadOrders();
   }
 
   loadOrders() {
     console.log('loadOrders called');
 
-    this.authService.currentUser().pipe(take(1)).subscribe(user => {
-      this.userId = user?.id;
-      console.log('Calling orders API with userId:', this.userId);
+    // First, show mock data immediately
+    this.orders = MOCK_ORDERS;
+    this.totalOrders = this.orders.length;
+    this.totalPages = Math.ceil(this.totalOrders / this.pageSize);
+    console.log('Loaded mock orders:', this.orders.length);
 
-      this.adminApi.getOrders(this.currentPage, this.pageSize, this.userId).subscribe({
-        next: (data: any)=> {
-          this.zone.run(() => {
-          console.log('Orders API success:', data);
-          console.log('Data type:', typeof data, 'Is array:', Array.isArray(data));
-          // Check if data is wrapped in a response object
-          if (data && data.items && Array.isArray(data.items)) {
-            this.orders = data.items;
-            this.totalOrders = data.totalItems;
-            this.totalPages = data.totalPages;
-          }  else {
-            console.warn('Unexpected data format:', data);
-            this.orders = [];
-            this.totalOrders = 0;
-            this.totalPages = 0;
+    // Then try to fetch from API
+    this.authService.currentUser().pipe(take(1)).subscribe({
+      next: (user) => {
+        this.userId = user?.id;
+        console.log('Calling orders API with userId:', this.userId);
+
+        this.adminApi.getOrders(this.currentPage, this.pageSize, this.userId).subscribe({
+          next: (data: any) => {
+            this.zone.run(() => {
+              console.log('Orders API success:', data);
+
+              if (data && data.items && Array.isArray(data.items)) {
+                this.orders = data.items;
+                this.totalOrders = data.totalItems;
+                this.totalPages = data.totalPages;
+              }
+
+              this.cdr.detectChanges();
+            });
+          },
+          error: (err) => {
+            console.warn('Orders API failed, using mock data', err);
+            // Already showing mock data
           }
-
-            this.cdr.detectChanges();
-          });
-        },
-        error: err => {
-          console.warn('Orders API failed, using mock data', err);
-          this.orders = MOCK_ORDERS;
-          this.totalOrders = this.orders.length;
-          this.totalPages = Math.ceil(this.totalOrders / this.pageSize);
-        }
-      });
+        });
+      },
+      error: (err) => {
+        console.warn('Auth service error:', err);
+        // Already showing mock data
+      }
     });
   }
 

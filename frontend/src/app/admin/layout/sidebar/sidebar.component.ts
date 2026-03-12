@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ChangeDetectorRef} from '@angular/core';
 import {RouterLink, RouterLinkActive} from '@angular/router';
 
 @Component({
@@ -12,4 +12,6 @@ import {RouterLink, RouterLinkActive} from '@angular/router';
   styleUrls: ['./sidebar.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SidebarComponent {}
+export class SidebarComponent {
+  constructor(private cdr: ChangeDetectorRef) {}
+}

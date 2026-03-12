@@ -11,36 +11,51 @@ const MOCK_PRODUCTS = [
     id: 1,
     name: 'iPhone 15 Pro',
     categoryName: 'Mobiles',
+    categoryId: 1,
     price: 1199,
-    active: true
+    stock: 50,
+    rating: 4.8,
+    images: []
   },
   {
     id: 2,
     name: 'Samsung Galaxy S24',
     categoryName: 'Mobiles',
+    categoryId: 1,
     price: 999,
-    active: true
+    stock: 35,
+    rating: 4.5,
+    images: []
   },
   {
     id: 3,
     name: 'Sony WH-1000XM5',
     categoryName: 'Headphones',
+    categoryId: 2,
     price: 349,
-    active: false
+    stock: 0,
+    rating: 4.7,
+    images: []
   },
   {
     id: 4,
     name: 'Gaming Mechanical Keyboard',
     categoryName: 'Accessories',
+    categoryId: 3,
     price: 129,
-    active: true
+    stock: 100,
+    rating: 4.3,
+    images: []
   },
   {
     id: 5,
     name: 'Apple Watch Series 9',
     categoryName: 'Wearables',
+    categoryId: 4,
     price: 499,
-    active: true
+    stock: 25,
+    rating: 4.6,
+    images: []
   }
 ];
 
@@ -80,42 +95,47 @@ export class ProductsListComponent implements OnInit {
   loadProducts() {
     console.log('loadProducts called');
 
-    this.authService.currentUser().pipe(take(1)).subscribe(user => {
-      this.userId = user?.id;
-      console.log('Calling products API with userId:', this.userId);
+    // First, show mock data immediately
+    this.products = MOCK_PRODUCTS;
+    this.totalProducts = this.products.length;
+    this.totalPages = Math.ceil(this.totalProducts / this.pageSize);
+    console.log('Loaded mock products:', this.products.length);
 
-      this.adminApi.getProducts(this.currentPage, this.pageSize, this.userId).subscribe({
-        next: (data: any) => {
-          this.zone.run(() => {
-            console.log('Products API success:', data);
-            console.log('Data type:', typeof data, 'Is array:', Array.isArray(data));
+    // Then try to fetch from API
+    this.authService.currentUser().pipe(take(1)).subscribe({
+      next: (user) => {
+        this.userId = user?.id;
+        console.log('User from auth:', user);
+        console.log('Calling products API with userId:', this.userId);
 
-            // Check if data is wrapped in a response object
-            if (data && data.items && Array.isArray(data.items)) {
-              this.products = data.items;
-              this.totalProducts = data.totalItems;
-              this.totalPages = data.totalPages;
-            } else if (Array.isArray(data)) {
-              this.products = data;
-              this.totalProducts = data.length;
-              this.totalPages = Math.ceil(this.totalProducts / this.pageSize);
-            } else {
-              console.warn('Unexpected data format:', data);
-              this.products = [];
-              this.totalProducts = 0;
-              this.totalPages = 0;
-            }
+        this.adminApi.getProducts(this.currentPage, this.pageSize, this.userId).subscribe({
+          next: (data: any) => {
+            this.zone.run(() => {
+              console.log('Products API success:', data);
 
-            this.cdr.detectChanges();
-          });
-        },
-        error: err => {
-          console.warn('Products API failed, using mock data', err);
-          this.products = MOCK_PRODUCTS;
-          this.totalProducts = this.products.length;
-          this.totalPages = Math.ceil(this.totalProducts / this.pageSize);
-        }
-      });
+              if (data && data.items && Array.isArray(data.items)) {
+                this.products = data.items;
+                this.totalProducts = data.totalItems;
+                this.totalPages = data.totalPages;
+              } else if (Array.isArray(data)) {
+                this.products = data;
+                this.totalProducts = data.length;
+                this.totalPages = Math.ceil(this.totalProducts / this.pageSize);
+              }
+
+              this.cdr.detectChanges();
+            });
+          },
+          error: (err) => {
+            console.warn('Products API failed, using mock data', err);
+            // Already showing mock data, no action needed
+          }
+        });
+      },
+      error: (err) => {
+        console.warn('Auth service error:', err);
+        // Already showing mock data, no action needed
+      }
     });
   }
 

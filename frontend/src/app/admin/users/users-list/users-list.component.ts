@@ -7,11 +7,11 @@ import {AuthService} from '../../../services/auth.service';
 import {take} from 'rxjs/operators';
 
 const MOCK_USERS = [
-  { id: 1, email: 'admin@shop.com', role: 'ADMIN', active: true },
-  { id: 2, email: 'john.doe@gmail.com', role: 'USER', active: true },
-  { id: 3, email: 'sara.khan@yahoo.com', role: 'USER', active: false },
-  { id: 4, email: 'manager@shop.com', role: 'ADMIN', active: true },
-  { id: 5, email: 'alex123@gmail.com', role: 'USER', active: true },
+  { id: 1, email: 'admin@shop.com', role: 'ADMIN', status: 'ACTIVE' },
+  { id: 2, email: 'john.doe@gmail.com', role: 'USER', status: 'ACTIVE' },
+  { id: 3, email: 'sara.khan@yahoo.com', role: 'USER', status: 'INACTIVE' },
+  { id: 4, email: 'manager@shop.com', role: 'ADMIN', status: 'ACTIVE' },
+  { id: 5, email: 'alex123@gmail.com', role: 'USER', status: 'ACTIVE' },
 ];
 
 
@@ -35,7 +35,7 @@ export class UsersListComponent implements OnInit {
   totalPages = 0;
 
   constructor(private adminApi: AdminApiService, private authService: AuthService, private cdr: ChangeDetectorRef, private zone: NgZone) {
-    console.error('UsersListComponent: Constructor called');
+    console.log('UsersListComponent: Constructor called');
   }
 
   ngOnInit() {
@@ -47,37 +47,43 @@ export class UsersListComponent implements OnInit {
   loadUsers() {
     console.log('loadUsers called');
 
-    this.authService.currentUser().pipe(take(1)).subscribe(user => {
-      this.userId = user?.id;
-      console.log('Calling users API with userId:', this.userId);
+    // First, show mock data immediately
+    this.users = MOCK_USERS;
+    this.totalUsers = this.users.length;
+    this.totalPages = Math.ceil(this.totalUsers / this.pageSize);
+    console.log('Loaded mock users:', this.users.length);
 
-      this.adminApi.getUsers(this.currentPage, this.pageSize, this.userId).subscribe({
-        next: (data: any)=> {
-          this.zone.run(() => {
-            console.log('Users API success:', data);
-            console.log('Data type:', typeof data, 'Is array:', Array.isArray(data));
-            // Check if data is wrapped in a response object
-            if (data && data.items && Array.isArray(data.items)) {
-              this.users = data.items;
-              this.totalUsers = data.totalItems;
-              this.totalPages = data.totalPages;
-            }  else {
-              console.warn('Unexpected data format:', data);
-              this.users = [];
-              this.totalUsers = 0;
-              this.totalPages = 0;
-            }
+    // Then try to fetch from API
+    this.authService.currentUser().pipe(take(1)).subscribe({
+      next: (user) => {
+        this.userId = user?.id;
+        console.log('User from auth:', user);
+        console.log('Calling users API with userId:', this.userId);
 
-            this.cdr.detectChanges();
-          });
-        },
-        error: err => {
-          console.warn('Users API failed, using mock data', err);
-          this.users = MOCK_USERS;
-          this.totalUsers = this.users.length;
-          this.totalPages = Math.ceil(this.totalUsers / this.pageSize);
-        }
-      });
+        this.adminApi.getUsers(this.currentPage, this.pageSize, this.userId).subscribe({
+          next: (data: any) => {
+            this.zone.run(() => {
+              console.log('Users API success:', data);
+
+              if (data && data.items && Array.isArray(data.items)) {
+                this.users = data.items;
+                this.totalUsers = data.totalItems;
+                this.totalPages = data.totalPages;
+              }
+
+              this.cdr.detectChanges();
+            });
+          },
+          error: (err) => {
+            console.warn('Users API failed, using mock data', err);
+            // Already showing mock data, no action needed
+          }
+        });
+      },
+      error: (err) => {
+        console.warn('Auth service error:', err);
+        // Already showing mock data, no action needed
+      }
     });
   }
 
