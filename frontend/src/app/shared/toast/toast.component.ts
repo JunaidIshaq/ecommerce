@@ -3,7 +3,7 @@ import { ToastService, Toast } from '../../services/toast.service';
 import { NgClass } from '@angular/common';
 
 @Component({
-  selector: 'napp-toast',
+  selector: 'app-toast',
   standalone: true,
   imports: [NgClass],
   templateUrl: './toast.component.html',
