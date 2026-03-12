@@ -1,14 +1,10 @@
-import {Component, OnInit} from '@angular/core';
-import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
-import {AdminApiService} from '../../services/admin-api.service';
+import {Component, OnInit, ChangeDetectorRef, NgZone} from '@angular/core';
+import {CommonModule, NgFor, NgIf, DecimalPipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {NgForOf, NgIf, DecimalPipe} from '@angular/common';
-
-interface ProductResponse {
-  items?: any[];
-  totalItems?: number;
-  totalPages?: number;
-}
+import {AdminApiService} from '../../services/admin-api.service';
+import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
+import {AuthService} from '../../../services/auth.service';
+import {take} from 'rxjs/operators';
 
 const MOCK_PRODUCTS = [
   {
@@ -51,22 +47,15 @@ const MOCK_PRODUCTS = [
 
 @Component({
   selector: 'products-list',
-  imports: [
-    AdminCardComponent,
-    FormsModule,
-    NgForOf,
-    NgIf,
-    DecimalPipe
-  ],
+  standalone: true,
+  imports: [CommonModule, FormsModule, NgFor, NgIf, DecimalPipe, AdminCardComponent],
   templateUrl: './products-list.component.html',
-  styleUrl: './products-list.component.css'
+  styleUrls: ['./products-list.component.css']
 })
 export class ProductsListComponent implements OnInit {
-
-  constructor(private adminApiService: AdminApiService) { }
-
   products: any[] = [];
   searchTerm = '';
+  userId: string | undefined;
 
   // Pagination
   currentPage = 1;
@@ -74,35 +63,59 @@ export class ProductsListComponent implements OnInit {
   totalProducts = 0;
   totalPages = 0;
 
+  constructor(
+    private adminApi: AdminApiService,
+    private authService: AuthService,
+    private zone: NgZone,
+    private cdr: ChangeDetectorRef
+  ) {
+    console.log('ProductsListComponent: Constructor called');
+  }
+
   ngOnInit() {
+    console.log('ProductsListComponent: ngOnInit called');
     this.loadProducts();
   }
 
   loadProducts() {
-    this.adminApiService.getProducts(this.currentPage, this.pageSize).subscribe({
-      next: (data: any) => {
-        // Check if data is wrapped in a response object
-        if (data && data.items && Array.isArray(data.items)) {
-          this.products = data.items;
-          this.totalProducts = data.totalItems;
-          this.totalPages = data.totalPages;
-        } else if (Array.isArray(data)) {
-          this.products = data;
-          this.totalProducts = data.length;
-          this.totalPages = Math.ceil(this.totalProducts / this.pageSize);
-        } else {
-          console.warn('Unexpected data format:', data);
+    console.log('loadProducts called');
+
+    this.authService.currentUser().pipe(take(1)).subscribe(user => {
+      this.userId = user?.id;
+      console.log('Calling products API with userId:', this.userId);
+
+      this.adminApi.getProducts(this.currentPage, this.pageSize, this.userId).subscribe({
+        next: (data: any) => {
+          this.zone.run(() => {
+            console.log('Products API success:', data);
+            console.log('Data type:', typeof data, 'Is array:', Array.isArray(data));
+
+            // Check if data is wrapped in a response object
+            if (data && data.items && Array.isArray(data.items)) {
+              this.products = data.items;
+              this.totalProducts = data.totalItems;
+              this.totalPages = data.totalPages;
+            } else if (Array.isArray(data)) {
+              this.products = data;
+              this.totalProducts = data.length;
+              this.totalPages = Math.ceil(this.totalProducts / this.pageSize);
+            } else {
+              console.warn('Unexpected data format:', data);
+              this.products = [];
+              this.totalProducts = 0;
+              this.totalPages = 0;
+            }
+
+            this.cdr.detectChanges();
+          });
+        },
+        error: err => {
+          console.warn('Products API failed, using mock data', err);
           this.products = MOCK_PRODUCTS;
           this.totalProducts = this.products.length;
           this.totalPages = Math.ceil(this.totalProducts / this.pageSize);
         }
-      },
-      error: () => {
-        console.warn('Using mock products data');
-        this.products = MOCK_PRODUCTS;
-        this.totalProducts = this.products.length;
-        this.totalPages = Math.ceil(this.totalProducts / this.pageSize);
-      }
+      });
     });
   }
 
@@ -155,7 +168,7 @@ export class ProductsListComponent implements OnInit {
   toggleProduct(p: any) {
     // Toggle stock: if > 0, set to 0; if 0, set to 1
     const newStock = p.stock > 0 ? 0 : 1;
-    this.adminApiService.updateProductStock(p.id, newStock).subscribe({
+    this.adminApi.updateProductStock(p.id, newStock).subscribe({
       next: () => this.loadProducts(),
       error: () => console.warn('Failed to update product stock')
     });

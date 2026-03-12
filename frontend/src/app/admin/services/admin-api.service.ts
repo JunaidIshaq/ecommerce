@@ -14,6 +14,10 @@ export class AdminApiService {
     ? `${environment.baseDomain}`
     : `http://localhost:${environment.checkoutPort}`;
 
+  private baseUrlProduct = environment.baseDomain
+    ? `${environment.baseDomain}`
+    : `http://localhost:${environment.productPort}`;
+
   constructor(private http: HttpClient) {}
 
   getUsers(pageNumber: number = 1, pageSize: number = 10, userId?: string) {
