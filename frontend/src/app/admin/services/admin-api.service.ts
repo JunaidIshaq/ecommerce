@@ -1,7 +1,6 @@
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {DashboardMetrics} from '../model/dashboard-metrics.model';
-import {User} from '../../models/user.model';
 import {environment} from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -106,12 +105,18 @@ export class AdminApiService {
     return this.http.get<any[]>(`${this.baseUrl}/audit-logs`);
   }
 
-  getProducts() {
-    return this.http.get<any[]>(`${this.baseUrl}/products`);
+  getProducts(pageNumber: number = 1, pageSize: number = 10, userId?: string) {
+    return this.http.get(`${this.baseUrlOrder}/api/v1/admin/product/pageNumber/${pageNumber}/pageSize/${pageSize}`, {
+      headers: userId ? { 'userId': userId } : {}
+    });
   }
 
-  toggleProduct(id: number) {
-    return this.http.put(`${this.baseUrl}/products/${id}/toggle`, {});
+  toggleProduct(id: string) {
+    return this.http.put(`${this.baseUrlOrder}/api/v1/admin/product/${id}/toggle`, {});
+  }
+
+  updateProductStock(id: string, stock: number) {
+    return this.http.put(`${this.baseUrlOrder}/api/v1/admin/product/${id}/stock`, { stock });
   }
 
   getPayments() {

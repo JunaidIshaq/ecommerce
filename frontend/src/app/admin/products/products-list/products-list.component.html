@@ -4,33 +4,70 @@
     <input type="text" placeholder="Search product..." [(ngModel)]="searchTerm" />
   </div>
 
-  <table class="admin-table">
-    <thead>
-    <tr>
-      <th>Name</th>
-      <th>Category</th>
-      <th>Price</th>
-      <th>Status</th>
-      <th style="width:160px;">Actions</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let p of filteredProducts()">
-      <td>{{ p.name }}</td>
-      <td>{{ p.categoryName }}</td>
-      <td>${{ p.price }}</td>
-      <td>
-          <span [class.active]="p.active" [class.blocked]="!p.active">
-            {{ p.active ? 'Active' : 'Disabled' }}
+  <!-- Empty state -->
+  <div *ngIf="products.length === 0" class="empty-state">
+    <p>No products found.</p>
+  </div>
+
+  <div class="table-container" *ngIf="products.length > 0">
+    <table class="admin-table">
+      <thead>
+      <tr>
+        <th>Image</th>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Rating</th>
+        <th>Status</th>
+        <th style="width:160px;">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let p of filteredProducts()">
+        <td>
+          <img *ngIf="p.images && p.images.length > 0" [src]="p.images[0]" alt="{{ p.name }}" class="product-image" />
+          <span *ngIf="!p.images || p.images.length === 0" class="no-image">N/A</span>
+        </td>
+        <td>{{ p.name }}</td>
+        <td>{{ p.categoryId || 'N/A' }}</td>
+        <td>${{ p.price }}</td>
+        <td>{{ p.stock }}</td>
+        <td>{{ p.rating | number:'1.1-1' }}</td>
+        <td>
+          <span [class.active]="p.stock > 0" [class.blocked]="p.stock <= 0">
+            {{ p.stock > 0 ? 'In Stock' : 'Out of Stock' }}
           </span>
-      </td>
-      <td>
-        <button class="btn-primary" (click)="editProduct(p)">Edit</button>
-        <button class="btn-danger" (click)="toggleProduct(p)">
-          {{ p.active ? 'Disable' : 'Enable' }}
-        </button>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+        </td>
+        <td>
+          <button class="btn-primary" (click)="editProduct(p)">Edit</button>
+          <button class="btn-danger" (click)="toggleProduct(p)">
+            {{ p.stock > 0 ? 'Disable' : 'Enable' }}
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button class="btn-page" (click)="previousPage()" [disabled]="currentPage === 1">
+      &laquo; Previous
+    </button>
+
+    <button class="btn-page" *ngFor="let page of getPageNumbers()"
+            (click)="goToPage(page)"
+            [class.active]="page === currentPage">
+      {{ page }}
+    </button>
+
+    <button class="btn-page" (click)="nextPage()" [disabled]="currentPage === totalPages">
+      Next &raquo;
+    </button>
+
+    <span class="page-info">
+      Page {{ currentPage }} of {{ totalPages }} ({{ totalProducts }} total products)
+    </span>
+  </div>
 </app-admin-card>
