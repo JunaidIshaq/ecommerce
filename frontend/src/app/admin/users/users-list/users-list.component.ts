@@ -1,6 +1,7 @@
-import {ChangeDetectorRef, Component, NgZone, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, NgZone, OnInit, Inject, PLATFORM_ID} from '@angular/core';
 import {CommonModule, NgFor, NgIf} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {isPlatformBrowser} from '@angular/common';
 import {AdminApiService} from '../../services/admin-api.service';
 import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
 import {AuthService} from '../../../services/auth.service';
@@ -34,12 +35,17 @@ export class UsersListComponent implements OnInit {
   totalUsers = 0;
   totalPages = 0;
 
-  constructor(private adminApi: AdminApiService, private authService: AuthService, private cdr: ChangeDetectorRef, private zone: NgZone) {
+  constructor(
+    private adminApi: AdminApiService,
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef,
+    private zone: NgZone,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
     console.log('UsersListComponent: Constructor called');
   }
 
   ngOnInit() {
-    // show dummy data instantly
     console.log('UsersListComponent ngOnInit called');
     this.loadUsers();
   }

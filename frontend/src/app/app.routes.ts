@@ -26,7 +26,8 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadChildren: () =>
-      import('./admin/admin-module').then(m => m.AdminModule)
+      import('./admin/admin-module').then(m => m.AdminModule),
+    data: { renderMode: 'client' }  // Disable SSR for admin panel
   },
   { path: '**', redirectTo: '' }
 ];

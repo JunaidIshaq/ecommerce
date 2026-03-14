@@ -1,6 +1,7 @@
-import {Component, OnInit, ChangeDetectorRef, NgZone} from '@angular/core';
+import {Component, OnInit, ChangeDetectorRef, NgZone, Inject, PLATFORM_ID} from '@angular/core';
 import {CommonModule, NgFor, NgIf, DecimalPipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {isPlatformBrowser} from '@angular/common';
 import {AdminApiService} from '../../services/admin-api.service';
 import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
 import {AuthService} from '../../../services/auth.service';
@@ -82,7 +83,8 @@ export class ProductsListComponent implements OnInit {
     private adminApi: AdminApiService,
     private authService: AuthService,
     private zone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     console.log('ProductsListComponent: Constructor called');
   }

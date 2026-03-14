@@ -1,6 +1,7 @@
-import {ChangeDetectorRef, Component, NgZone, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, NgZone, OnInit, Inject, PLATFORM_ID} from '@angular/core';
 import { CommonModule, NgFor, NgIf, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { isPlatformBrowser } from '@angular/common';
 import { AdminApiService } from '../../services/admin-api.service';
 import {RouterLink} from '@angular/router';
 import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
@@ -65,7 +66,13 @@ export class OrdersListComponent implements OnInit{
   totalOrders = 0;
   totalPages = 0;
 
-  constructor(private adminApi: AdminApiService, private authService: AuthService, private zone: NgZone, private cdr: ChangeDetectorRef) {
+  constructor(
+    private adminApi: AdminApiService,
+    private authService: AuthService,
+    private zone: NgZone,
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
     console.error('OrdersListComponent: Constructor called');
   }
 

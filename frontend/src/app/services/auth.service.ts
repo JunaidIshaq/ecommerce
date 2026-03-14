@@ -42,7 +42,7 @@
 // }
 import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {isPlatformBrowser} from '@angular/common';
+import {isPlatformBrowser, isPlatformServer} from '@angular/common';
 import {AuthResponse} from '../models/auth-response.model';
 import {BehaviorSubject, Observable, tap} from 'rxjs';
 import {User} from '../models/user.model';
@@ -59,8 +59,8 @@ export class AuthService {
 
 
   // 🔥 Holds current logged in user
-  private userSubject = new BehaviorSubject<User | null>(this.getUserFromStorage());
-  user$ = this.userSubject.asObservable();
+  private userSubject: BehaviorSubject<User | null>;
+  user$: Observable<User | null>;
 
   // private baseUrl = `${environment_dev.apiUrl}/api/v1/auth`;
   private readonly AUTH_KEY = 'auth_token';
@@ -69,10 +69,11 @@ export class AuthService {
     private http: HttpClient,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
-    // Initialize user safely
-    const user = this.isBrowser() ? this.getUserFromStorage() : null;
-    this.userSubject = new BehaviorSubject<User | null>(user);
+    // Initialize with null first, then restore from storage after platformId is available
+    const initialUser = this.isBrowser() ? this.getUserFromStorage() : null;
+    this.userSubject = new BehaviorSubject<User | null>(initialUser);
     this.user$ = this.userSubject.asObservable();
+    console.log('AuthService: Constructor called, initial user:', initialUser);
   }
 
   currentUser(): Observable<User | null> {
@@ -158,10 +159,13 @@ export class AuthService {
   // Call this after app stabilizes to restore user from localStorage (works with SSR)
   initializeAuth(): void {
     console.log('initializeAuth called');
+
+    // Use isPlatformBrowser for more reliable platform detection
     if (!this.isBrowser()) {
       console.log('initializeAuth: not browser, skipping');
       return;
     }
+
     const user = this.getUserFromStorage();
     console.log('initializeAuth: user from storage:', user);
     if (user) {

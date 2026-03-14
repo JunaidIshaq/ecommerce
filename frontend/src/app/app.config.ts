@@ -1,5 +1,5 @@
-import { ApplicationConfig, APP_INITIALIZER } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { ApplicationConfig, isDevMode, APP_INITIALIZER } from '@angular/core';
+import { provideRouter, withViewTransitions } from '@angular/router';
 import {
   provideHttpClient,
   withFetch,
@@ -13,14 +13,11 @@ import { AuthInterceptor } from './services/auth.interceptor';
 import { AuthService } from './services/auth.service';
 
 // Factory function for APP_INITIALIZER
-export function initializeAuth(authService: AuthService) {
+function initializeAuth(authService: AuthService) {
   return () => {
-    // This runs before the app initializes
-    // Initialize auth on client side only
-    if (typeof window !== 'undefined') {
-      authService.initializeAuth();
-    }
-    return Promise.resolve();
+    console.log('APP_INITIALIZER: Calling initializeAuth');
+    authService.initializeAuth();
+    return Promise.resolve(true);
   };
 }
 
@@ -28,15 +25,15 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(withFetch(), withInterceptorsFromDi()),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    provideRouter(routes, withViewTransitions()),
+    provideClientHydration(withEventReplay()),
+    provideBrowserGlobalErrorListeners(),
+    provideZonelessChangeDetection(),
     {
       provide: APP_INITIALIZER,
       useFactory: initializeAuth,
       deps: [AuthService],
       multi: true
-    },
-    provideRouter(routes),
-    provideClientHydration(withEventReplay()),
-    provideBrowserGlobalErrorListeners(),
-    provideZonelessChangeDetection()
+    }
   ]
 };
