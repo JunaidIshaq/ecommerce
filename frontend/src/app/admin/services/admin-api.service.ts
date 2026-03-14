@@ -61,8 +61,10 @@ export class AdminApiService {
     return this.http.get<DashboardMetrics>(`${this.baseUrl}/dashboard/metrics`);
   }
 
-  getInventory() {
-    return this.http.get<any[]>(`${this.baseUrl}/inventory`);
+  getInventory(pageNumber: number = 1, pageSize: number = 10, userId?: string) {
+    return this.http.get(`${this.baseUrlOrder}/api/v1/admin/inventory/pageNumber/${pageNumber}/pageSize/${pageSize}`, {
+      headers: userId ? { 'userId': userId } : {}
+    });
   }
 
   updateStock(productId: number, quantity: number) {

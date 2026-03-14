@@ -1,15 +1,17 @@
 <app-admin-card>
   <div class="page-header">
     <h2>Inventory Management</h2>
-    <input type="text" placeholder="Search product..." [(ngModel)]="searchTerm" />
+    <input type="text" placeholder="Search inventory..." [(ngModel)]="searchTerm" />
   </div>
 
   <table class="admin-table">
     <thead>
     <tr>
-      <th>Product</th>
-      <th>SKU</th>
-      <th>Stock</th>
+      <th>Inventory ID</th>
+      <th>Product ID</th>
+      <th>Available Qty</th>
+      <th>Reserved Qty</th>
+      <th>Sold Qty</th>
       <th>Status</th>
       <th style="width:160px;">Actions</th>
     </tr>
@@ -17,12 +19,14 @@
 
     <tbody>
     <tr *ngFor="let item of filteredInventory()">
-      <td>{{ item.productName }}</td>
-      <td>{{ item.sku }}</td>
-      <td>{{ item.stock }}</td>
+      <td>{{ item.id | slice:0:8 }}...</td>
+      <td>{{ item.product_id | slice:0:8 }}...</td>
+      <td>{{ item.available_quantity }}</td>
+      <td>{{ item.reserved_quantity }}</td>
+      <td>{{ item.sold_quantity }}</td>
       <td>
-          <span [class.low]="item.stock < 5" [class.ok]="item.stock >= 5">
-            {{ item.stock < 5 ? 'Low Stock' : 'In Stock' }}
+          <span [class.low]="item.available_quantity < 5" [class.ok]="item.available_quantity >= 5">
+            {{ item.available_quantity < 5 ? 'Low Stock' : 'In Stock' }}
           </span>
       </td>
       <td>
@@ -31,6 +35,35 @@
     </tr>
     </tbody>
   </table>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button
+      class="pagination-btn"
+      (click)="previousPage()"
+      [disabled]="currentPage === 1">
+      Previous
+    </button>
+
+    <button
+      *ngFor="let page of getPageNumbers()"
+      class="pagination-btn"
+      [class.active]="page === currentPage"
+      (click)="goToPage(page)">
+      {{ page }}
+    </button>
+
+    <button
+      class="pagination-btn"
+      (click)="nextPage()"
+      [disabled]="currentPage === totalPages">
+      Next
+    </button>
+
+    <span class="page-info">
+      Page {{ currentPage }} of {{ totalPages }} ({{ totalItems }} items)
+    </span>
+  </div>
 </app-admin-card>
 
 <!-- 👇 ADD DIALOG HERE (OUTSIDE THE CARD) -->
