@@ -14,7 +14,7 @@ public interface InventoryAdminClient {
     Object getAllInventory(@RequestHeader("userId") String userId, @PathVariable Integer pageNumber, @PathVariable Integer pageSize);
 
     @PutMapping("/{id}/status")
-    void updateOrderStatus(@PathVariable Long id,
+    void updateInventoryStatus(@PathVariable Long id,
                            @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
                            @RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize,
                            @RequestParam String status);
