@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface InventoryAdminClient {
 
     @GetMapping("/internal/admin/inventory/pageNumber/{pageNumber}/pageSize/{pageSize}")
-    Object getAllOrders(@RequestHeader("userId") String id, @PathVariable Integer pageNumber, @PathVariable Integer pageSize, @RequestParam String role);
+    Object getAllInventory(@RequestHeader("userId") String userId, @PathVariable Integer pageNumber, @PathVariable Integer pageSize);
 
     @PutMapping("/{id}/status")
     void updateOrderStatus(@PathVariable Long id,

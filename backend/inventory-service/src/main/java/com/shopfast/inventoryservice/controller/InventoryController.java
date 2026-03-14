@@ -50,6 +50,7 @@ public class InventoryController {
     @Operation(summary = "Get all inventory records")
     @GetMapping("/internal/admin/inventory/pageNumber/{pageNumber}/pageSize/{pageSize}")
     public ResponseEntity<PagedResponse<InventoryResponseDto>> getAllAdminInventoryItems(
+            @RequestParam(name = "userId") int userId,
             @PathVariable(name = "pageNumber") int pageNumber,
             @PathVariable(name = "pageSize") int pageSize) {
         return ResponseEntity.ok(inventoryService.getAllInventoryItems(pageNumber, pageSize));
