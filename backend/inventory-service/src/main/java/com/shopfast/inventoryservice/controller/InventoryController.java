@@ -47,6 +47,15 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryService.getAllInventoryItems(pageNumber, pageSize));
     }
 
+    @Operation(summary = "Get all inventory records")
+    @GetMapping("/internal/admin/inventory/pageNumber/{pageNumber}/pageSize/{pageSize}")
+    public ResponseEntity<PagedResponse<InventoryResponseDto>> getAllAdminInventoryItems(
+            @PathVariable(name = "pageNumber") int pageNumber,
+            @PathVariable(name = "pageSize") int pageSize) {
+        return ResponseEntity.ok(inventoryService.getAllInventoryItems(pageNumber, pageSize));
+    }
+
+
     @Operation(summary = "Get inventory by productId")
     @GetMapping("/{productId}")
     public ResponseEntity<InventoryResponseDto> getByProductId(@PathVariable UUID productId) {
