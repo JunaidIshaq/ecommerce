@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * Kafka consumer for inventory events
+ */
 @Slf4j
 @Component
 public class KafkaInventoryConsumer {
@@ -24,13 +27,13 @@ public class KafkaInventoryConsumer {
 
     @KafkaListener(topics = "inventory.events", groupId = "product-service-group", containerFactory = "kafkaListenerContainerFactory")
     public void onInventoryEvent(InventoryEvent event) throws IOException {
-        // idempotency: skip if processed
-        if(processedEventStore.isProcessed(event.getEventId())) {
+        // Idempotency: skip if already processed
+        if (processedEventStore.isProcessed(event.getEventId())) {
             log.info("Skipping already processed event {}", event.getEventId());
             return;
         }
 
-        // idempotency: attempt to mark; if false => already processed
+        // Idempotency: attempt to mark; if false => already processed
         boolean marked = processedEventStore.markProcessed(event.getEventId());
         if (!marked) {
             log.info("Event {} already processed, skipping", event.getEventId());
@@ -38,16 +41,17 @@ public class KafkaInventoryConsumer {
         }
         
         try {
-            Map<String, Object> p = event.getPayload();
-            String productId = p.get("productId").toString();
-            int available = (int) p.get("availableQuantity");
-            // update product availability (pseudo-code)
+            Map<String, Object> payload = event.getPayload();
+            String productId = payload.get("productId").toString();
+            int available = (int) payload.get("availableQuantity");
+            
+            // Update product availability
             productService.updateStockAndAvailability(productId, available);
             log.info("Processed inventory event {} for product {}", event.getEventId(), productId);
 
         } catch (Exception ex) {
-            log.error("Failed to process inventory event : {} : {}", event.getEventId(), ex.getMessage(), ex);
-            // throw exception to trigger retry / DLQ handling depending on your Kafka listener configuration
+            log.error("Failed to process inventory event {}: {}", event.getEventId(), ex.getMessage(), ex);
+            // Throw exception to trigger retry / DLQ handling depending on Kafka listener configuration
             throw ex;
         }
     }

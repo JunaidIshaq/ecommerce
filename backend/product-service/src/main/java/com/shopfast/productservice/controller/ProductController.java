@@ -54,8 +54,8 @@ public class ProductController {
             @RequestParam(name = "sortBy", required = false) String sortBy,
             @RequestParam(name = "sortOrder", required = false) String sortOrder
     ) {
-        PagedResponse<ProductDto> response = productService.getAllProducts(pageNumber, pageSize, searchKeyword, categoryId, sortBy, sortOrder);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(productService.getAllProducts(
+                pageNumber, pageSize, searchKeyword, categoryId, sortBy, sortOrder));
     }
 
     @Operation(summary = "Get all products (paginated)")
@@ -64,40 +64,37 @@ public class ProductController {
             @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
     ) {
-        PagedResponse<UUID> response = productService.getAllProductIds(pageNumber, pageSize);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(productService.getAllProductIds(pageNumber, pageSize));
     }
 
-    @Operation(summary = "Get all products (paginated)")
-    @GetMapping("/internal/admin/product/pageNumber/{pageNumber}/pageSize/{pageSize}")
-    public ResponseEntity<PagedResponse<ProductDto>> getAllProducts(
-            @RequestHeader("userId") String userId,
-            @PathVariable(name = "pageNumber") int pageNumber,
-            @PathVariable(name = "pageSize") int pageSize
+    @Operation(summary = "Get all products for admin (paginated)", security = @SecurityRequirement(name = "bearerAuth"))
+    @GetMapping("/admin")
+    public ResponseEntity<PagedResponse<ProductDto>> getAllProductsAdmin(
+            @PathVariable(name = "pageNumber", required = false) Integer pageNumber,
+            @PathVariable(name = "pageSize", required = false) Integer pageSize
     ) {
-        PagedResponse<ProductDto> response = productService.getAllProducts(pageNumber, pageSize);
-        return ResponseEntity.ok(response);
+        int pn = pageNumber != null ? pageNumber : 1;
+        int ps = pageSize != null ? pageSize : 10;
+        return ResponseEntity.ok(productService.getAllProducts(pn, ps));
     }
 
     @Operation(summary = "Get Product details based on Id")
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable("id") String id) {
-        ProductDto response = productService.getProductById(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(productService.getProductById(id));
     }
 
-    @Operation(summary = "Get Product details based on Id")
+    @Operation(summary = "Get Product details based on Id (internal)")
     @GetMapping("/{id}/internal")
     public ResponseEntity<ProductInternalResponseDto> getProductByIdInternal(@PathVariable("id") String id) {
-        ProductInternalResponseDto response = productService.getProductByIdInternal(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(productService.getProductByIdInternal(id));
     }
 
-    @Operation(summary = "Update Product based on Id")
+    @Operation(summary = "Update Product based on Id", security = @SecurityRequirement(name = "bearerAuth"))
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable String id, @Valid @RequestBody ProductDto productDto) throws IOException {
-        ProductDto updated = productService.updateProduct(id, ProductMapper.getProduct(productDto));
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable String id, 
+                                                     @Valid @RequestBody ProductDto productDto) throws IOException {
+        return ResponseEntity.ok(productService.updateProduct(id, ProductMapper.getProduct(productDto)));
     }
 
     @Operation(summary = "Delete Product based on Id")
@@ -124,12 +121,7 @@ public class ProductController {
                 keyword, categories, minPrice, maxPrice, sortBy, sortOrder, page, size
         );
 
-
-        return ResponseEntity.ok(
-                new PagedResponse<>(pagedResults.getItems(), pagedResults.getTotalItems(), pagedResults.getTotalPages(), page, size)
-        );
+        return ResponseEntity.ok(pagedResults);
     }
-
-
 
 }

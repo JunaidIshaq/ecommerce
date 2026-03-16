@@ -24,7 +24,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -54,24 +53,7 @@ public class ProductService {
     }
 
     public Optional<ProductDto> findBySlug(String slug) {
-        return productRepository.findBySlug(slug).map(this::toDto);
-    }
-
-
-    private ProductDto toDto(Product p) {
-        ProductDto d = new ProductDto();
-        d.id = p.getId();
-        d.slug = p.getSlug();
-        d.name = p.getName();
-        d.description = p.getDescription();
-        d.categoryId = p.getCategoryId();
-        d.price = p.getPrice();
-        d.currency = p.getCurrency();
-        d.stock = p.getStock();
-        d.rating = p.getRating();
-        d.images = p.getImages();
-        d.tags = p.getTags();
-        return d;
+        return productRepository.findBySlug(slug).map(ProductMapper::getProductDto);
     }
 
     @Transactional
@@ -86,10 +68,10 @@ public class ProductService {
         }
         try {
             Product saved = productRepository.save(product);
-//            Elastic service will consume events through kakfa.
+            // Elastic service will consume events through kafka.
             elasticProductSearchService.indexProduct(saved);
-        }catch (Exception e){
-            e.printStackTrace();  // or use log.error("Elasticsearch indexing failed", e);
+        } catch (Exception e) {
+            log.error("Failed to index product in Elasticsearch: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to index product: " + e.getMessage(), e);
         }
         // Publish product created event
@@ -120,26 +102,25 @@ public class ProductService {
         log.info("Class ProductService method getAllProducts() -> pageNumber : {}, pageSize : {}, categoryId : {}, sortBy : {}, sortOrder : {}", pageNumber, pageSize, categoryId, sortBy, sortOrder);
         PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
         Page<Product> productPage;
-        Sort defaultSort = Sort.by("createdAt").descending();
-        Sort sort = null;
-        if(Strings.hasText(sortBy) && Strings.hasText(sortOrder)) {
-             sort = sortOrder.equalsIgnoreCase("desc")
-                    ? Sort.by(sortBy).descending()
-                    : Sort.by(sortBy).ascending();
-            pageable = pageable.withSort(sort);
+        
+        // Build sort based on parameters, default to createdAt descending
+        Sort defaultSort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Sort sort = defaultSort;
+        
+        if (Strings.hasText(sortBy) && Strings.hasText(sortOrder)) {
+            Sort.Direction direction = sortOrder.equalsIgnoreCase("desc") 
+                ? Sort.Direction.DESC 
+                : Sort.Direction.ASC;
+            sort = Sort.by(direction, sortBy);
         }
-        if(ObjectUtils.isEmpty(sort)) {
-            pageable = pageable.withSort(defaultSort);
-        }else {
-            pageable = pageable.withSort(sort);
-        }
+        pageable = pageable.withSort(sort);
         if(Strings.hasText(categoryId) && Strings.hasText(searchKeyword)) {
             productPage = productRepository.findByNameContainingIgnoreCaseAndCategoryId(searchKeyword, categoryId, pageable);
-        }else if(Strings.hasText(categoryId)) {
+        } else if(Strings.hasText(categoryId)) {
             productPage = productRepository.findByCategoryId(categoryId, pageable);
-        }else if(Strings.hasText(searchKeyword)) {
+        } else if(Strings.hasText(searchKeyword)) {
             productPage = productRepository.findByNameContainingIgnoreCase(searchKeyword, pageable);
-        }else {
+        } else {
             productPage = productRepository.findAll(pageable);
         }
 
@@ -159,18 +140,18 @@ public class ProductService {
 
     @Transactional
     public PagedResponse<UUID> getAllProductIds(int pageNumber, int pageSize) {
-        log.info("🧠 Inside getAllProductIds() -> pageNumber={}, pageSize={}", pageNumber, pageSize);
+        log.debug("Fetching all product IDs -> pageNumber={}, pageSize={}", pageNumber, pageSize);
 
         PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Product> productPage = productRepository.findAll(pageable);
 
-        List<UUID> productDtos = productPage.getContent()
+        List<UUID> productIds = productPage.getContent()
                 .stream()
                 .map(Product::getId)
                 .toList();
 
         return new PagedResponse<>(
-                productDtos,
+                productIds,
                 productPage.getTotalElements(),
                 productPage.getTotalPages(),
                 pageNumber,
@@ -178,39 +159,44 @@ public class ProductService {
         );
     }
 
+    /**
+     * Get all products for admin page (simplified version without filters)
+     */
     @Transactional
     public PagedResponse<ProductDto> getAllProducts(int pageNumber, int pageSize) {
-        log.info("🧠 Inside getAllProductIds() -> pageNumber={}, pageSize={}", pageNumber, pageSize);
+        log.debug("Fetching all products for admin -> pageNumber={}, pageSize={}", pageNumber, pageSize);
 
         PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<ProductDto> productPage = productRepository.findAll(pageable).map(ProductDto::from);
+        Page<ProductDto> productPage = productRepository.findAll(pageable).map(ProductMapper::getProductDto);
 
-        PagedResponse<ProductDto> response = new PagedResponse<>(
+        return new PagedResponse<>(
                 productPage.getContent(),
                 productPage.getTotalElements(),
                 productPage.getTotalPages(),
                 productPage.getNumber(),
                 productPage.getSize()
         );
-        
-        return response;
     }
 
     @Transactional
     @Cacheable(value = "product", key = "#id")
     public ProductDto getProductById(String id) {
-        Optional<Product> product = productRepository.findById(UUID.fromString(id));
+        UUID productId = UUID.fromString(id);
+        Optional<Product> product = productRepository.findById(productId);
         return product.map(ProductMapper::getProductDto).orElseThrow(() -> new ProductNotFoundException(id));
     }
 
-    @Transactional()
+    @Transactional
     @Cacheable(value = "productInternalSearch", key = "#id")
     public ProductInternalResponseDto getProductByIdInternal(String id) {
-        Product product = productRepository.findByIdWithImages(UUID.fromString(id))
+        UUID productId = UUID.fromString(id);
+        Product product = productRepository.findByIdWithImages(productId)
                 .orElseThrow(() -> new ProductNotFoundException(id));
 
-        // 🔥 FORCE Hibernate to load images NOW
-        product.getImages().size();
+        // Force Hibernate to initialize lazy-loaded collection
+        if (product.getImages() != null) {
+            product.getImages().size();
+        }
 
         return ProductMapper.getProductInternalDto(product);
     }
@@ -222,10 +208,11 @@ public class ProductService {
             @CacheEvict(value = "productsPage", allEntries = true)
     })
     public ProductDto updateProduct(String id, Product updatedProduct) throws InvalidCategoryException {
+        UUID productId = UUID.fromString(id);
         if (!categoryClient.validateCategoryExists(updatedProduct.getCategoryId())) {
             throw new InvalidCategoryException(updatedProduct.getCategoryId());
         }
-        return productRepository.findById(UUID.fromString(id)).map(existing -> {
+        return productRepository.findById(productId).map(existing -> {
             existing.setName(updatedProduct.getName());
             existing.setDescription(updatedProduct.getDescription());
             existing.setCategoryId(updatedProduct.getCategoryId());
@@ -258,20 +245,20 @@ public class ProductService {
             event.setPayload(payload);
 
             kafkaProductProducer.publishProductEvent(event);
-            log.info("✅ Product event published for {}", savedProduct.getId());
+            log.info("Product event published for {}", savedProduct.getId());
 
             return ProductMapper.getProductDto(savedProduct);
-        }).orElseThrow(() -> new ProductNotFoundException("Product not found"));
+        }).orElseThrow(() -> new ProductNotFoundException(id));
     }
 
-    @Transactional
     @Caching(evict = {
             @CacheEvict(value = "product", key = "#id"),
             @CacheEvict(value = "productInternalSearch", key = "#id"),
             @CacheEvict(value = "productsPage", allEntries = true)
     })
     public void deleteProduct(String id) {
-        productRepository.deleteById(UUID.fromString(id));
+        UUID productId = UUID.fromString(id);
+        productRepository.deleteById(productId);
         elasticProductSearchService.deleteProductFromIndex(id);
     }
 
@@ -319,26 +306,25 @@ public class ProductService {
     public void updateStockAndAvailability(String productId, int stock) throws IOException {
         log.info("Updating stock for product {} -> {}", productId, stock);
 
-        // 1️⃣ Find product in MongoDB
+        // Find product in database
         Optional<Product> optionalProduct = productRepository.findById(UUID.fromString(productId));
         if (optionalProduct.isEmpty()) {
             log.warn("Product {} not found, skipping stock update", productId);
             return;
         }
 
-            Product product = optionalProduct.get();
+        Product product = optionalProduct.get();
+        product.setStock(stock);
+        productRepository.save(product);
 
-            product.setStock(stock);
-            productRepository.save(product);
+        log.info("Updated product {} in database. New stock = {}", productId, stock);
 
-            log.info("Updated product {} in MongoDB. New stock = {}", productId, stock);
-
-            // 3️⃣ Reindex product in Elasticsearch (try-catch to avoid breaking Kafka listener)
-            try {
-                elasticProductSearchService.indexProduct(product);
-                log.info("Reindexed product {} in Elasticsearch", productId);
-            } catch (IOException e) {
-                log.error("Failed to reindex product {} in Elasticsearch: {}", productId, e.getMessage(), e);
-            }
+        // Reindex product in Elasticsearch (try-catch to avoid breaking Kafka listener)
+        try {
+            elasticProductSearchService.indexProduct(product);
+            log.info("Reindexed product {} in Elasticsearch", productId);
+        } catch (IOException e) {
+            log.error("Failed to reindex product {} in Elasticsearch: {}", productId, e.getMessage(), e);
+        }
     }
 }

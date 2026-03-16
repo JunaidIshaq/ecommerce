@@ -3,9 +3,11 @@ package com.shopfast.productservice.util;
 import com.shopfast.productservice.dto.ProductDto;
 import com.shopfast.productservice.dto.ProductInternalResponseDto;
 import com.shopfast.productservice.model.Product;
-import jakarta.validation.Valid;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class ProductMapper {
@@ -27,6 +29,10 @@ public class ProductMapper {
     }
 
     public static ProductDto getProductDto(Product product) {
+        if (product == null) {
+            return null;
+        }
+        
         ProductDto dto = new ProductDto();
         dto.setId(product.getId());
         dto.setName(product.getName());
@@ -36,7 +42,7 @@ public class ProductMapper {
         dto.setPrice(product.getPrice());
         dto.setRating(product.getRating());
         dto.setStock(product.getStock());
-        dto.setImages(product.getImages().stream().toList());
+        dto.setImages(product.getImages() != null ? new ArrayList<>(product.getImages()) : new ArrayList<>());
         dto.setCreatedAt(product.getCreatedAt());
         dto.setUpdatedAt(product.getUpdatedAt());
         dto.setCreatedBy(product.getCreatedBy());
@@ -45,16 +51,24 @@ public class ProductMapper {
     }
 
     public static ProductInternalResponseDto getProductInternalDto(Product product) {
+        if (product == null) {
+            return null;
+        }
+        
         return ProductInternalResponseDto.builder()
                 .id(String.valueOf(product.getId()))
-                .title(String.valueOf(product.getName()))
+                .title(product.getName())
                 .active(product.getIsActive())
                 .price(product.getPrice())
-                .images(product.getImages().stream().toList())
+                .images(product.getImages() != null ? new ArrayList<>(product.getImages()) : new ArrayList<>())
                 .build();
     }
 
-    public static Product createProduct(@Valid ProductDto productDto) {
+    public static Product createProduct(ProductDto productDto) {
+        if (productDto == null) {
+            return null;
+        }
+        
         Product product = new Product();
         product.setName(productDto.getName());
         product.setSlug(productDto.getSlug());
@@ -63,7 +77,7 @@ public class ProductMapper {
         product.setPrice(productDto.getPrice());
         product.setRating(productDto.getRating());
         product.setStock(productDto.getStock());
-        product.setImages(productDto.getImages().stream().toList());
+        product.setImages(productDto.getImages() != null ? new ArrayList<>(productDto.getImages()) : new ArrayList<>());
         return product;
     }
 }
