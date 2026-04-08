@@ -11,7 +11,7 @@ spring:
       type: redis
 
   datasource:
-    url: ${POSTGRES_URI:jdbc:postgresql://host.docker.internal:5432/product_db}
+    url: ${POSTGRES_URI:jdbc:postgresql://postgres:5432/product_db}
     username: postgres
     password: postgres
 

@@ -148,7 +148,7 @@ services:
         condition: service_healthy
 
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/product_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/product_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - CATEGORY_SERVICE_URL=http://category-service:8082/api/v1/category
@@ -183,7 +183,7 @@ services:
       elasticsearch:
         condition: service_healthy
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/category_db
+      - POSTGRES_URI=jdbc:postgresql://postgres:5432/category_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - PRODUCT_SERVICE_URL=http://product-service:8081/api/v1/product
@@ -194,6 +194,7 @@ services:
       - REDIS_PORT=6379
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
+      - EUREKA_URL=http://eureka-server:8761/eureka/eureka/
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1" ]
       interval: 20s
@@ -213,7 +214,7 @@ services:
       dockerfile: inventory-service/Dockerfile
     container_name: inventory-service
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/inventory_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/inventory_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - REDIS_HOST=redis
@@ -250,7 +251,7 @@ services:
       dockerfile: order-service/Dockerfile
     container_name: order-service
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/order_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/order_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - KAFKA_BOOTSTRAP=kafka:9092
@@ -284,14 +285,15 @@ services:
       dockerfile: payment-service/Dockerfile
     container_name: payment-service
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/payment_db
+      - POSTGRES_URI=jdbc:postgresql://postgres:5432/payment_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_BOOTSTRAP=kafka:9092
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
       - SERVER_PORT=8085
+      - EUREKA_URL=http://eureka-server:8761/eureka/eureka/
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8085/actuator/health || exit 1" ]
       interval: 20s
@@ -316,14 +318,15 @@ services:
       dockerfile: user-service/Dockerfile
     container_name: user-service
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/user_db
+      - POSTGRES_URI=jdbc:postgresql://postgres:5432/user_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_BOOTSTRAP=kafka:9092
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
       - SERVER_PORT=8086
+      - EUREKA_URL=http://eureka-server:8761/eureka/eureka/
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8086/actuator/health || exit 1" ]
       interval: 20s
@@ -348,7 +351,7 @@ services:
       dockerfile: auth-service/Dockerfile
     container_name: auth-service
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/auth_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auth_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - USER_SERVICE_URL=http://user-service:8086
@@ -383,7 +386,7 @@ services:
       dockerfile: cart-service/Dockerfile
     container_name: cart-service
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/cart_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/cart_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - KAFKA_BOOTSTRAP=kafka:9092
@@ -417,7 +420,7 @@ services:
       dockerfile: coupon-service/Dockerfile
     container_name: coupon-service
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/coupon_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/coupon_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - KAFKA_BOOTSTRAP=kafka:9092
@@ -451,7 +454,7 @@ services:
       dockerfile: review-service/Dockerfile
     container_name: review-service
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/review_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/review_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - KAFKA_BOOTSTRAP=kafka:9092
@@ -485,7 +488,7 @@ services:
       dockerfile: notification-service/Dockerfile
     container_name: notification-service
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/notification_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/notification_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - KAFKA_BOOTSTRAP=kafka:9092
@@ -549,7 +552,7 @@ services:
       dockerfile: admin-service/Dockerfile
     container_name: admin-service
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/admin_db
+      - POSTGRES_URI=jdbc:postgresql://postgres:5432/admin_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - KAFKA_BOOTSTRAP=kafka:9092
@@ -557,6 +560,14 @@ services:
       - SERVER_PORT=8093
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
+      - EUREKA_URL=http://eureka-server:8761/eureka/eureka/
+      - USER_SERVICE_URL=http://user-service:8086
+      - ORDER_SERVICE_URL=http://order-service:8084
+      - CART_SERVICE_URL=http://cart-service:8088
+      - CATEGORY_SERVICE_URL=http://category-service:8082
+      - PRODUCT_SERVICE_URL=http://product-service:8081
+      - INVENTORY_SERVICE_URL=http://inventory-service:8083
+      - COUPON_SERVICE_URL=http://coupon-service:8089
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8093/actuator/health || exit 1" ]
       interval: 20s
@@ -632,20 +643,24 @@ services:
     networks:
       - product-net
 
-  #  postgres:
-  #    image: postgres:15
-  #    container_name: postgres
-  #    environment:
-  #      POSTGRES_USER: postgres
-  #      POSTGRES_PASSWORD: postgres
-  #      POSTGRES_DB: inventory_db
-  #    ports:
-  #      - "5432:5432"
-  #    volumes:
-  #      - ./init-order-db.sql:/docker-entrypoint-initdb.d/init-order-db.sql
-  #      - pgdata:/var/lib/postgresql/data
-  #    networks:
-  #      - product-net
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - product-net
 
   redis:
     image: redis:7

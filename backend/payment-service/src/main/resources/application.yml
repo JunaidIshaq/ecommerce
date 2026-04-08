@@ -3,7 +3,7 @@ spring:
     name: payment-service
 
   datasource:
-    url: ${POSTGRES_URI:jdbc:postgresql://host.docker.internal:5432/payment_db}
+    url: ${POSTGRES_URI:jdbc:postgresql://postgres:5432/payment_db}
     username: postgres
     password: postgres
   jpa:
@@ -44,7 +44,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/eureka/
+      defaultZone: ${EUREKA_URL:http://eureka-server:8761/eureka/eureka/}
 
 server:
   port: ${SERVER_PORT:8085}
