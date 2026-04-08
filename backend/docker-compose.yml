@@ -89,14 +89,6 @@ services:
       - bootstrap.memory_lock=true
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
       - xpack.security.enabled=false
-
-      # Correct CORS settings
-    #      - http.cors.enabled=true
-    #      - http.cors.allow-origin="*"
-    #      - http.cors.allow-credentials=true
-    #      - http.cors.allow-headers="X-Requested-With, X-Auth-Token, Content-Type, Content-Length, Authorization"
-    #      - http.cors.allow-methods="OPTIONS, HEAD, GET, POST, PUT, DELETE"
-
     ulimits:
       memlock:
         soft: -1
@@ -105,8 +97,8 @@ services:
       - "9200:9200"
     healthcheck:
       test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
-      interval: 10s
-      timeout: 5s
+      interval: 1m
+      timeout: 10s
       retries: 5
     volumes:
       - es_data:/usr/share/elasticsearch/data
@@ -140,8 +132,6 @@ services:
     depends_on:
        redis:
          condition: service_healthy
-       elasticsearch:
-         condition: service_started
        kafka:
          condition: service_healthy
        category-service:
@@ -184,8 +174,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      elasticsearch:
-        condition: service_started
       postgres:
         condition: service_healthy
       eureka-server:
@@ -244,8 +232,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      elasticsearch:
-        condition: service_started
       postgres:
         condition: service_healthy
       kafka:
@@ -427,8 +413,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      elasticsearch:
-        condition: service_started
       kafka:
         condition: service_healthy
       product-service:
@@ -465,8 +449,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-      elasticsearch:
-        condition: service_started
       kafka:
         condition: service_healthy
       product-service:
@@ -563,8 +545,6 @@ services:
     ports:
       - "8092:8092"
     depends_on:
-      elasticsearch:
-        condition: service_started
       redis:
         condition: service_healthy
       kafka:
