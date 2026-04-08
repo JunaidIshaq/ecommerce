@@ -155,6 +155,7 @@ services:
       - REDIS_PORT=6379
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
+      - APP_SEED_PRODUCTS=false
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8081/actuator/health || exit 1" ]
       interval: 20s
@@ -195,6 +196,7 @@ services:
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
       - EUREKA_URL=http://eureka-server:8761/eureka/eureka/
+      - APP_SEED_CATEGORIES=false
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1" ]
       interval: 20s

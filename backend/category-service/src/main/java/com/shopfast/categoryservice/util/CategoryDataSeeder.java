@@ -49,17 +49,36 @@ public class CategoryDataSeeder {
 
 
         try {
-            if (categoryRepository.count() > 0 && elasticService.count() > 0) {
-                log.info("🟢 Category already exist, skipping seeding.");
-                return;
+            if (categoryRepository.count() > 0) {
+                try {
+                    if (elasticService.count() > 0) {
+                        log.info("🟢 Category already exist, skipping seeding.");
+                        return;
+                    }
+                } catch (Exception ex) {
+                    log.warn("⚠️ Could not count categories in elasticsearch, proceeding with seeding: {}", ex.getMessage());
+                }
             }
-        }catch (Exception ex){
-            log.warn("⚠️ Could not count existing categories, proceeding with seeding", ex);
+        } catch (Exception ex) {
+            log.warn("⚠️ Could not count existing categories in postgres, proceeding with seeding: {}", ex.getMessage());
         }
-        elasticIndexConfig.resetCategoryIndex();
-        elasticIndexConfig.createCategoryIndexIfNotExists();
+
+        // Try to setup Elasticsearch index, but don't fail if Elasticsearch is not available
+        try {
+            elasticIndexConfig.resetCategoryIndex();
+            elasticIndexConfig.createCategoryIndexIfNotExists();
+        } catch (Exception ex) {
+            log.error("⚠️ Failed to setup Elasticsearch index (service may not be ready): {}", ex.getMessage());
+        }
+
         categoryRepository.deleteAll();
-        elasticService.deleteAllCategories();
+
+        // Try to delete categories from Elasticsearch, but don't fail if not available
+        try {
+            elasticService.deleteAllCategories();
+        } catch (Exception ex) {
+            log.warn("⚠️ Could not delete categories from elasticsearch: {}", ex.getMessage());
+        }
 
         // Predefined category list with fixed UUIDs
         List<Category> predefined = List.of(
