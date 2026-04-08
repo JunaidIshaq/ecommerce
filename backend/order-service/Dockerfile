@@ -2,6 +2,8 @@ FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
 # Copy shared common-lib (because it's inside the context ".")
+COPY pom.xml .
+RUN mvn install -N -DskipTests
 COPY common-lib ./common-lib
 RUN mvn -f common-lib/pom.xml install -DskipTests
 

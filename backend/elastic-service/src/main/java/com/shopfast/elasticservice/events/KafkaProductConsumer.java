@@ -3,7 +3,6 @@ package com.shopfast.elasticservice.events;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shopfast.common.events.ProductEvent;
 import com.shopfast.common.model.elastic.Product;
-import com.shopfast.elasticservice.document.ProductDocument;
 import com.shopfast.elasticservice.repository.ProductSearchRepository;
 import com.shopfast.elasticservice.search.ElasticProductSearchService;
 import com.shopfast.elasticservice.service.EmbeddingService;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j

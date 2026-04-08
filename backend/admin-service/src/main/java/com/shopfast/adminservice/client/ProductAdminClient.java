@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ProductAdminClient {
 
     @GetMapping("/internal/admin/product/pageNumber/{pageNumber}/pageSize/{pageSize}")
-    Object getAllProducts(@RequestHeader("userId") String id, @PathVariable Integer pageNumber, @PathVariable Integer pageSize);
+    Object getAllProducts(@RequestHeader("userId") String id, @PathVariable("pageNumber") Integer pageNumber, @PathVariable("pageSize") Integer pageSize);
 
     @PutMapping("/{id}/status")
-    void updateProductStatus(@PathVariable Long id,
+    void updateProductStatus(@PathVariable("id") Long id,
                            @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
                            @RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize,
-                           @RequestParam String status);
+                           @RequestParam("status") String status);
 }

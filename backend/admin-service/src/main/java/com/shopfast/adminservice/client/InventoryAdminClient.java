@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface InventoryAdminClient {
 
     @GetMapping("/internal/admin/inventory/pageNumber/{pageNumber}/pageSize/{pageSize}")
-    Object getAllInventory(@RequestHeader("userId") String userId, @PathVariable Integer pageNumber, @PathVariable Integer pageSize);
+    Object getAllInventory(@RequestHeader("userId") String userId, @PathVariable("pageNumber") Integer pageNumber, @PathVariable("pageSize") Integer pageSize);
 
     @PutMapping("/{id}/status")
-    void updateInventoryStatus(@PathVariable Long id,
+    void updateInventoryStatus(@PathVariable("id") Long id,
                            @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
                            @RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize,
-                           @RequestParam String status);
+                           @RequestParam(name = "status") String status);
 
 }
 

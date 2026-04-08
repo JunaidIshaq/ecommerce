@@ -111,8 +111,12 @@ export class AdminApiService {
     return this.http.get<any[]>(`${this.baseUrl}/audit-logs`);
   }
 
-  getProducts(pageNumber: number = 1, pageSize: number = 10, userId?: string) {
-    return this.http.get(`${this.baseUrlOrder}/api/v1/admin/product/pageNumber/${pageNumber}/pageSize/${pageSize}`, {
+  getProducts(pageNumber: number = 1, pageSize: number = 10, userId?: string, searchTerm?: string) {
+    let url = `${this.baseUrlOrder}/api/v1/admin/product/pageNumber/${pageNumber}/pageSize/${pageSize}`;
+    if (searchTerm) {
+      url += `?search=${encodeURIComponent(searchTerm)}`;
+    }
+    return this.http.get(url, {
       headers: userId ? { 'userId': userId } : {}
     });
   }

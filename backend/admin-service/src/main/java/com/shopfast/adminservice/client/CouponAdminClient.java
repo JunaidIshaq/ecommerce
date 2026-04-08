@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "coupon-service", url= "coupon.service.url",path = "/internal/admin/coupons")
+@FeignClient(name = "coupon-service", url= "${coupon.service.url}",path = "/internal/admin/coupons")
 public interface CouponAdminClient {
 
     @PostMapping
     CouponDto createCoupon(@RequestBody CreateCouponRequest request);
 
     @PutMapping("/{id}/disable")
-    void disableCoupon(@PathVariable Long id);
+    void disableCoupon(@PathVariable("id") Long id);
 
 }
 

@@ -5,6 +5,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>com.shopfast</groupId>
+        <artifactId>ecommerce-platform</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
     <groupId>com.shopfast</groupId>
     <artifactId>common-lib</artifactId>
     <version>1.0.0</version>
@@ -14,7 +20,7 @@
     <description>Shared library for all microservices</description>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>16</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
@@ -51,7 +57,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.13.0</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>

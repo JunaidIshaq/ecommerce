@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface OrderAdminClient {
 
     @GetMapping("/internal/admin/orders/pageNumber/{pageNumber}/pageSize/{pageSize}")
-    Object getAllOrders(@RequestHeader("userId") String id, @PathVariable Integer pageNumber, @PathVariable Integer pageSize, @RequestParam String role);
+    Object getAllOrders(@RequestHeader("userId") String id, @PathVariable("pageNumber") Integer pageNumber, @PathVariable("pageSize") Integer pageSize, @RequestParam("role") String role);
 
     @PutMapping("/{id}/status")
-    void updateOrderStatus(@PathVariable Long id,
+    void updateOrderStatus(@PathVariable("id") Long id,
                            @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,
                            @RequestParam(name = "pageSize", required = false, defaultValue = "10") Integer pageSize,
-                           @RequestParam String status);
+                           @RequestParam("status") String status);
 
 }

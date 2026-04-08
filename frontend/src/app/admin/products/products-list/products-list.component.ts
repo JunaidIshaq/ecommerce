@@ -57,6 +57,76 @@ const MOCK_PRODUCTS = [
     stock: 25,
     rating: 4.6,
     images: []
+  },
+  {
+    id: 6,
+    name: 'MacBook Pro 16"',
+    categoryName: 'Laptops',
+    categoryId: 5,
+    price: 2499,
+    stock: 10,
+    rating: 4.9,
+    images: []
+  },
+  {
+    id: 7,
+    name: 'Dell XPS 13',
+    categoryName: 'Laptops',
+    categoryId: 5,
+    price: 1399,
+    stock: 20,
+    rating: 4.4,
+    images: []
+  },
+  {
+    id: 8,
+    name: 'iPad Air',
+    categoryName: 'Tablets',
+    categoryId: 6,
+    price: 599,
+    stock: 30,
+    rating: 4.5,
+    images: []
+  },
+  {
+    id: 9,
+    name: 'Surface Pro 9',
+    categoryName: 'Tablets',
+    categoryId: 6,
+    price: 1099,
+    stock: 15,
+    rating: 4.3,
+    images: []
+  },
+  {
+    id: 10,
+    name: 'AirPods Pro',
+    categoryName: 'Headphones',
+    categoryId: 2,
+    price: 249,
+    stock: 40,
+    rating: 4.6,
+    images: []
+  },
+  {
+    id: 11,
+    name: 'Logitech MX Master 3',
+    categoryName: 'Accessories',
+    categoryId: 3,
+    price: 99,
+    stock: 50,
+    rating: 4.7,
+    images: []
+  },
+  {
+    id: 12,
+    name: 'Samsung 4K Monitor',
+    categoryName: 'Monitors',
+    categoryId: 7,
+    price: 399,
+    stock: 25,
+    rating: 4.4,
+    images: []
   }
 ];
 
@@ -98,9 +168,9 @@ export class ProductsListComponent implements OnInit {
     console.log('loadProducts called');
 
     // First, show mock data immediately
-    this.products = MOCK_PRODUCTS;
-    this.totalProducts = this.products.length;
+    this.totalProducts = MOCK_PRODUCTS.length;
     this.totalPages = Math.ceil(this.totalProducts / this.pageSize);
+    this.products = MOCK_PRODUCTS.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
     console.log('Loaded mock products:', this.products.length);
 
     // Then try to fetch from API
@@ -110,7 +180,7 @@ export class ProductsListComponent implements OnInit {
         console.log('User from auth:', user);
         console.log('Calling products API with userId:', this.userId);
 
-        this.adminApi.getProducts(this.currentPage, this.pageSize, this.userId).subscribe({
+        this.adminApi.getProducts(this.currentPage, this.pageSize, this.userId, this.searchTerm).subscribe({
           next: (data: any) => {
             this.zone.run(() => {
               console.log('Products API success:', data);
@@ -120,7 +190,7 @@ export class ProductsListComponent implements OnInit {
                 this.totalProducts = data.totalItems;
                 this.totalPages = data.totalPages;
               } else if (Array.isArray(data)) {
-                this.products = data;
+                this.products = data.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
                 this.totalProducts = data.length;
                 this.totalPages = Math.ceil(this.totalProducts / this.pageSize);
               }
@@ -179,12 +249,9 @@ export class ProductsListComponent implements OnInit {
     return pages;
   }
 
-
-  filteredProducts() {
-    return this.products.filter(p =>
-      (p.name && p.name.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
-      (p.description && p.description.toLowerCase().includes(this.searchTerm.toLowerCase()))
-    );
+  onSearch() {
+    this.currentPage = 1; // Reset to first page when searching
+    this.loadProducts();
   }
 
   toggleProduct(p: any) {

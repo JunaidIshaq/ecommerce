@@ -37,15 +37,6 @@ spring:
         enable.idempotence: true
         max.in.flight.requests.per.connection: 1
 
-  data:
-    redis:
-      host: ${REDIS_HOST:redis}
-      port: ${REDIS_PORT:6379}
-      timeout: 6000
-      connect-timeout: 6000
-  cache:
-    type: redis
-
   elasticsearch:
     uris: ${ELASTIC_URI:http://elasticsearch:9200}
 
@@ -65,13 +56,6 @@ server:
 
 jwt:
   secret: ${JWT_SECRET:supersecretkeythatshouldbereplacedandstoredsecurely}
-
-logging:
-  level:
-    root: INFO
-    org.springframework.data.redis: WARN
-    org.springframework.cache.interceptor: DEBUG
-
 
 elastic:
   host:
@@ -113,3 +97,7 @@ product:
 inventory:
   service:
     url: ${INVENTORY_SERVICE_URL:http://inventory-service:8083}
+
+coupon:
+  service:
+    url: ${COUPON_SERVICE_URL:http://coupon-service:8089}

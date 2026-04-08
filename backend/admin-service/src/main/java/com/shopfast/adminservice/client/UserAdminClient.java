@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface UserAdminClient {
 
     @GetMapping("/internal/admin/users/pageNumber/{pageNumber}/pageSize/{pageSize}")
-    Object getAllUsers(@RequestHeader("userId") String userId, @PathVariable Integer pageNumber, @PathVariable Integer pageSize, @RequestParam String role);
+    Object getAllUsers(@RequestHeader("userId") String userId, @PathVariable("pageNumber") Integer pageNumber, @PathVariable("pageSize") Integer pageSize, @RequestParam("role") String role);
 
     @PutMapping("/{id}/block")
-    void blockUser(@PathVariable Long id);
+    void blockUser(@PathVariable("id") Long id);
 
     @PutMapping("/{id}/unblock")
-    void unblockUser(@PathVariable Long id);
+    void unblockUser(@PathVariable("id") Long id);
 
 }

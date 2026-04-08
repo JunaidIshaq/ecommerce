@@ -6,7 +6,7 @@ import com.shopfast.couponservice.enums.CouponType;
 import com.shopfast.couponservice.model.Coupon;
 import com.shopfast.couponservice.repository.CouponRepository;
 import com.shopfast.couponservice.service.CouponService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import static org.assertj.core.api.Assertions.assertThat;

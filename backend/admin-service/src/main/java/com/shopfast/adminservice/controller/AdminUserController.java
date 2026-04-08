@@ -32,9 +32,9 @@ public class AdminUserController {
     //  @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users/pageNumber/{pageNumber}/pageSize/{pageSize}")
     public Object getAllUsers( @RequestHeader("userId") @NotNull(message =  "userId is required") String id,
-                               @PathVariable(required = false) Integer pageNumber,
-                               @PathVariable(required = false) Integer pageSize,
-                               @RequestParam(required = false) String role,
+                               @PathVariable(value = "pageNumber", required = false) Integer pageNumber,
+                               @PathVariable(value = "pageSize", required = false) Integer pageSize,
+                               @RequestParam(value = "role", required = false) String role,
                                Authentication auth) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         if(StringUtils.isEmpty(userId)) {

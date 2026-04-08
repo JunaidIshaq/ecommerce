@@ -25,9 +25,9 @@ public class AdminOrderController {
 
     @GetMapping("/orders/pageNumber/{pageNumber}/pageSize/{pageSize}")
     public Object getAllOrders( @RequestHeader("userId") @NotNull String id,
-                                @PathVariable Integer pageNumber,
-                                @PathVariable Integer pageSize,
-                                @RequestParam(required = false) String status,
+                                @PathVariable(value = "pageNumber") Integer pageNumber,
+                                @PathVariable(value = "pageSize") Integer pageSize,
+                                @RequestParam(value = "status", required = false) String status,
                                 Authentication auth) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         if(StringUtils.isEmpty(userId)) {

@@ -15,7 +15,7 @@ eureka:
   server:
     wait-time-in-ms-when-sync-empty: 0
   instance:
-    hostname: eureka-server
+    hostname: localhost
 
 logging:
   level:

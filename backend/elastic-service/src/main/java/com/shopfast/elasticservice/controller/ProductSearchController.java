@@ -30,8 +30,8 @@ public class ProductSearchController {
     }
 
     @GetMapping("/semantic")
-    public List<ProductDocument> semanticSearch(@RequestParam String q,
-                                                @RequestParam(defaultValue = "10") int k) {
+    public List<ProductDocument> semanticSearch(@RequestParam("q") String q,
+                                                @RequestParam(value = "k", defaultValue = "10") int k) {
         return searchService.semanticSearch(q, k);
     }
 }
