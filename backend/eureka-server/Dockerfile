@@ -1,6 +1,10 @@
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
+# Copy parent pom and install it
+COPY pom.xml .
+RUN mvn install -N -DskipTests
+
 # Copy eureka-server sources from subfolder
 COPY eureka-server/pom.xml ./pom.xml
 COPY eureka-server/src ./src
