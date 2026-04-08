@@ -134,6 +134,8 @@ services:
          condition: service_healthy
        kafka:
          condition: service_healthy
+       elasticsearch:
+         condition: service_healthy
        category-service:
          condition: service_healthy
        postgres:
@@ -177,6 +179,8 @@ services:
       postgres:
         condition: service_healthy
       eureka-server:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
     environment:
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/category_db
