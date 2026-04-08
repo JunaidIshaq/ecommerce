@@ -141,7 +141,7 @@ services:
        redis:
          condition: service_healthy
        elasticsearch:
-         condition: service_healthy
+         condition: service_started
        kafka:
          condition: service_healthy
        category-service:
@@ -185,7 +185,7 @@ services:
       redis:
         condition: service_healthy
       elasticsearch:
-        condition: service_healthy
+        condition: service_started
       postgres:
         condition: service_healthy
       eureka-server:
@@ -245,7 +245,7 @@ services:
       redis:
         condition: service_healthy
       elasticsearch:
-        condition: service_healthy
+        condition: service_started
       postgres:
         condition: service_healthy
       kafka:
@@ -428,7 +428,7 @@ services:
       redis:
         condition: service_healthy
       elasticsearch:
-        condition: service_healthy
+        condition: service_started
       kafka:
         condition: service_healthy
       product-service:
@@ -466,7 +466,7 @@ services:
       redis:
         condition: service_healthy
       elasticsearch:
-        condition: service_healthy
+        condition: service_started
       kafka:
         condition: service_healthy
       product-service:
@@ -564,7 +564,7 @@ services:
       - "8092:8092"
     depends_on:
       elasticsearch:
-        condition: service_healthy
+        condition: service_started
       redis:
         condition: service_healthy
       kafka:
