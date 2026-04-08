@@ -5,13 +5,11 @@ import com.shopfast.productservice.client.CategoryClient;
 import com.shopfast.productservice.dto.PagedResponse;
 import com.shopfast.productservice.dto.ProductDto;
 import com.shopfast.productservice.dto.ProductInternalResponseDto;
-import com.shopfast.productservice.dto.SearchResult;
 import com.shopfast.productservice.events.KafkaProductProducer;
 import com.shopfast.productservice.exception.InvalidCategoryException;
 import com.shopfast.productservice.exception.ProductNotFoundException;
 import com.shopfast.productservice.model.Product;
 import com.shopfast.productservice.repository.ProductRepository;
-import com.shopfast.productservice.search.ElasticProductSearchService;
 import com.shopfast.productservice.util.ProductMapper;
 import io.jsonwebtoken.lang.Strings;
 import jakarta.transaction.Transactional;
@@ -25,7 +23,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -37,16 +34,14 @@ import java.util.UUID;
 @Service
 public class ProductService {
 
-    private ElasticProductSearchService elasticProductSearchService;
-
     private ProductRepository productRepository;
 
     private CategoryClient categoryClient;
 
     private KafkaProductProducer kafkaProductProducer;
 
-    public ProductService(ElasticProductSearchService elasticProductSearchService, ProductRepository productRepository, CategoryClient categoryClient, KafkaProductProducer kafkaProductProducer) {
-        this.elasticProductSearchService = elasticProductSearchService;
+    // Elasticsearch disabled - removed ElasticProductSearchService dependency
+    public ProductService(ProductRepository productRepository, CategoryClient categoryClient, KafkaProductProducer kafkaProductProducer) {
         this.productRepository = productRepository;
         this.categoryClient = categoryClient;
         this.kafkaProductProducer = kafkaProductProducer;
@@ -61,19 +56,13 @@ public class ProductService {
             @CacheEvict(value = "product", key = "#result.id", condition = "#result != null"),
             @CacheEvict(value = "productsPage", allEntries = true)
     })
-    public ProductDto createProduct(@Valid ProductDto productDto) throws IOException, InvalidCategoryException {
+    public ProductDto createProduct(@Valid ProductDto productDto) throws InvalidCategoryException {
         Product product = ProductMapper.createProduct(productDto);
         if (!categoryClient.validateCategoryExists(product.getCategoryId())) {
             throw new InvalidCategoryException(product.getCategoryId());
         }
-        try {
-            Product saved = productRepository.save(product);
-            // Elastic service will consume events through kafka.
-            elasticProductSearchService.indexProduct(saved);
-        } catch (Exception e) {
-            log.error("Failed to index product in Elasticsearch: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to index product: " + e.getMessage(), e);
-        }
+        Product saved = productRepository.save(product);
+        
         // Publish product created event
         ProductEvent event = new ProductEvent(
                 UUID.randomUUID().toString(),
@@ -102,14 +91,14 @@ public class ProductService {
         log.info("Class ProductService method getAllProducts() -> pageNumber : {}, pageSize : {}, categoryId : {}, sortBy : {}, sortOrder : {}", pageNumber, pageSize, categoryId, sortBy, sortOrder);
         PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
         Page<Product> productPage;
-        
+
         // Build sort based on parameters, default to createdAt descending
         Sort defaultSort = Sort.by(Sort.Direction.DESC, "createdAt");
         Sort sort = defaultSort;
-        
+
         if (Strings.hasText(sortBy) && Strings.hasText(sortOrder)) {
-            Sort.Direction direction = sortOrder.equalsIgnoreCase("desc") 
-                ? Sort.Direction.DESC 
+            Sort.Direction direction = sortOrder.equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC
                 : Sort.Direction.ASC;
             sort = Sort.by(direction, sortBy);
         }
@@ -220,11 +209,11 @@ public class ProductService {
             existing.setImages(updatedProduct.getImages());
             existing.setStock(updatedProduct.getStock());
             Product savedProduct = productRepository.save(existing);
-            try {
-                elasticProductSearchService.indexProduct(savedProduct);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to reindex product", e);
-            }
+//            try {
+//                elasticProductSearchService.indexProduct(savedProduct);
+//            } catch (IOException e) {
+//                throw new RuntimeException("Failed to reindex product", e);
+//            }
 
             // Publish Product Update event to Kafka for elastic search
             ProductEvent event = new ProductEvent();
@@ -259,7 +248,7 @@ public class ProductService {
     public void deleteProduct(String id) {
         UUID productId = UUID.fromString(id);
         productRepository.deleteById(productId);
-        elasticProductSearchService.deleteProductFromIndex(id);
+//        elasticProductSearchService.deleteProductFromIndex(id);
     }
 
     public List<Product> searchByTitle(String title) {
@@ -277,33 +266,37 @@ public class ProductService {
             int size
     ) {
         try {
-            SearchResult result = elasticProductSearchService.searchProducts(
-                    keyword, categoryIds, minPrice, maxPrice, sortBy, sortOrder, page, size
-            );
+//            SearchResult result = elasticProductSearchService.searchProducts(
+//                    keyword, categoryIds, minPrice, maxPrice, sortBy, sortOrder, page, size
+//            );
 
-            long totalItems = result.getTotalHits();
-            int totalPages = (int) Math.ceil((double) totalItems / size);
+//            long totalItems = result.getTotalHits();
+//            int totalPages = (int) Math.ceil((double) totalItems / size);
+//
+//
+//            PagedResponse<Product> pagedResults = new PagedResponse<>(
+//                    result.getProducts(),
+//                    totalItems,
+//                    totalPages,
+//                    page,
+//                    size
+//            );
 
-
-            PagedResponse<Product> pagedResults = new PagedResponse<>(
-                    result.getProducts(),
-                    totalItems,
-                    totalPages,
-                    page,
-                    size
-            );
-
-            return pagedResults;
-        } catch (IOException e) {
-            throw new RuntimeException("Search failed", e);
+//            return pagedResults;
+//        } catch (IOException e) {
+//            throw new RuntimeException("Search failed", e);
+//        }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+        return null;
     }
 
-    /**
+        /**
      * Updates inStock status of a product, persists it, and reindexes in Elasticsearch.
      */
     @Transactional
-    public void updateStockAndAvailability(String productId, int stock) throws IOException {
+    public void updateStockAndAvailability(String productId, int stock) {
         log.info("Updating stock for product {} -> {}", productId, stock);
 
         // Find product in database
@@ -318,13 +311,5 @@ public class ProductService {
         productRepository.save(product);
 
         log.info("Updated product {} in database. New stock = {}", productId, stock);
-
-        // Reindex product in Elasticsearch (try-catch to avoid breaking Kafka listener)
-        try {
-            elasticProductSearchService.indexProduct(product);
-            log.info("Reindexed product {} in Elasticsearch", productId);
-        } catch (IOException e) {
-            log.error("Failed to reindex product {} in Elasticsearch: {}", productId, e.getMessage(), e);
-        }
     }
 }

@@ -1,9 +1,7 @@
 package com.shopfast.categoryservice.util;
 
-import com.shopfast.categoryservice.config.ElasticIndexConfig;
 import com.shopfast.categoryservice.model.Category;
 import com.shopfast.categoryservice.repository.CategoryRepository;
-import com.shopfast.categoryservice.search.ElasticCategorySearchService;
 import com.shopfast.categoryservice.service.CategoryService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -24,15 +21,16 @@ public class CategoryDataSeeder {
 
     private final CategoryService categoryService;
 
-    private final ElasticCategorySearchService elasticService;
+    // Elasticsearch disabled - no longer injecting ElasticCategorySearchService and ElasticIndexConfig
+    // private final ElasticCategorySearchService elasticService;
+    // private final ElasticIndexConfig elasticIndexConfig;
 
-    private final ElasticIndexConfig elasticIndexConfig;
-
-    public CategoryDataSeeder(CategoryRepository categoryRepository, CategoryService categoryService, ElasticCategorySearchService elasticService, ElasticIndexConfig elasticIndexConfig) {
+    // Elasticsearch disabled constructor
+    public CategoryDataSeeder(CategoryRepository categoryRepository, CategoryService categoryService) {
         this.categoryRepository = categoryRepository;
         this.categoryService = categoryService;
-        this.elasticService = elasticService;
-        this.elasticIndexConfig = elasticIndexConfig;
+        // this.elasticService = elasticService;
+        // this.elasticIndexConfig = elasticIndexConfig;
     }
 
     @Value("${app.seed-categories:false}")
@@ -41,44 +39,24 @@ public class CategoryDataSeeder {
     private static final int CATEGORY_COUNT = 6;
 
     @PostConstruct
-    public void seed() throws IOException {
+    public void seed() {
         if (!seedCategories) {
             System.out.println("🟢 Category seeding disabled (set app.seed-categories=true to enable)");
             return;
         }
 
-
+        // Elasticsearch disabled - only check database
         try {
             if (categoryRepository.count() > 0) {
-                try {
-                    if (elasticService.count() > 0) {
-                        log.info("🟢 Category already exist, skipping seeding.");
-                        return;
-                    }
-                } catch (Exception ex) {
-                    log.warn("⚠️ Could not count categories in elasticsearch, proceeding with seeding: {}", ex.getMessage());
-                }
+                log.info("🟢 Category already exist, skipping seeding.");
+                return;
             }
         } catch (Exception ex) {
             log.warn("⚠️ Could not count existing categories in postgres, proceeding with seeding: {}", ex.getMessage());
         }
 
-        // Try to setup Elasticsearch index, but don't fail if Elasticsearch is not available
-        try {
-            elasticIndexConfig.resetCategoryIndex();
-            elasticIndexConfig.createCategoryIndexIfNotExists();
-        } catch (Exception ex) {
-            log.error("⚠️ Failed to setup Elasticsearch index (service may not be ready): {}", ex.getMessage());
-        }
-
+        // Elasticsearch disabled - skip index setup
         categoryRepository.deleteAll();
-
-        // Try to delete categories from Elasticsearch, but don't fail if not available
-        try {
-            elasticService.deleteAllCategories();
-        } catch (Exception ex) {
-            log.warn("⚠️ Could not delete categories from elasticsearch: {}", ex.getMessage());
-        }
 
         // Predefined category list with fixed UUIDs
         List<Category> predefined = List.of(

@@ -30,7 +30,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   elasticsearch:
-    uris: ${ELASTIC_URI:http://localhost:9200}
+    uris: ${ELASTIC_URI:}
 
   jackson:
     serialization:

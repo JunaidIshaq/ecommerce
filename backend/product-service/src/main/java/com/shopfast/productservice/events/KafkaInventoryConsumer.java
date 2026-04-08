@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -26,7 +25,7 @@ public class KafkaInventoryConsumer {
     }
 
     @KafkaListener(topics = "inventory.events", groupId = "product-service-group", containerFactory = "kafkaListenerContainerFactory")
-    public void onInventoryEvent(InventoryEvent event) throws IOException {
+    public void onInventoryEvent(InventoryEvent event) {
         // Idempotency: skip if already processed
         if (processedEventStore.isProcessed(event.getEventId())) {
             log.info("Skipping already processed event {}", event.getEventId());

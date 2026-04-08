@@ -4,10 +4,8 @@ import com.github.javafaker.Faker;
 import com.shopfast.common.dto.CategoryDto;
 import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.productservice.client.CategoryClient;
-import com.shopfast.productservice.config.ElasticIndexConfig;
 import com.shopfast.productservice.model.Product;
 import com.shopfast.productservice.repository.ProductRepository;
-import com.shopfast.productservice.search.ElasticProductSearchService;
 import com.shopfast.productservice.service.ProductService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -18,15 +16,12 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
 public class ProductDataSeeder {
 
     private final ProductRepository productRepository;
-    private final ElasticProductSearchService elasticService;
-    private final ElasticIndexConfig elasticIndexConfig;
     private final ProductService productService;
     private final CategoryClient categoryClient;
 
@@ -35,13 +30,10 @@ public class ProductDataSeeder {
 
     private static final int PRODUCT_COUNT = 1000;
 
-    public ProductDataSeeder(ElasticIndexConfig elasticIndexConfig,
-                             ElasticProductSearchService elasticService,
-                             ProductRepository productRepository,
+    // Elasticsearch disabled - simplified constructor
+    public ProductDataSeeder(ProductRepository productRepository,
                              ProductService productService,
                              CategoryClient categoryClient) {
-        this.elasticIndexConfig = elasticIndexConfig;
-        this.elasticService = elasticService;
         this.productRepository = productRepository;
         this.productService = productService;
         this.categoryClient = categoryClient;
@@ -54,28 +46,19 @@ public class ProductDataSeeder {
             return;
         }
 
+        // Elasticsearch disabled - only check database
         try {
-            waitForElasticsearch();
-
-
-            long dbCount = 0;
-            long esCount = 0;
-            try {
-                dbCount = productRepository.count();
-                esCount = elasticService.count();
-            } catch (Exception e) {
-                log.warn("⚠️ Could not count existing products, proceeding with seeding", e);
-            }
-
-            if (dbCount > 0 && esCount > 0) {
+            long dbCount = productRepository.count();
+            if (dbCount > 0) {
                 log.info("🟢 Products already exist, skipping seeding.");
                 return;
             }
-            elasticIndexConfig.resetProductIndex();
-            elasticIndexConfig.createProductIndexIfNotExists();
-            productRepository.deleteAll();
-            elasticService.deleteAllProducts();
+        } catch (Exception e) {
+            log.warn("⚠️ Could not count existing products, proceeding with seeding", e);
+        }
 
+        try {
+            productRepository.deleteAll();
 
             log.info("🚀 Generating {} dummy products...", PRODUCT_COUNT);
 
@@ -101,24 +84,6 @@ public class ProductDataSeeder {
         } catch (Exception e) {
             log.error("❌ Exception occurred when seeding products", e);
         }
-    }
-
-    /**
-     * Retry connecting to Elasticsearch a few times before seeding.
-     */
-    private void waitForElasticsearch() throws InterruptedException {
-        int retries = 10;
-        while (retries-- > 0) {
-            try {
-                elasticService.healthCheck(); // <-- implement a simple ping in your ElasticProductSearchService
-                log.info("🟢 Elasticsearch is reachable");
-                return;
-            } catch (Exception e) {
-                log.warn("⏳ Waiting for Elasticsearch to be ready... Retries left: {}", retries);
-                TimeUnit.SECONDS.sleep(5);
-            }
-        }
-        log.error("❌ Elasticsearch is not ready after multiple retries, proceeding anyway.");
     }
 
     /**

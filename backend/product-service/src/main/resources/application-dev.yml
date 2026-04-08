@@ -44,7 +44,7 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
   elasticsearch:
-    uris: ${ELASTIC_URI:http://localhost:9200}
+    uris: ${ELASTIC_URI:}
 
   jackson:
     serialization:

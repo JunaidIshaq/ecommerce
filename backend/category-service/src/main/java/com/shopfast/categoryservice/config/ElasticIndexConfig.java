@@ -1,78 +1,54 @@
 package com.shopfast.categoryservice.config;
 
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
-import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+// import co.elastic.clients.elasticsearch.ElasticsearchClient;
+// import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
+// import lombok.RequiredArgsConstructor;
+// import lombok.extern.slf4j.Slf4j;
+// import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-
-@Slf4j
-@Component
+/**
+ * Elasticsearch index configuration - DISABLED for now
+ * Uncomment to enable Elasticsearch index management
+ */
+// @Slf4j
+// @Component
+// @RequiredArgsConstructor
 public class ElasticIndexConfig {
 
-    private final ElasticsearchClient client;
+    // private final ElasticsearchClient client;
 
-    public ElasticIndexConfig(ElasticsearchClient client) {
-        this.client = client;
-    }
+    // public void createCategoryIndexIfNotExists() {
+    //     try {
+    //         boolean indexExists = client.indices().exists(e -> e.index("category")).value();
+    //         if (!indexExists) {
+    //             client.indices().create(c -> c
+    //                 .index("category")
+    //                 .mappings(m -> m
+    //                     .properties("id", p -> p.keyword(k -> k))
+    //                     .properties("name", p -> p.text(t -> t.analyzer("standard")))
+    //                     .properties("description", p -> p.text(t -> t.analyzer("standard")))
+    //                     .properties("slug", p -> p.keyword(k -> k))
+    //                     .properties("parentId", p -> p.keyword(k -> k))
+    //                 )
+    //             );
+    //             log.info("✅ Created Elasticsearch index: category");
+    //         } else {
+    //             log.info("ℹ️ Elasticsearch index already exists: category");
+    //         }
+    //     } catch (Exception e) {
+    //         log.error("❌ Failed to create Elasticsearch index: {}", e.getMessage());
+    //     }
+    // }
 
-    public void resetCategoryIndex() {
-        try {
-            boolean exists = client.indices().exists(e -> e.index("category")).value();
-            if (exists) {
-                client.indices().delete(d -> d.index("category"));
-                log.info("Old Elasticsearch index 'category' deleted successfully");
-            }
-        } catch (IOException e) {
-            log.error("Failed to delete old Elasticsearch index", e);
-        }
-    }
-
-
-    public void createCategoryIndexIfNotExists() {
-        try {
-            boolean exists = client.indices().exists(e -> e.index("category")).value();
-            if (!exists) {
-                log.info("Creating Elasticsearch index: category");
-
-                CreateIndexResponse response = client.indices().create(c -> c
-                        .index("category")
-                        .settings(s -> s
-                                .analysis(a -> a
-                                        .analyzer("custom_text_analyzer", analyzer -> analyzer
-                                                .custom(ca -> ca
-                                                        .tokenizer("standard")
-                                                        .filter("lowercase", "asciifolding", "porter_stem")
-                                                )
-                                        )
-                                )
-                        )
-                        .mappings(m -> m
-                                .properties("id", p -> p.keyword(k -> k))
-                                .properties("name", p -> p.text(t -> t
-                                        .analyzer("custom_text_analyzer")
-                                        .fields("keyword", f -> f.keyword(k -> k.ignoreAbove(256)))
-                                ))
-                                .properties("description", p -> p.text(t -> t.analyzer("custom_text_analyzer")))
-                                .properties("parentId", p -> p.keyword(k -> k))
-                                .properties("subCategoryIds", p -> p.keyword(d -> d))
-                                .properties("createdAt", p -> p.date(d -> d))
-                                .properties("updatedAt", p -> p.date(d -> d))
-                                .properties("createdBy", p ->  p.keyword(d -> d))
-                                .properties("updatedBy", p ->  p.keyword(d -> d))
-                        )
-                );
-
-                if (response.acknowledged()) {
-                    log.info("Elasticsearch index 'category' created successfully");
-                }
-            } else {
-                log.info("Elasticsearch index 'category' already exists");
-            }
-        } catch (IOException e) {
-            log.error("Error creating Elasticsearch index mapping", e);
-        }
-    }
+    // public void resetCategoryIndex() {
+    //     try {
+    //         boolean indexExists = client.indices().exists(e -> e.index("category")).value();
+    //         if (indexExists) {
+    //             client.indices().delete(d -> d.index("category"));
+    //             log.info("✅ Deleted Elasticsearch index: category");
+    //         }
+    //     } catch (Exception e) {
+    //         log.warn("⚠️ Failed to delete Elasticsearch index: {}", e.getMessage());
+    //     }
+    // }
 }

@@ -5,7 +5,7 @@ import com.shopfast.categoryservice.dto.PagedResponse;
 import com.shopfast.categoryservice.exception.CategoryNotFoundException;
 import com.shopfast.categoryservice.model.Category;
 import com.shopfast.categoryservice.repository.CategoryRepository;
-import com.shopfast.categoryservice.search.ElasticCategorySearchService;
+// import com.shopfast.categoryservice.search.ElasticCategorySearchService;
 import com.shopfast.categoryservice.util.CategoryMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +28,12 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final ElasticCategorySearchService elasticService;
+    // private final ElasticCategorySearchService elasticService;
 
-    public CategoryService(CategoryRepository categoryRepository, ElasticCategorySearchService elasticService) {
+    // Elasticsearch disabled - no longer injecting ElasticCategorySearchService
+    public CategoryService(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
-        this.elasticService = elasticService;
+        // this.elasticService = elasticService;
     }
 
     @Transactional
@@ -49,7 +50,7 @@ public class CategoryService {
                     throw new IllegalArgumentException("Category with this name already exists");
                 });
         category = categoryRepository.save(category);
-        elasticService.indexCategory(category);
+//        elasticService.indexCategory(category);
         return category;
     }
 
@@ -102,7 +103,7 @@ public class CategoryService {
         existingCategory.setSubCategoryIds(updatedCategory.getSubCategoryIds());
 
         existingCategory = categoryRepository.save(existingCategory);
-        elasticService.indexCategory(existingCategory);
+//        elasticService.indexCategory(existingCategory);
         return existingCategory;
     }
 
