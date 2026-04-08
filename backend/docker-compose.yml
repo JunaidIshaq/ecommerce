@@ -75,9 +75,9 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1" ]
       interval: 10s
-      timeout: 5s
+      timeout: 10s
       retries: 5
-      start_period: 15s
+      start_period: 60s
     networks:
       - product-net
 
@@ -138,16 +138,18 @@ services:
       dockerfile: product-service/Dockerfile
     container_name: product-service
     depends_on:
-      redis:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      category-service:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
+       redis:
+         condition: service_healthy
+       elasticsearch:
+         condition: service_healthy
+       kafka:
+         condition: service_healthy
+       category-service:
+         condition: service_healthy
+       postgres:
+         condition: service_healthy
+       eureka-server:
+         condition: service_healthy
 
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/product_db
@@ -164,9 +166,9 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8081/actuator/health || exit 1" ]
       interval: 20s
-      timeout: 5s
+      timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 60s
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
@@ -184,6 +186,10 @@ services:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
+      postgres:
+        condition: service_started
+      eureka-server:
+        condition: service_healthy
     environment:
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/category_db
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -200,9 +206,9 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1" ]
       interval: 20s
-      timeout: 5s
+      timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 60s
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
@@ -228,9 +234,9 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8083/actuator/health || exit 1" ]
       interval: 20s
-      timeout: 5s
+      timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 60s
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
@@ -266,9 +272,9 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8084/actuator/health || exit 1" ]
       interval: 20s
-      timeout: 5s
+      timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 60s
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
@@ -279,6 +285,10 @@ services:
       kafka:
         condition: service_healthy
       product-service:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      eureka-server:
         condition: service_healthy
     networks:
       - product-net
@@ -301,9 +311,9 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8085/actuator/health || exit 1" ]
       interval: 20s
-      timeout: 5s
+      timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 60s
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
@@ -312,6 +322,10 @@ services:
       kafka:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      eureka-server:
         condition: service_healthy
     networks:
       - product-net
@@ -403,15 +417,17 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8088/actuator/health || exit 1" ]
       interval: 20s
-      timeout: 5s
+      timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 60s
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
       - "8088:8088"
     depends_on:
       redis:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
       kafka:
         condition: service_healthy
@@ -439,9 +455,9 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8089/actuator/health || exit 1" ]
       interval: 20s
-      timeout: 5s
+      timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 60s
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
@@ -449,10 +465,14 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
       kafka:
         condition: service_healthy
       product-service:
         condition: service_healthy
+      postgres:
+        condition: service_started
     networks:
       - product-net
 
