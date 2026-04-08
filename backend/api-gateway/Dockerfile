@@ -16,6 +16,6 @@ RUN mvn clean package -DskipTests
 # Run stage
 FROM eclipse-temurin:21-jdk
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/api-gateway-1.0.0.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+      </profile>
+      <profile name="Annotation profile for ecommerce-platform" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.6.0/mapstruct-processor-1.6.0.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
+        </processorPath>
+        <module name="cart-service" />
+        <module name="category-service" />
+        <module name="coupon-service" />
+        <module name="review-service" />
+        <module name="product-service" />
+        <module name="common-lib" />
+        <module name="user-service" />
+        <module name="eureka-server" />
+        <module name="notification-service" />
+        <module name="auth-service" />
+        <module name="inventory-service" />
+        <module name="payment-service" />
+        <module name="api-gateway" />
+        <module name="elastic-service" />
+        <module name="order-service" />
+        <module name="admin-service" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="admin-service" options="" />
+      <module name="api-gateway" options="" />
+      <module name="auth-service" options="" />
+      <module name="cart-service" options="" />
+      <module name="category-service" options="" />
+      <module name="coupon-service" options="" />
+      <module name="elastic-service" options="" />
+      <module name="eureka-server" options="" />
+      <module name="inventory-service" options="" />
+      <module name="notification-service" options="" />
+      <module name="order-service" options="" />
+      <module name="payment-service" options="" />
+      <module name="product-service" options="-parameters" />
+      <module name="review-service" options="" />
+      <module name="user-service" options="" />
+    </option>
+  </component>
+</project>
