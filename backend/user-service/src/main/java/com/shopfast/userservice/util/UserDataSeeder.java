@@ -1,8 +1,10 @@
 package com.shopfast.userservice.util;
 
 import com.shopfast.userservice.client.ProductClient;
+import com.shopfast.userservice.dto.RegisterRequestDto;
 import com.shopfast.userservice.repository.UserRepository;
 import com.shopfast.userservice.service.UserService;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,47 +26,57 @@ public class UserDataSeeder {
     }
 
     @Value("${app.seed-user:false}")
-    private boolean seedOrder; // toggle via application.yml
+    private boolean seedUser; // toggle via application.yml
 
-    private static final int ORDER_COUNT = 10;
+    private static final int USER_COUNT = 10;
 
-//    @PostConstruct
-//    public void seed() throws IOException {
-//        if (!seedOrder) {
-//            System.out.println("🟢 User seeding disabled (set app.seed-products=true to enable)");
-//            return;
-//        }
-//        userRepository.deleteAll();
-//        if (userRepository.count() > 0) {
-//            System.out.println("🟢 Orders already exist, skipping seeding.");
-//            return;
-//        }
-//
-//        log.info("🚀 Generating " + ORDER_COUNT + " dummy orders...");
-//
-//        List<String> productIds = productClient.fetchAllProducts();
-//
-//        for (int i = 1; i <= ORDER_COUNT; i++) {
-//            RegisterRequestDto registerRequestDto = new RegisterRequestDto();
-//            registerRequestDto.setUserId(UUID.randomUUID().toString());
-//            List<OrderItem> orderItems = new ArrayList<>();
-//            for(int j = 1; j <= new Random().nextInt(1,20); j++) {
-//                OrderItem  orderItem = new OrderItem();
-//                orderItem.setId(UUID.randomUUID());
-//                orderItem.setProductId(UUID.fromString(productIds.get(new Random().nextInt(1000))));
-//                orderItem.setQuantity(new Random().nextInt(1, 10));
-//                orderItem.setPrice(BigDecimal.valueOf(new Random().nextDouble(1000)));
-//                orderItem.setCreatedAt(Instant.now());
-//                orderItem.setUpdatedAt(Instant.now());
-//                orderItem.setCreatedBy(UUID.randomUUID().toString());
-//                orderItem.setUpdatedBy(UUID.randomUUID().toString());
-//                orderItems.add(orderItem);
-//            }
-//            registerRequestDto.setItems(orderItems.stream().map(OrderMapper::getOrderItemDto).toList());
-//            userService.placeOrder(registerRequestDto);
-//        }
-//
-//        System.out.println("✅ Seeded " + ORDER_COUNT + " orders successfully!");
-//    }
+    @PostConstruct
+    public void seed() {
+        if (!seedUser) {
+            System.out.println("🟢 User seeding disabled (set app.seed-user=true to enable)");
+            return;
+        }
+        
+        if (userRepository.count() > 0) {
+            System.out.println("🟢 Users already exist, skipping seeding.");
+            return;
+        }
+
+        log.info("🚀 Generating " + USER_COUNT + " dummy users...");
+
+        // Create alice@example.com first
+        try {
+            RegisterRequestDto aliceRequest = RegisterRequestDto.builder()
+                    .email("alice@example.com")
+                    .password("secret123")
+                    .firstName("Alice")
+                    .lastName("User")
+                    .build();
+            
+            userService.registerNewUser(aliceRequest);
+            log.info("✅ Created user: alice@example.com");
+        } catch (Exception e) {
+            log.error("❌ Failed to create user alice@example.com: {}", e.getMessage());
+        }
+        
+        // Create alice1 to alice9 (9 more users)
+        for (int i = 1; i < USER_COUNT; i++) {
+            try {
+                RegisterRequestDto registerRequestDto = RegisterRequestDto.builder()
+                        .email("alice" + i + "@example.com")
+                        .password("secret123")
+                        .firstName("Alice")
+                        .lastName("User" + i)
+                        .build();
+                
+                userService.registerNewUser(registerRequestDto);
+                log.info("✅ Created user: alice{}@example.com", i);
+            } catch (Exception e) {
+                log.error("❌ Failed to create user alice{}@example.com: {}", i, e.getMessage());
+            }
+        }
+
+        System.out.println("✅ Seeded " + USER_COUNT + " users successfully!");
+    }
 
 }
