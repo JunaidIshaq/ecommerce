@@ -87,7 +87,7 @@ management:
       application: product-service
 
 app:
-  seed-products: false
+  seed-products: true
 
 category:
   service:
