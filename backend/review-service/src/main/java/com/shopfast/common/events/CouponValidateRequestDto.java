@@ -1,6 +1,6 @@
 package com.shopfast.common.events;
 
-import com.shopfast.couponservice.dto.CouponLineItemDto;
+import com.shopfast.reviewservice.dto.CouponLineItemDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
