@@ -51,12 +51,12 @@ public class CartGuestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CartItemDto>> getCartItem(@RequestParam String anonId) {
+    public ResponseEntity<List<CartItemDto>> getCartItem(@RequestParam("anonId") String anonId) {
         return ResponseEntity.ok(cartService.getGuestCart(anonId));
     }
 
     @DeleteMapping("/items/{productId}")
-    public ResponseEntity<Map<String, String>> removeItem(@RequestParam String anonId, @PathVariable String productId) {
+    public ResponseEntity<Map<String, String>> removeItem(@RequestParam("anonId") String anonId, @PathVariable String productId) {
         cartService.removeGuestItem(anonId, productId);
         Map<String, String> map = new HashMap<>();
         map.put("status", "success");
@@ -65,7 +65,7 @@ public class CartGuestController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Map<String, String>> clear(@RequestParam String anonId) {
+    public ResponseEntity<Map<String, String>> clear(@RequestParam("anonId") String anonId) {
         cartService.clearGuestCart(anonId);
         Map<String, String> map = new HashMap<>();
         map.put("status", "success");
