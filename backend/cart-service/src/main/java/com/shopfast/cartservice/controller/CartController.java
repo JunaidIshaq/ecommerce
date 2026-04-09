@@ -47,7 +47,7 @@ public class CartController {
     }
 
     @PutMapping("/items/{productId}")
-    public ResponseEntity<Map<String, String>> updateItem(@PathVariable String productId, @RequestParam("quantity") Integer quantity, Authentication authentication) throws JsonProcessingException {
+    public ResponseEntity<Map<String, String>> updateItem(@PathVariable("productId") String productId, @RequestParam("quantity") Integer quantity, Authentication authentication) throws JsonProcessingException {
         String userId = authentication.getName();
         cartService.updateUser(userId, productId, quantity);
         Map<String, String> map = new HashMap<>();
@@ -69,7 +69,7 @@ public class CartController {
 
     @Operation(summary = "Delete Product form Cart")
     @DeleteMapping("/items/{productId}")
-    public ResponseEntity<Map<String, String>> removeItem(@PathVariable String productId, Authentication authentication) throws JsonProcessingException {
+    public ResponseEntity<Map<String, String>> removeItem(@PathVariable("productId") String productId, Authentication authentication) throws JsonProcessingException {
         cartService.removeUserItem(authentication.getName(), productId);
         Map<String, String> map = new HashMap<>();
         map.put("status", "success");

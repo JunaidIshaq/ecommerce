@@ -27,8 +27,8 @@ public class AdminProductController {
 
     @GetMapping("/product/pageNumber/{pageNumber}/pageSize/{pageSize}")
     public Object getAllProducts( @RequestHeader("userId") @NotNull String id,
-                                @PathVariable Integer pageNumber,
-                                @PathVariable Integer pageSize,
+                                @PathVariable("pageNumber") Integer pageNumber,
+                                @PathVariable("pageSize") Integer pageSize,
                                 Authentication auth) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         if(StringUtils.isEmpty(userId)) {

@@ -92,7 +92,7 @@ public class ProductController {
 
     @Operation(summary = "Update Product based on Id", security = @SecurityRequirement(name = "bearerAuth"))
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable String id, 
+    public ResponseEntity<ProductDto> updateProduct(@PathVariable("id") String id, 
                                                      @Valid @RequestBody ProductDto productDto) throws IOException {
         return ResponseEntity.ok(productService.updateProduct(id, ProductMapper.getProduct(productDto)));
     }

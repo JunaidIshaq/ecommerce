@@ -56,7 +56,7 @@ public class CouponController {
     }
 
     @GetMapping("/{code}")
-    public ResponseEntity<Coupon> getByCode(@PathVariable String code) {
+    public ResponseEntity<Coupon> getByCode(@PathVariable("code") String code) {
         return couponService.findByCode(code)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

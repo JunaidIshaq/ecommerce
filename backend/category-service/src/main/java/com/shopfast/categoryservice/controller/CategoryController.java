@@ -60,7 +60,7 @@ public class CategoryController {
 
     @Operation(summary = "Get subcategories of a parent category")
     @GetMapping("/{parentId}/subcategories")
-    public ResponseEntity<List<CategoryDto>> getSubCategories(@PathVariable String parentId) {
+    public ResponseEntity<List<CategoryDto>> getSubCategories(@PathVariable("parentId") String parentId) {
         List<CategoryDto> list = categoryService.getSubCategories(parentId)
                 .stream().map(CategoryMapper::getCategoryDto).collect(Collectors.toList());
         return ResponseEntity.ok(list);
@@ -68,7 +68,7 @@ public class CategoryController {
 
     @Operation(summary = "Update category details", security = @SecurityRequirement(name = "bearerAuth"))
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryDto> updateCategory(@PathVariable String id, @Valid @RequestBody CategoryDto dto) throws IOException {
+    public ResponseEntity<CategoryDto> updateCategory(@PathVariable("id") String id, @Valid @RequestBody CategoryDto dto) throws IOException {
         Category updated = categoryService.updateCategory(id, CategoryMapper.getCategory(dto));
         return ResponseEntity.ok(CategoryMapper.getCategoryDto(updated));
     }
@@ -76,7 +76,7 @@ public class CategoryController {
 
     @Operation(summary = "Delete a category", security = @SecurityRequirement(name = "bearerAuth"))
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable String id) {
+    ResponseEntity<Void> deleteCategory(@PathVariable("id") String id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
     }

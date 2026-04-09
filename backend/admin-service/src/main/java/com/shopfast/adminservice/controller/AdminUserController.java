@@ -46,7 +46,7 @@ public class AdminUserController {
     }
 
     @PutMapping("/{id}/block")
-    public void block(@PathVariable Long id, Authentication auth) {
+    public void block(@PathVariable("id") Long id, Authentication auth) {
         service.blockUser(id, auth.getName());
     }
 }

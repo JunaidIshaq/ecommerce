@@ -34,14 +34,14 @@ public class NotificationController {
     }
 
     @GetMapping("/user/{userId}")
-    public Page<NotificationResponseDto> getUserNotifications(@PathVariable UUID userId,
-                                                              @RequestParam(defaultValue = "1") Integer pageNumber,
-                                                              @RequestParam(defaultValue = "10") Integer pageSize) {
+    public Page<NotificationResponseDto> getUserNotifications(@PathVariable("userId") UUID userId,
+                                                              @RequestParam(name = "pageNumber", defaultValue = "1") Integer pageNumber,
+                                                              @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
         return notificationService.getUserNotifications(userId, PageRequest.of(pageNumber - 1, pageSize));
     }
 
     @PatchMapping("/{id}/read")
-    public NotificationResponseDto markAsRead(@PathVariable UUID userId) {
+    public NotificationResponseDto markAsRead(@PathVariable("id") UUID userId) {
         return notificationService.markAsRead(userId);
     }
 }

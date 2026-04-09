@@ -23,8 +23,8 @@ public class AdminInventoryController {
 
     @GetMapping("/inventory/pageNumber/{pageNumber}/pageSize/{pageSize}")
     public Object getAllInventory(@RequestHeader("userId") @NotNull String id,
-                                   @PathVariable Integer pageNumber,
-                                   @PathVariable Integer pageSize,
+                                   @PathVariable("pageNumber") Integer pageNumber,
+                                   @PathVariable("pageSize") Integer pageSize,
                                    Authentication auth) {
         String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         if (StringUtils.isEmpty(userId)) {

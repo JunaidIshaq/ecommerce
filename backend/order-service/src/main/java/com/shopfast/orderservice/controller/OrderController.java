@@ -65,20 +65,20 @@ public class OrderController {
 
     @Operation(summary = "Get order by id")
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrder(@PathVariable UUID id) {
+    public ResponseEntity<Order> getOrder(@PathVariable("id") UUID id) {
         return orderService.getOrderById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Cancel order")
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<Order> cancel(@PathVariable UUID id) {
+    public ResponseEntity<Order> cancel(@PathVariable("id") UUID id) {
         Order canceled = orderService.cancelOrder(id);
         return ResponseEntity.ok(canceled);
     }
 
     @Operation(summary = "Confirm order")
     @PatchMapping("/{id}/confirm")
-    public ResponseEntity<Order> confirm(@PathVariable UUID id) {
+    public ResponseEntity<Order> confirm(@PathVariable("id") UUID id) {
         Order canceled = orderService.confirmOrder(id);
         return ResponseEntity.ok(canceled);
     }

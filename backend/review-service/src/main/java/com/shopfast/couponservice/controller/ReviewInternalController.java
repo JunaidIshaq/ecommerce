@@ -20,7 +20,7 @@ public class ReviewInternalController {
     }
 
     @GetMapping("/summary/{productId}")
-    public RatingSummaryResponseDto internalSummary(@PathVariable UUID productId) {
+    public RatingSummaryResponseDto internalSummary(@PathVariable("productId") UUID productId) {
         return reviewService.getSummary(productId);
     }
 

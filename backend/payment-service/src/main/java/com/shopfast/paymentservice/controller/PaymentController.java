@@ -57,7 +57,7 @@ public class PaymentController {
     }
 
     @GetMapping("/{paymentId}")
-    public ResponseEntity<PaymentResponseDto> getById(@PathVariable UUID paymentId) {
+    public ResponseEntity<PaymentResponseDto> getById(@PathVariable("paymentId") UUID paymentId) {
         Payment payment = paymentService.getById(paymentId);
         PaymentResponseDto res = PaymentResponseDto.builder()
                 .id(payment.getId())

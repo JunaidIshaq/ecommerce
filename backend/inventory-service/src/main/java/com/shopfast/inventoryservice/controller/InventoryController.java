@@ -61,20 +61,20 @@ public class InventoryController {
 
     @Operation(summary = "Get inventory by productId")
     @GetMapping("/{productId}")
-    public ResponseEntity<InventoryResponseDto> getByProductId(@PathVariable UUID productId) {
+    public ResponseEntity<InventoryResponseDto> getByProductId(@PathVariable("productId") UUID productId) {
         return ResponseEntity.ok(InventoryMapper.getInventoryResponseDto(inventoryService.getByProductId(productId)));
     }
 
     @Operation(summary = "Adjust stock manually (Admin)")
     @PatchMapping("/{productId}/adjust")
-    public ResponseEntity<InventoryResponseDto> adjust(@PathVariable UUID productId,
+    public ResponseEntity<InventoryResponseDto> adjust(@PathVariable("productId") UUID productId,
                                                        @Valid @RequestBody AdjustQuantityDto dto) {
         return ResponseEntity.ok(InventoryMapper.getInventoryResponseDto(inventoryService.adjustQuantity(productId, dto)));
     }
 
     @Operation(summary = "Reserve stock (User/Order Service)")
     @PostMapping("/{productId}/reserve")
-    public ResponseEntity<InventoryResponseDto> reserve(@PathVariable UUID productId,
+    public ResponseEntity<InventoryResponseDto> reserve(@PathVariable("productId") UUID productId,
                                                         @RequestParam("quantity") int qty) {
         return ResponseEntity.ok(InventoryMapper.getInventoryResponseDto(inventoryService.reserveStock(productId, qty)));
     }
@@ -82,14 +82,14 @@ public class InventoryController {
 
     @Operation(summary = "Release reserved stock (Order Canceled)")
     @PostMapping("/{productId}/release")
-    public ResponseEntity<InventoryResponseDto> release(@PathVariable UUID productId,
+    public ResponseEntity<InventoryResponseDto> release(@PathVariable("productId") UUID productId,
                                                         @RequestParam("quantity") int qty) {
         return ResponseEntity.ok(InventoryMapper.getInventoryResponseDto(inventoryService.releaseStock(productId, qty)));
     }
 
     @Operation(summary = "Confirm reserved stock (Order Completed)")
     @PostMapping("/{productId}/confirm")
-    public ResponseEntity<InventoryResponseDto> confirm(@PathVariable UUID productId,
+    public ResponseEntity<InventoryResponseDto> confirm(@PathVariable("productId") UUID productId,
                                                         @RequestParam("quantity") int qty) {
         return ResponseEntity.ok(InventoryMapper.getInventoryResponseDto(inventoryService.confirmReservation(productId, qty)));
     }

@@ -42,7 +42,7 @@ public class CartGuestController {
     }
 
     @PutMapping("/items/{productId}")
-    public ResponseEntity<Map<String, String>> updateItem(@PathVariable String productId, @RequestParam("anonId") String anonId, @RequestParam("quantity") Integer quantity) throws JsonProcessingException {
+    public ResponseEntity<Map<String, String>> updateItem(@PathVariable("productId") String productId, @RequestParam("anonId") String anonId, @RequestParam("quantity") Integer quantity) throws JsonProcessingException {
         cartService.updateGuest(anonId, productId, quantity);
         Map<String, String> map = new HashMap<>();
         map.put("status", "success");
@@ -56,7 +56,7 @@ public class CartGuestController {
     }
 
     @DeleteMapping("/items/{productId}")
-    public ResponseEntity<Map<String, String>> removeItem(@RequestParam("anonId") String anonId, @PathVariable String productId) {
+    public ResponseEntity<Map<String, String>> removeItem(@RequestParam("anonId") String anonId, @PathVariable("productId") String productId) {
         cartService.removeGuestItem(anonId, productId);
         Map<String, String> map = new HashMap<>();
         map.put("status", "success");

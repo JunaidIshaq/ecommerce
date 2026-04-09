@@ -64,7 +64,7 @@ public class UserController {
 
     @Operation(summary = "Get user by id (admin)")
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getById(@PathVariable UUID id) {
+    public ResponseEntity<UserDto> getById(@PathVariable("id") UUID id) {
         User u = userService.getById(id);
         return ResponseEntity.ok(UserMapper.getUserDto(u));
     }
@@ -72,7 +72,7 @@ public class UserController {
 
     @Operation(summary = "Update status (admin)")
     @PatchMapping("/{id}/status")
-    public ResponseEntity<UserDto> updateStatus(@PathVariable UUID id, @RequestParam UserStatus status) {
+    public ResponseEntity<UserDto> updateStatus(@PathVariable("id") UUID id, @RequestParam("status") UserStatus status) {
         User u = userService.updateStatus(id, status);
         return ResponseEntity.ok(UserMapper.getUserDto(u));
     }

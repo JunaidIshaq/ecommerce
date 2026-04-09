@@ -39,17 +39,17 @@ public class ReviewController {
     }
 
     @GetMapping("/product/{productId}")
-    public ResponseEntity<List<ReviewResponseDto>> getProductReviews(@PathVariable String productId) {
+    public ResponseEntity<List<ReviewResponseDto>> getProductReviews(@PathVariable("productId") String productId) {
         return ResponseEntity.ok(reviewService.getProductReviews(UUID.fromString(productId)));
     }
 
     @GetMapping("/summary/{productId}")
-    public ResponseEntity<RatingSummaryResponseDto> getSummary(@PathVariable String productId) {
+    public ResponseEntity<RatingSummaryResponseDto> getSummary(@PathVariable("productId") String productId) {
         return ResponseEntity.ok(reviewService.getSummary(UUID.fromString(productId)));
     }
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<Void> deleteReview(@PathVariable String productId, Authentication authentication) {
+    public ResponseEntity<Void> deleteReview(@PathVariable("productId") String productId, Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
         reviewService.deleteReview(userId, UUID.fromString(productId));
         return ResponseEntity.ok().build();
