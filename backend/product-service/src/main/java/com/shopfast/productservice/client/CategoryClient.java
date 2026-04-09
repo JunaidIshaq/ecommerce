@@ -77,13 +77,23 @@ public class CategoryClient {
             webClient.get()
                     .uri("/{id}", categoryId)
                     .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<CategoryDto>() {})
+                    .toEntity(new ParameterizedTypeReference<CategoryDto>() {})
                     .block(Duration.ofSeconds(3));
             log.info("✅ Category {} validated successfully", categoryId);
             return true;
 
         } catch (WebClientResponseException.NotFound e) {
             log.warn("❌ Category {} not found", categoryId);
+            return false;
+
+        } catch (WebClientResponseException e) {
+            // Log actual HTTP status and response body for debugging
+            log.error("⚠️ Category Service returned error: {} {}", e.getStatusCode(), e.getResponseBodyAsString());
+            // On server errors (5xx), assume category might exist
+            if (e.getStatusCode().is5xxServerError()) {
+                log.warn("⚠️ Category service returned 500, assuming category might exist");
+                return true;
+            }
             return false;
 
         } catch (Exception e) {

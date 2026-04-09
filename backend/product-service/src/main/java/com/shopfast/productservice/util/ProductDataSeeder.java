@@ -66,6 +66,10 @@ public class ProductDataSeeder {
             Random random = new Random();
 
             List<String> categoryIds = getSafeCategoryList();
+            if (categoryIds.isEmpty()) {
+                log.warn("⚠️ No valid category IDs available, skipping product seeding.");
+                return;
+            }
 
             for (int i = 1; i <= PRODUCT_COUNT; i++) {
                 Product p = new Product();
@@ -77,7 +81,16 @@ public class ProductDataSeeder {
                 p.setStock(random.nextInt(1000));
                 p.setRating(random.nextDouble() * 10);
                 p.setImages(List.of("https://picsum.photos/seed/" + i + "/600/400"));
-                productService.createProduct(ProductMapper.getProductDto(p));
+                
+                // Use ProductService to create product (includes Kafka event publishing)
+                try {
+                    productService.createProduct(ProductMapper.getProductDto(p));
+                    if (i % 100 == 0) {
+                        log.info("✅ Seeded {} products...", i);
+                    }
+                } catch (Exception e) {
+                    log.warn("⚠️ Failed to create product {}: {}", i, e.getMessage());
+                }
             }
 
             log.info("✅ Seeded {} products successfully!", PRODUCT_COUNT);

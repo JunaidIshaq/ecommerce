@@ -102,13 +102,13 @@ public class CategoryDataSeeder {
                 log.info("ℹ️ Category already exists: {}", category.getName());
             }
         });
-        // Saving Categories
-        // Index in Elasticsearch
+        // Save categories to database
+        // Skip Elasticsearch indexing during seeding - it's handled in createCategory for API calls
         try {
-            for (Category category : categories) {
-                categoryService.createCategory(category);
-            }
-        }catch (Exception ex){
+            categoryRepository.saveAll(categories);
+            log.info("✅ Saved {} categories to database successfully!", categories.size());
+        } catch (Exception ex) {
+            log.error("❌ Failed to save categories to database: {}", ex.getMessage());
             throw new RuntimeException(ex);
         }
 

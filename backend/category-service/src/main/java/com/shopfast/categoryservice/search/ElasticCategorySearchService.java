@@ -1,5 +1,7 @@
 package com.shopfast.categoryservice.search;
 
+import org.springframework.stereotype.Service;
+
 // import co.elastic.clients.elasticsearch.ElasticsearchClient;
 // import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 // import co.elastic.clients.elasticsearch._types.SortOrder;
@@ -22,7 +24,7 @@ package com.shopfast.categoryservice.search;
  * Elasticsearch search service - DISABLED for now
  * Uncomment to enable Elasticsearch search functionality
  */
-// @Service
+@Service
 public class ElasticCategorySearchService {
 
     // private final ElasticsearchClient client;
@@ -96,6 +98,11 @@ public class ElasticCategorySearchService {
 
     // Placeholder for health check - returns successfully
     public void healthCheck() {
+        // Do nothing - Elasticsearch is disabled
+    }
+
+    // Placeholder method to satisfy CategoryService - Elasticsearch is disabled
+    public void indexCategory(Object category) {
         // Do nothing - Elasticsearch is disabled
     }
 }
