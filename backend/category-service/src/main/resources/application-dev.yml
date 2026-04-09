@@ -73,7 +73,7 @@ management:
       application: category-service
 
 app:
-  seed-categories: false
+  seed-categories: true
 
 product:
   service:
