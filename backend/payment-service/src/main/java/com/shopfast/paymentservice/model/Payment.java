@@ -5,16 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.shopfast.paymentservice.enums.PaymentMethod;
 import com.shopfast.paymentservice.enums.PaymentStatus;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,7 +26,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "payments")
-@JsonIgnoreProperties(ignoreUnknown = true)  // Prevent unknown fields from breaking serialization
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Payment {
 
@@ -43,7 +34,7 @@ public class Payment {
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private UUID orderId;
 
     @Column(nullable = false)
@@ -58,7 +49,13 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
-    private String transactionId; // gateway reference
+    private String transactionId;
+    
+    private String paymentIntentId;
+    
+    private String clientSecret;
+
+    private String paymentMethodDetails;
 
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -73,5 +70,4 @@ public class Payment {
 
     @LastModifiedBy
     private String updatedBy;
-
 }

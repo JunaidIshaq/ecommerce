@@ -42,4 +42,9 @@ public class PaymentResponseDto implements Serializable {
     @JsonProperty("updated_at")
     private String updatedAt;
 
+    @JsonProperty("client_secret")
+    private String clientSecret;
+
+    @JsonProperty("payment_method")
+    private String paymentMethod;
 }

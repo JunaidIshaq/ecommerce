@@ -94,3 +94,8 @@ product:
 inventory:
   service:
     url: ${INVENTORY_SERVICE_URL:http://localhost:8083/api/v1/inventory}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:sk_test_your_test_key_here}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_your_webhook_secret_here}
+  publishable-key: ${STRIPE_PUBLISHABLE_KEY:pk_test_your_publishable_key_here}
