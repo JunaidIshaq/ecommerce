@@ -506,6 +506,7 @@ services:
       - SERVER_PORT=8091
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
+      - MANAGEMENT_HEALTH_MAIL_ENABLED=false
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8091/actuator/health || exit 1" ]
       interval: 20s
@@ -534,6 +535,7 @@ services:
       - SERVER_PORT=8092
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
+      - MANAGEMENT_HEALTH_ELASTICSEARCH_ENABLED=false
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8092/actuator/health || exit 1" ]
       interval: 20s
@@ -568,6 +570,8 @@ services:
       - SERVER_PORT=8093
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
+      - MANAGEMENT_HEALTH_ELASTICSEARCH_ENABLED=false
+      - MANAGEMENT_HEALTH_MAIL_ENABLED=false
       - EUREKA_URL=http://eureka-server:8761/eureka/eureka/
       - USER_SERVICE_URL=http://user-service:8086
       - ORDER_SERVICE_URL=http://order-service:8084
