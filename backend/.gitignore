@@ -1,0 +1,52 @@
+# Environment files (contain secrets)
+.env.production
+.env.local
+.env.*.local
+
+# Docker volumes
+docker-data/
+*.sql.gz
+
+# Backups
+backups/
+backup/
+*.backup
+
+# Logs
+logs/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build artifacts (if any)
+target/
+build/
+dist/
+
+# Docker
+docker-compose.override.yml
+
+# Certificates
+*.pem
+*.crt
+*.key
+*.pfx
+*.p12
+certbot/
+
+# Monitoring data
+grafana_data/
+prometheus_data/
