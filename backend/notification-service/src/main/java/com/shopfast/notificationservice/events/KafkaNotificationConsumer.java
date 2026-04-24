@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Slf4j
 @Component
 public class KafkaNotificationConsumer {
@@ -40,7 +42,7 @@ public class KafkaNotificationConsumer {
                 event.setContent(notificationTemplateService.buildContent(event));
 //            }
             CreateNotificationRequestDto requestDto = new CreateNotificationRequestDto();
-            requestDto.setUserId(event.getUserId());
+            requestDto.setUserId(UUID.fromString(event.getUserId()));
             requestDto.setRecipient(event.getRecipient());
             requestDto.setSubject(event.getSubject());
             requestDto.setContent(event.getContent());

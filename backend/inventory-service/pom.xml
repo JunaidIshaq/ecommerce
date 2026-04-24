@@ -168,6 +168,11 @@
             <artifactId>jakarta.ws.rs-api</artifactId>
             <version>3.1.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.shopfast</groupId>
+            <artifactId>common-lib</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

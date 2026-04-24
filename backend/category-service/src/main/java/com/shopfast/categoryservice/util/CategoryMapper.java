@@ -1,6 +1,6 @@
 package com.shopfast.categoryservice.util;
 
-import com.shopfast.categoryservice.dto.CategoryDto;
+import com.shopfast.common.dto.CategoryDto;
 import com.shopfast.categoryservice.model.Category;
 
 import java.util.Locale;

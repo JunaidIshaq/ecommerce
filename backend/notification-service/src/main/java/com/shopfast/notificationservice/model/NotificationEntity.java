@@ -1,8 +1,8 @@
 package com.shopfast.notificationservice.model;
 
-import com.shopfast.notificationservice.enums.NotificationChannel;
-import com.shopfast.notificationservice.enums.NotificationStatus;
-import com.shopfast.notificationservice.enums.NotificationType;
+import com.shopfast.common.enums.NotificationChannel;
+import com.shopfast.common.enums.NotificationStatus;
+import com.shopfast.common.enums.NotificationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

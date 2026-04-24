@@ -1,7 +1,7 @@
 package com.shopfast.notificationservice.service;
 
 import com.shopfast.common.events.NotificationEvent;
-import com.shopfast.notificationservice.enums.NotificationType;
+import com.shopfast.common.enums.NotificationType;
 import org.springframework.stereotype.Service;
 
 @Service

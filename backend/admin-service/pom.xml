@@ -153,6 +153,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.shopfast</groupId>
+            <artifactId>common-lib</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

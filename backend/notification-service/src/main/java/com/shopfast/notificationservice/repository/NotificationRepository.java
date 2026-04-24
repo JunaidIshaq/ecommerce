@@ -1,7 +1,7 @@
 package com.shopfast.notificationservice.repository;
 
-import com.shopfast.notificationservice.enums.NotificationChannel;
-import com.shopfast.notificationservice.enums.NotificationStatus;
+import com.shopfast.common.enums.NotificationChannel;
+import com.shopfast.common.enums.NotificationStatus;
 import com.shopfast.notificationservice.model.NotificationEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

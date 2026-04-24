@@ -1,9 +1,9 @@
 package com.shopfast.reviewservice.controller;
 
 import com.shopfast.reviewservice.dto.CouponCreateRequestDto;
-import com.shopfast.reviewservice.dto.CouponRedeemRequestDto;
-import com.shopfast.reviewservice.dto.CouponValidateRequestDto;
-import com.shopfast.reviewservice.dto.CouponValidateResponseDto;
+import com.shopfast.common.events.CouponRedeemRequestDto;
+import com.shopfast.common.events.CouponValidateRequestDto;
+import com.shopfast.common.events.CouponValidateResponseDto;
 import com.shopfast.reviewservice.model.Coupon;
 import com.shopfast.reviewservice.service.CouponService;
 import io.swagger.v3.oas.annotations.tags.Tag;

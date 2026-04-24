@@ -3,7 +3,7 @@ package com.shopfast.inventoryservice.controller;
 import com.shopfast.inventoryservice.dto.AdjustQuantityDto;
 import com.shopfast.inventoryservice.dto.InventoryRequestDto;
 import com.shopfast.inventoryservice.dto.InventoryResponseDto;
-import com.shopfast.inventoryservice.dto.PagedResponse;
+import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.inventoryservice.service.InventoryService;
 import com.shopfast.inventoryservice.util.InventoryMapper;
 import io.swagger.v3.oas.annotations.Operation;

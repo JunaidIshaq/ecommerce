@@ -1,17 +1,20 @@
 package com.shopfast.notificationservice.dto;
 
-import com.shopfast.notificationservice.enums.NotificationChannel;
-import com.shopfast.notificationservice.enums.NotificationStatus;
-import com.shopfast.notificationservice.enums.NotificationType;
+import com.shopfast.common.enums.NotificationChannel;
+import com.shopfast.common.enums.NotificationStatus;
+import com.shopfast.common.enums.NotificationType;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.UUID;
 
 @Data
 @Builder
-public class NotificationResponseDto {
+public class NotificationResponseDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private UUID id;
 

@@ -1,11 +1,10 @@
 package com.shopfast.orderservice.controller;
 
-import com.shopfast.orderservice.dto.AdminOrderDto;
-import com.shopfast.orderservice.dto.PagedResponse;
+import com.shopfast.common.dto.AdminOrderDto;
+import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.orderservice.repository.OrderRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.ws.rs.HeaderParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +37,17 @@ public class AdminOrderController {
             @RequestParam(name = "status", required = false) String status) {
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<AdminOrderDto> orderPage = orderRepository.findAll(pageable)
-                .map(AdminOrderDto::from);
+                .map(order -> AdminOrderDto.builder()
+                        .id(order.getId())
+                        .userId(order.getUserId())
+                        .orderNumber(order.getOrderNumber())
+                        .subTotal(order.getSubTotal().toString())
+                        .discount(order.getDiscount().toString())
+                        .totalAmount(order.getTotalAmount().toString())
+                        .status(order.getStatus().name())
+                        .createdAt(order.getCreatedAt())
+                        .updatedAt(order.getUpdatedAt())
+                        .build());
 
         PagedResponse<AdminOrderDto> response = new PagedResponse<>(
                 orderPage.getContent(),

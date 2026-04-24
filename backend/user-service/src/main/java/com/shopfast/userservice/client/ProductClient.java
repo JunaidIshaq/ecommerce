@@ -1,6 +1,6 @@
 package com.shopfast.userservice.client;
 
-import com.shopfast.userservice.dto.PagedResponse;
+import com.shopfast.common.dto.PagedResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

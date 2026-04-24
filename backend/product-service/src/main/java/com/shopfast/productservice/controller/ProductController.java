@@ -1,6 +1,6 @@
 package com.shopfast.productservice.controller;
 
-import com.shopfast.productservice.dto.PagedResponse;
+import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.productservice.dto.ProductDto;
 import com.shopfast.productservice.dto.ProductInternalResponseDto;
 import com.shopfast.productservice.model.Product;

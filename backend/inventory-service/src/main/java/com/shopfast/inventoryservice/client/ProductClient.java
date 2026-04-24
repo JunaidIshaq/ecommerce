@@ -1,6 +1,6 @@
 package com.shopfast.inventoryservice.client;
 
-import com.shopfast.inventoryservice.dto.PagedResponse;
+import com.shopfast.common.dto.PagedResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

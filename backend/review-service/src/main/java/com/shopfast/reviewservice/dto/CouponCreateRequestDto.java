@@ -6,10 +6,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 @Data
-public class CouponCreateRequestDto {
+public class CouponCreateRequestDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @NotBlank
     private String code;

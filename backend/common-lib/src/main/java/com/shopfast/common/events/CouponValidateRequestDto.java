@@ -7,13 +7,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CouponValidateRequestDto {
+public class CouponValidateRequestDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @NotBlank
     private String code;

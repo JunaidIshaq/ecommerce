@@ -5,10 +5,13 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @Data
-public class InventoryRequestDto {
+public class InventoryRequestDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @NotNull
     @JsonProperty("productId")

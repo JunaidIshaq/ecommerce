@@ -1,6 +1,6 @@
 package com.shopfast.userservice.controller;
 
-import com.shopfast.userservice.dto.PagedResponse;
+import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.userservice.dto.UserDto;
 import com.shopfast.userservice.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;

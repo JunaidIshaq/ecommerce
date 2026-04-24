@@ -1,7 +1,7 @@
 package com.shopfast.categoryservice.controller;
 
-import com.shopfast.categoryservice.dto.PagedResponse;
-import com.shopfast.categoryservice.dto.CategoryDto;
+import com.shopfast.common.dto.CategoryDto;
+import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.categoryservice.model.Category;
 import com.shopfast.categoryservice.service.CategoryService;
 import com.shopfast.categoryservice.util.CategoryMapper;

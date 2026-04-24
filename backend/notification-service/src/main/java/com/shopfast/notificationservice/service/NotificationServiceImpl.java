@@ -2,8 +2,8 @@ package com.shopfast.notificationservice.service;
 
 import com.shopfast.notificationservice.dto.CreateNotificationRequestDto;
 import com.shopfast.notificationservice.dto.NotificationResponseDto;
-import com.shopfast.notificationservice.enums.NotificationChannel;
-import com.shopfast.notificationservice.enums.NotificationStatus;
+import com.shopfast.common.enums.NotificationChannel;
+import com.shopfast.common.enums.NotificationStatus;
 import com.shopfast.notificationservice.model.NotificationEntity;
 import com.shopfast.notificationservice.repository.NotificationRepository;
 import com.shopfast.notificationservice.sendor.NotificationSender;

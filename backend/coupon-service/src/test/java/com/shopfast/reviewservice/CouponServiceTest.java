@@ -1,7 +1,7 @@
 package com.shopfast.reviewservice;
 
-import com.shopfast.reviewservice.dto.CouponLineItemDto;
-import com.shopfast.reviewservice.dto.CouponValidateRequestDto;
+import com.shopfast.common.events.CouponLineItemDto;
+import com.shopfast.common.events.CouponValidateRequestDto;
 import com.shopfast.reviewservice.enums.CouponType;
 import com.shopfast.reviewservice.model.Coupon;
 import com.shopfast.reviewservice.repository.CouponRepository;

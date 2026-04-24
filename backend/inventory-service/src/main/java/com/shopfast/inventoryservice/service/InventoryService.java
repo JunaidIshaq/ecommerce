@@ -4,7 +4,7 @@ import com.shopfast.common.events.InventoryEvent;
 import com.shopfast.inventoryservice.dto.AdjustQuantityDto;
 import com.shopfast.inventoryservice.dto.InventoryRequestDto;
 import com.shopfast.inventoryservice.dto.InventoryResponseDto;
-import com.shopfast.inventoryservice.dto.PagedResponse;
+import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.inventoryservice.events.KafkaInventoryProducer;
 import com.shopfast.inventoryservice.model.InventoryItem;
 import com.shopfast.inventoryservice.repository.InventoryRepository;

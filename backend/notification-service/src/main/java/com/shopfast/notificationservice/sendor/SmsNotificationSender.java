@@ -1,6 +1,6 @@
 package com.shopfast.notificationservice.sendor;
 
-import com.shopfast.notificationservice.enums.NotificationChannel;
+import com.shopfast.common.enums.NotificationChannel;
 import com.shopfast.notificationservice.model.NotificationEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

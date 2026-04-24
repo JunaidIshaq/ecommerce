@@ -2,7 +2,7 @@ package com.shopfast.productservice.service;
 
 import com.shopfast.common.events.ProductEvent;
 import com.shopfast.productservice.client.CategoryClient;
-import com.shopfast.productservice.dto.PagedResponse;
+import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.productservice.dto.ProductDto;
 import com.shopfast.productservice.dto.ProductInternalResponseDto;
 import com.shopfast.productservice.events.KafkaProductProducer;

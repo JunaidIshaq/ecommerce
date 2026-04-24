@@ -1,6 +1,6 @@
 package com.shopfast.userservice.service;
 
-import com.shopfast.userservice.dto.PagedResponse;
+import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.userservice.dto.RegisterRequestDto;
 import com.shopfast.userservice.dto.UserDto;
 import com.shopfast.userservice.enums.Role;
@@ -93,4 +93,3 @@ public class UserService {
     }
 
 }
-

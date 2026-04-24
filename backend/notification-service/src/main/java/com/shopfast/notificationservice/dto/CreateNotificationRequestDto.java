@@ -1,7 +1,7 @@
 package com.shopfast.notificationservice.dto;
 
-import com.shopfast.notificationservice.enums.NotificationChannel;
-import com.shopfast.notificationservice.enums.NotificationType;
+import com.shopfast.common.enums.NotificationChannel;
+import com.shopfast.common.enums.NotificationType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

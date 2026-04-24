@@ -1,7 +1,7 @@
 package com.shopfast.categoryservice.service;
 
-import com.shopfast.categoryservice.dto.CategoryDto;
-import com.shopfast.categoryservice.dto.PagedResponse;
+import com.shopfast.common.dto.CategoryDto;
+import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.categoryservice.exception.CategoryNotFoundException;
 import com.shopfast.categoryservice.model.Category;
 import com.shopfast.categoryservice.repository.CategoryRepository;

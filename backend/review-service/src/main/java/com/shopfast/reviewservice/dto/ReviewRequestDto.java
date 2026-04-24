@@ -6,8 +6,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class ReviewRequestDto {
+public class ReviewRequestDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @NotNull
     private String productId;
