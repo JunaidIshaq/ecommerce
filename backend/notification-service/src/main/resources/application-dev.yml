@@ -61,6 +61,9 @@ logging:
     org.springframework.cache.interceptor: DEBUG
 
 management:
+  health:
+    mail:
+      enabled: false
   endpoints:
     web:
       exposure:

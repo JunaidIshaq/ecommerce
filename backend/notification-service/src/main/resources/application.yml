@@ -75,6 +75,9 @@ elastic:
     name: elasticsearch
 
 management:
+  health:
+    mail:
+      enabled: false
   endpoints:
     web:
       exposure:
