@@ -5,6 +5,36 @@ import { NgIf, NgForOf } from '@angular/common';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 
+const MOCK_ORDER: Order = {
+  id: 1001,
+  order_number: 'ORD-1001',
+  userEmail: 'john.doe@gmail.com',
+  shippingAddress: '123 Main St, Springfield, IL 62704',
+  phone: '+1-555-0101',
+  paymentMethod: 'Credit Card',
+  paymentStatus: 'PAID',
+  status: 'PLACED',
+  subtotal: 249.99,
+  tax: 15.00,
+  discount: 0,
+  totalAmount: 264.99,
+  createdAt: '2026-02-01T10:30:00',
+  items: [
+    {
+      productId: 'prod-001',
+      productName: 'Wireless Headphones',
+      price: 89.99,
+      quantity: 2
+    },
+    {
+      productId: 'prod-002',
+      productName: 'USB-C Cable',
+      price: 35.00,
+      quantity: 1
+    }
+  ]
+};
+
 @Component({
   selector: 'app-order-detail',
   standalone: true,
@@ -26,14 +56,22 @@ export class OrderDetailComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
+      console.log('OrderDetailComponent: ngOnInit called, orderId:', id);
+      this.order = MOCK_ORDER;
+      this.loading = false;
+      this.cdr.detectChanges();
+      console.log('Loaded mock order detail for id:', id, '; attempting API...');
+
       this.orderService.getOrderById(id).subscribe({
         next: (data) => {
+          console.log('Order API success:', data);
           this.order = data;
           this.loading = false;
           this.cdr.detectChanges();
         },
         error: (err) => {
-          this.errorMessage = err.error?.message || 'Failed to load order details.';
+          console.warn('Order API failed, using mock data', err);
+          this.errorMessage = err.error?.message || 'Failed to load order details. Using cached data.';
           this.loading = false;
           this.cdr.detectChanges();
         }

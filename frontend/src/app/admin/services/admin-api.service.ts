@@ -44,8 +44,10 @@ export class AdminApiService {
     return this.http.put(`${this.baseUrl}/orders/${id}/status?status=${status}`, {});
   }
 
-  getOrderById(id: string) {
-    return this.http.get(`${this.baseUrl}/api/v1/admin/order/${id}`);
+  getOrderById(id: string, userId?: string) {
+    return this.http.get(`${this.baseUrl}/api/v1/admin/order/${id}`, {
+      headers: userId ? { 'userId': userId } : {}
+    });
   }
 
   refundOrder(orderId: number, amount: number, reason: string) {

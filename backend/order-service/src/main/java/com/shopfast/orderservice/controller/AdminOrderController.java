@@ -41,7 +41,7 @@ public class AdminOrderController {
 
     @Operation(summary = "Get order status by ID for admin")
     @GetMapping("/internal/admin/orders/pageNumber/{pageNumber}/pageSize/{pageSize}")
-    public ResponseEntity<PagedResponse<AdminOrderDto>> getOrderStatus(
+    public ResponseEntity<PagedResponse<AdminOrderDto>> getOrderStatus(git
             @RequestHeader("userId") String userId,
             @PathVariable(name = "pageNumber", required = false) Integer pageNumber,
             @PathVariable(name = "pageSize", required = false) Integer pageSize,
@@ -84,9 +84,15 @@ public class AdminOrderController {
                                 ProductDetailDto product = productClient.fetchProductById(item.getProductId());
                                 return AdminOrderItemDetailDto.builder()
                                         .productId(item.getProductId())
+                                        .productName(product != null ? product.getName() : null)
+                                        .productSlug(product != null ? product.getSlug() : null)
+                                        .productDescription(product != null ? product.getDescription() : null)
                                         .quantity(item.getQuantity())
                                         .price(item.getPrice())
-                                        .imageUrl(product != null ? product.getImageUrl() : null)
+                                        .imageUrl(product != null && product.getImages() != null && !product.getImages().isEmpty() 
+                                                ? product.getImages().get(0) 
+                                                : (product != null ? product.getImageUrl() : null))
+                                        .images(product != null ? product.getImages() : null)
                                         .build();
                             })
                             .toList();

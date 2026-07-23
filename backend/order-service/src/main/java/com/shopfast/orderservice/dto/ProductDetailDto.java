@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -21,6 +22,8 @@ public class ProductDetailDto {
 
     @JsonProperty("image_url")
     private String imageUrl;
+
+    private List<String> images;
 
     private BigDecimal price;
 }
