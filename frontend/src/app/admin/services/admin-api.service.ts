@@ -45,7 +45,7 @@ export class AdminApiService {
   }
 
   getOrderById(id: string) {
-    return this.http.get(`${this.baseUrl}/orders/${id}`);
+    return this.http.get(`${this.baseUrl}/api/v1/admin/order/${id}`);
   }
 
   refundOrder(orderId: number, amount: number, reason: string) {

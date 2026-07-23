@@ -37,4 +37,15 @@ public class AdminOrderController {
         return orderAdminClient.getAllOrders(id, pageNumber, pageSize, status);
 
     }
+
+    @GetMapping("/order/{id}")
+    public Object getOrderById(@RequestHeader("userId") @NotNull String userId,
+                               @PathVariable("id") String id) {
+        String adminUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (StringUtils.isEmpty(adminUserId)) {
+            throw new RuntimeException("Not an Admin User");
+        }
+
+        return service.getOrderById(userId, id);
+    }
 }
