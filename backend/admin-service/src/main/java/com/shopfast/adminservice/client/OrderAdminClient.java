@@ -13,6 +13,9 @@ public interface OrderAdminClient {
     @GetMapping("/internal/admin/orders/pageNumber/{pageNumber}/pageSize/{pageSize}")
     Object getAllOrders(@RequestHeader("userId") String id, @PathVariable("pageNumber") Integer pageNumber, @PathVariable("pageSize") Integer pageSize, @RequestParam("role") String role);
 
+    @GetMapping("/internal/admin/order/{id}")
+    Object getOrderById(@RequestHeader("userId") String userId, @PathVariable("id") String id);
+
     @PutMapping("/{id}/status")
     void updateOrderStatus(@PathVariable("id") Long id,
                            @RequestParam(name = "pageNumber", required = false, defaultValue = "1") Integer pageNumber,

@@ -31,7 +31,11 @@ export class OrderDetailsComponent {
       .subscribe(() => this.order.status = 'CANCELLED');
   }
 
-  protected openRefund() {
-
+  openRefund() {
+    const refundAmount = prompt('Enter refund amount:');
+    if (refundAmount === null) return;
+    const reason = prompt('Enter refund reason:') || '';
+    this.adminApi.refundOrder(this.order.id, Number(refundAmount), reason)
+      .subscribe(() => alert('Refund processed successfully'));
   }
 }

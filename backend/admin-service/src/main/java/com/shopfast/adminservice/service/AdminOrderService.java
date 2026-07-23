@@ -16,4 +16,8 @@ public class AdminOrderService {
         orderClient.updateOrderStatus(id, null, null, status);
         auditService.log(adminEmail, "UPDATE_ORDER_STATUS", "ORDER", id);
     }
+
+    public Object getOrderById(String adminUserId, String orderId) {
+        return orderClient.getOrderById(adminUserId, orderId);
+    }
 }
