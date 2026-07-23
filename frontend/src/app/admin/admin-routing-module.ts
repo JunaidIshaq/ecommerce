@@ -10,7 +10,7 @@ import { ReviewsListComponent } from './reviews/reviews-list/reviews-list.compon
 import { PaymentsListComponent } from './payments/payments-list/payments-list.component';
 import { NotificationsListComponent } from './notifications/notifications-list/notifications-list.component';
 import { AdminAuthGuard } from './admin-auth.guard';
-import {OrderDetailsComponent} from './orders/order-details/order-details.component';
+import {AdminOrderDetailsComponent} from './orders/order-details/order-details.component';
 import {NgModule} from '@angular/core';
 
 console.log('AdminRoutingModule: Importing module');
@@ -24,7 +24,7 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'users', component: UsersListComponent },
       { path: 'orders', component: OrdersListComponent },
-      { path: 'orders/:id', component: OrderDetailsComponent },
+      { path: 'orders/:id', component: AdminOrderDetailsComponent },
       { path: 'products', component: ProductsListComponent },
       { path: 'inventory', component: InventoryListComponent },
       { path: 'coupons', component: CouponsListComponent },

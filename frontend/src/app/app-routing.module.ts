@@ -8,6 +8,7 @@ import {CheckoutComponent} from './pages/checkout/checkout.component';
 import {ProfileComponent} from './pages/profile/profile.component';
 import {LoginComponent} from './pages/login/login.component';
 import {SignupComponent} from './pages/signup/signup.component';
+import {CustomerOrderDetailComponent} from './pages/order-detail/order-detail.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -18,6 +19,7 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'signup', component: SignupComponent },
   { path: 'profile', component: ProfileComponent },
+  { path: 'order/:id', component: CustomerOrderDetailComponent },
   { path: '**', redirectTo: '' }
 ];
 

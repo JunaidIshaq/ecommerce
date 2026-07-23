@@ -1,6 +1,6 @@
-import { Component, ChangeDetectorRef, Inject, NgZone, PLATFORM_ID, OnInit } from '@angular/core';
+import { Component, ChangeDetectorRef, Inject, PLATFORM_ID, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { CommonModule, NgIf, NgFor } from '@angular/common';
+import { CommonModule, NgIf, NgFor, isPlatformBrowser } from '@angular/common';
 import { AdminApiService } from '../../services/admin-api.service';
 import { AdminCardComponent } from '../../shared/admin-card/admin-card.component';
 import { AuthService } from '../../../services/auth.service';
@@ -55,13 +55,13 @@ const MOCK_ORDER: Order = {
 };
 
 @Component({
-  selector: 'app-order-details',
+  selector: 'app-admin-order-details',
   standalone: true,
   imports: [CommonModule, NgIf, NgFor, AdminCardComponent],
   templateUrl: './order-details.component.html',
   styleUrls: ['./order-details.component.css']
 })
-export class OrderDetailsComponent implements OnInit {
+export class AdminOrderDetailsComponent implements OnInit {
   order: Order | null = null;
   loading = true;
   errorMessage: string | null = null;
@@ -70,7 +70,6 @@ export class OrderDetailsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private adminApi: AdminApiService,
-    private zone: NgZone,
     private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object,
     private authService: AuthService
@@ -78,46 +77,46 @@ export class OrderDetailsComponent implements OnInit {
 
   ngOnInit() {
     this.orderId = this.route.snapshot.paramMap.get('id');
-    console.log('OrderDetailsComponent: ngOnInit called, orderId:', this.orderId);
+    console.log('[AdminOrderDetails] ngOnInit called, orderId:', this.orderId);
     this.loadOrder();
   }
 
   loadOrder() {
-    console.log('loadOrder called for id:', this.orderId);
+    console.log('[AdminOrderDetails] loadOrder called for id:', this.orderId);
+
+    // Always show mock data immediately (works for both SSR and client)
     this.order = MOCK_ORDER;
     this.loading = false;
     this.errorMessage = null;
     this.cdr.detectChanges();
-    console.log('Loaded mock order; attempting API...');
 
+    // Only hit the API on the browser — localStorage/auth tokens are unavailable in SSR
+    if (!isPlatformBrowser(this.platformId)) {
+      console.log('[AdminOrderDetails] SSR: skipping API call, using mock data');
+      return;
+    }
+
+    console.log('[AdminOrderDetails] Browser: attempting API call for order:', this.orderId);
     this.authService.currentUser().pipe(take(1)).subscribe({
       next: (user) => {
         this.adminApi.getOrderById(this.orderId!, user?.id).subscribe({
           next: (res: any) => {
-            this.zone.run(() => {
-              console.log('Order API success:', res);
-              // Unwrap the API envelope: { success, status, message, data: { ... } }
-              this.order = res?.data ?? res;
-              this.loading = false;
-              this.errorMessage = null;
+            console.log('[AdminOrderDetails] API success:', res);
+            // Unwrap the API envelope: { success, status, message, data: { ... } }
+            const orderData: Order | null = res?.data ?? null;
+            if (orderData?.id) {
+              // Only replace mock when we received a valid order
+              this.order = orderData;
               this.cdr.detectChanges();
-            });
+            }
           },
           error: (err) => {
-            this.zone.run(() => {
-              console.warn('Order API failed, keeping mock data', err);
-              this.loading = false;
-              this.errorMessage = null;
-              this.cdr.detectChanges();
-            });
+            console.warn('[AdminOrderDetails] API failed, keeping mock data', err);
           }
         });
       },
       error: (err) => {
-        console.warn('Auth service error in order detail:', err);
-        this.loading = false;
-        this.errorMessage = null;
-        this.cdr.detectChanges();
+        console.warn('[AdminOrderDetails] Auth service error in order detail:', err);
       }
     });
   }
@@ -128,7 +127,7 @@ export class OrderDetailsComponent implements OnInit {
 
   markShipped() {
     if (!this.order) return;
-    console.log('markShipped called for order:', this.order.order_number);
+    console.log('[AdminOrderDetails] markShipped called for order:', this.order.order_number);
     this.adminApi.updateOrderStatus(this.order.id, 'SHIPPED')
       .subscribe(() => {
         if (this.order) this.order.status = 'SHIPPED';
@@ -138,7 +137,7 @@ export class OrderDetailsComponent implements OnInit {
 
   cancelOrder() {
     if (!this.order) return;
-    console.log('cancelOrder called for order:', this.order.order_number);
+    console.log('[AdminOrderDetails] cancelOrder called for order:', this.order.order_number);
     this.adminApi.updateOrderStatus(this.order.id, 'CANCELLED')
       .subscribe(() => {
         if (this.order) this.order.status = 'CANCELLED';
@@ -148,7 +147,7 @@ export class OrderDetailsComponent implements OnInit {
 
   openRefund() {
     if (!this.order) return;
-    console.log('openRefund called for order:', this.order.order_number);
+    console.log('[AdminOrderDetails] openRefund called for order:', this.order.order_number);
     const refundAmount = prompt('Enter refund amount:');
     if (refundAmount === null) return;
     const reason = prompt('Enter refund reason:') || '';
