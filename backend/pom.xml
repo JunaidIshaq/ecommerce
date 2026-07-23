@@ -39,7 +39,6 @@
         <mapstruct.version>1.6.0</mapstruct.version>
         <lombok.version>1.18.34</lombok.version>
         <testcontainers.version>1.20.3</testcontainers.version>
-        <elasticsearch.client.version>8.19.5</elasticsearch.client.version>
         <springdoc.version>2.6.0</springdoc.version>
         <javafaker.version>1.0.2</javafaker.version>
     </properties>
@@ -111,13 +110,6 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
-            </dependency>
-
-            <!-- Elasticsearch Java API Client -->
-            <dependency>
-                <groupId>co.elastic.clients</groupId>
-                <artifactId>elasticsearch-java</artifactId>
-                <version>${elasticsearch.client.version}</version>
             </dependency>
 
             <!-- OpenAPI 3 (Swagger UI) -->

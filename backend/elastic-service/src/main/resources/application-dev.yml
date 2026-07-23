@@ -41,6 +41,9 @@ logging:
     org.springframework.cache.interceptor: DEBUG
 
 management:
+  health:
+    elasticsearch:
+      enabled: false
   endpoints:
     web:
       exposure:

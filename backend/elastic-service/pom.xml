@@ -59,19 +59,6 @@
             <artifactId>elasticsearch-java</artifactId>
         </dependency>
 
-        <!-- Apache HttpClient for Elasticsearch -->
-        <dependency>
-            <groupId>org.apache.httpcomponents.client5</groupId>
-            <artifactId>httpclient5</artifactId>
-            <version>5.2.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>elasticsearch-rest-client</artifactId>
-            <version>8.19.5</version>
-        </dependency>
-
         <!-- Spring Cloud OpenFeign -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
