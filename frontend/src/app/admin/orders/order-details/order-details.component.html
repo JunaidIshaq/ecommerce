@@ -54,6 +54,7 @@
         <thead>
           <tr>
             <th>Product</th>
+            <th>Description</th>
             <th>Price</th>
             <th>Qty</th>
             <th>Line Total</th>
@@ -68,7 +69,18 @@
                 </span>
                 <span class="product-id muted">ID: {{ item.product_id }}</span>
                 <span class="muted" *ngIf="item.product_slug">{{ item.product_slug }}</span>
+                <div class="product-images" *ngIf="item.images && item.images.length">
+                  <img *ngFor="let img of item.images"
+                       [src]="img"
+                       alt="{{ item.product_name }}"
+                       class="product-thumb"
+                       (error)="img.src = item.image_url || ''">
+                </div>
               </div>
+            </td>
+            <td class="description-cell">
+              <span *ngIf="item.product_description">{{ item.product_description | slice:0:120 }}{{ item.product_description.length > 120 ? '...' : '' }}</span>
+              <span *ngIf="!item.product_description" class="muted">No description</span>
             </td>
             <td>${{ item.price | number:'1.2-2' }}</td>
             <td>{{ item.quantity }}</td>

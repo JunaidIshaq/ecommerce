@@ -111,7 +111,7 @@
 .product-cell {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .product-name {
@@ -125,6 +125,34 @@
 
 .muted {
   color: #6b7280;
+}
+
+.product-images {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.product-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.product-thumb:hover {
+  transform: scale(1.08);
+}
+
+.description-cell {
+  max-width: 320px;
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.4;
 }
 
 .summary {
