@@ -89,8 +89,8 @@ public class AdminOrderController {
                                         .productDescription(product != null ? product.getDescription() : null)
                                         .quantity(item.getQuantity())
                                         .price(item.getPrice())
-                                        .imageUrl(product != null && product.getImages() != null && !product.getImages().isEmpty() 
-                                                ? product.getImages().get(0) 
+                                        .imageUrl(product != null && product.getImages() != null && !product.getImages().isEmpty()
+                                                ? product.getImages().get(0)
                                                 : (product != null ? product.getImageUrl() : null))
                                         .images(product != null ? product.getImages() : null)
                                         .build();

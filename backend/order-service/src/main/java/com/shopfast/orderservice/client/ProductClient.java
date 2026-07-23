@@ -38,7 +38,7 @@ public class ProductClient {
         try {
             log.info("Fetching product {} from Product Service...", productId);
             ResponseEntity<ProductDetailDto> response = restTemplate.getForEntity(
-                    productServiceUrl + "/" + productId, ProductDetailDto.class);
+                    productServiceUrl + "/api/v1/product/" + productId, ProductDetailDto.class);
             return response.getBody();
         } catch (HttpClientErrorException.NotFound e) {
             log.warn("Product {} not found in Product Service", productId);
