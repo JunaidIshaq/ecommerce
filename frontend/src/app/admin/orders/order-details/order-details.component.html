@@ -1,88 +1,115 @@
+<!-- Loading state -->
 <div class="order-detail" *ngIf="loading">
   <p class="loading">Loading order details...</p>
 </div>
 
+<!-- Error state -->
 <div class="order-detail" *ngIf="!loading && errorMessage">
   <div class="error">{{ errorMessage }}</div>
 </div>
 
+<!-- Order loaded -->
 <div *ngIf="!loading && order">
   <app-admin-card>
 
+    <!-- Header -->
     <div class="order-header">
-      <h2>Order #{{ order.order_number || order.id }}</h2>
-      <span class="status" [ngClass]="(order.status || '').toLowerCase()">{{ order.status || 'UNKNOWN' }}</span>
+      <div>
+        <h2>{{ order.order_number }}</h2>
+        <p class="order-id muted">ID: {{ order.id }}</p>
+      </div>
+      <span class="status" [ngClass]="order.status.toLowerCase()">{{ order.status }}</span>
     </div>
 
-    <p class="order-date" *ngIf="order.created_at || order.createdAt">
-      Placed on {{ (order.created_at || order.createdAt) | date:'medium' }}
+    <p class="order-date">
+      Placed on {{ order.created_at | date:'medium' }}
+    </p>
+    <p class="order-date muted" *ngIf="order.updated_at !== order.created_at">
+      Last updated: {{ order.updated_at | date:'medium' }}
     </p>
 
+    <!-- Info grid -->
     <div class="grid">
 
       <div class="section">
         <h3>Order Info</h3>
-        <p><strong>Status:</strong> {{ order.status || 'N/A' }}</p>
-        <p><strong>Discount:</strong> ${{ order.discount || '0.00' }}</p>
+        <p><strong>Status:</strong> {{ order.status }}</p>
+        <p><strong>Discount:</strong> ${{ order.discount }}</p>
+        <p><strong>Subtotal:</strong> ${{ order.sub_total }}</p>
+        <p><strong>Total:</strong> ${{ order.total_amount }}</p>
       </div>
 
       <div class="section">
-        <h3>Payment</h3>
-        <p><strong>User ID:</strong> {{ order.user_id || order.userId || 'N/A' }}</p>
+        <h3>Customer</h3>
+        <p><strong>User ID:</strong> {{ order.user_id }}</p>
       </div>
 
     </div>
 
-    <h3>Items</h3>
+    <!-- Items table -->
+    <h3>Items ({{ order.items.length }})</h3>
     <div class="table-wrapper">
       <table class="admin-table">
         <thead>
-        <tr>
-          <th>Product</th>
-          <th>Price</th>
-          <th>Qty</th>
-          <th>Total</th>
-        </tr>
+          <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Qty</th>
+            <th>Line Total</th>
+          </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let item of order.items">
-          <td>
-            <div class="product-cell">
-              <span class="product-name">{{ item.product_id || item.productId || 'Product' }}</span>
-              <span class="product-id muted">ID: {{ item.product_id || item.productId || 'N/A' }}</span>
-            </div>
-          </td>
-          <td>${{ item.price }}</td>
-          <td>{{ item.quantity }}</td>
-          <td>${{ item.quantity * item.price }}</td>
-        </tr>
+          <tr *ngFor="let item of order.items">
+            <td>
+              <div class="product-cell">
+                <span class="product-name">
+                  {{ item.product_name || 'Product' }}
+                </span>
+                <span class="product-id muted">ID: {{ item.product_id }}</span>
+                <span class="muted" *ngIf="item.product_slug">{{ item.product_slug }}</span>
+              </div>
+            </td>
+            <td>${{ item.price | number:'1.2-2' }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ getItemTotal(item) | number:'1.2-2' }}</td>
+          </tr>
         </tbody>
       </table>
     </div>
 
+    <!-- Order summary -->
     <div class="summary">
-      <div class="summary-row" *ngIf="order.sub_total">
+      <div class="summary-row">
         <span>Subtotal</span>
         <span>${{ order.sub_total }}</span>
       </div>
+      <div class="summary-row" *ngIf="+order.discount > 0">
+        <span>Discount</span>
+        <span>-${{ order.discount }}</span>
+      </div>
       <div class="summary-row total">
         <span>Total</span>
-        <span>${{ order.total_amount || order.total_amount || 0 }}</span>
+        <span>${{ order.total_amount }}</span>
       </div>
     </div>
 
+    <!-- Actions -->
     <div class="actions">
-      <button class="btn-primary" (click)="markShipped()" *ngIf="order.status === 'PLACED' || order.status === 'CREATED'">
+      <button class="btn-primary"
+              (click)="markShipped()"
+              *ngIf="order.status === 'PLACED' || order.status === 'CREATED'">
         Mark as Shipped
       </button>
 
       <button class="btn-danger"
-              *ngIf="(order.payment_status || order.paymentStatus) === 'PAID' && order.status !== 'REFUNDED'"
-              (click)="openRefund()">
+              (click)="openRefund()"
+              *ngIf="order.status !== 'REFUNDED' && order.status !== 'CANCELLED'">
         Issue Refund
       </button>
 
-      <button class="btn-danger" (click)="cancelOrder()" *ngIf="order.status !== 'CANCELLED'">
+      <button class="btn-danger"
+              (click)="cancelOrder()"
+              *ngIf="order.status !== 'CANCELLED'">
         Cancel Order
       </button>
     </div>
@@ -90,6 +117,7 @@
   </app-admin-card>
 </div>
 
+<!-- No data state -->
 <div class="order-detail" *ngIf="!loading && !order && !errorMessage">
   <div class="error">No order data available.</div>
 </div>

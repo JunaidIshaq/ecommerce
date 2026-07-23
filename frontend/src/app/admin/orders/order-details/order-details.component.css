@@ -26,6 +26,11 @@
 }
 
 .order-header h2 {
+  margin: 0 0 4px;
+}
+
+.order-id {
+  font-size: 12px;
   margin: 0;
 }
 
@@ -44,6 +49,11 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.status.created {
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .status.placed {

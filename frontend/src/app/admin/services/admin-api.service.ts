@@ -40,7 +40,7 @@ export class AdminApiService {
     });
   }
 
-  updateOrderStatus(id: number, status: string) {
+  updateOrderStatus(id: string | number, status: string) {
     return this.http.put(`${this.baseUrl}/orders/${id}/status?status=${status}`, {});
   }
 
@@ -50,7 +50,7 @@ export class AdminApiService {
     });
   }
 
-  refundOrder(orderId: number, amount: number, reason: string) {
+  refundOrder(orderId: string | number, amount: number, reason: string) {
     return this.http.post(`${this.baseUrl}/payments/refund`, {
       orderId,
       amount,

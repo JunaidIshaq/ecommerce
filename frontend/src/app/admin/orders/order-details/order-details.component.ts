@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, Inject, NgZone, PLATFORM_ID } from '@angular/core';
+import { Component, ChangeDetectorRef, Inject, NgZone, PLATFORM_ID, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { AdminApiService } from '../../services/admin-api.service';
@@ -6,36 +6,52 @@ import { AdminCardComponent } from '../../shared/admin-card/admin-card.component
 import { AuthService } from '../../../services/auth.service';
 import { take } from 'rxjs/operators';
 
-const MOCK_ORDER = {
-  id: 1001,
-  order_number: 'ORD-1001',
-  userEmail: 'john.doe@gmail.com',
-  userId: 'user-001',
-  shippingAddress: '123 Main St, Springfield, IL 62704',
-  phone: '+1-555-0101',
-  paymentMethod: 'Credit Card',
-  paymentStatus: 'PAID',
-  status: 'PLACED',
-  subtotal: 249.99,
-  tax: 15.00,
-  discount: 0,
-  totalAmount: 264.99,
-  createdAt: '2026-02-01T10:30:00',
-  updated_at: '2026-02-01T10:30:00',
+export interface OrderItem {
+  quantity: number;
+  price: number;
+  product_id: string;
+  product_name: string | null;
+  product_slug: string | null;
+  product_description: string | null;
+  image_url: string | null;
+  images: any[] | null;
+}
+
+export interface Order {
+  id: string;
+  discount: string;
+  status: string;
+  items: OrderItem[];
+  user_id: string;
+  order_number: string;
+  sub_total: string;
+  total_amount: string;
+  created_at: string;
+  updated_at: string;
+}
+
+const MOCK_ORDER: Order = {
+  id: 'mock-order-id',
+  discount: '0.00',
+  status: 'CREATED',
   items: [
     {
-      productId: 'prod-001',
-      productName: 'Wireless Headphones',
+      quantity: 1,
       price: 89.99,
-      quantity: 2
-    },
-    {
-      productId: 'prod-002',
-      productName: 'USB-C Cable',
-      price: 35.00,
-      quantity: 1
+      product_id: 'mock-product-id',
+      product_name: 'Sample Product',
+      product_slug: null,
+      product_description: null,
+      image_url: null,
+      images: null
     }
-  ]
+  ],
+  user_id: 'mock-user-id',
+  order_number: 'Order-MOCK0001',
+  sub_total: '89.99',
+  total_amount: '89.99',
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString()
 };
 
 @Component({
@@ -45,8 +61,8 @@ const MOCK_ORDER = {
   templateUrl: './order-details.component.html',
   styleUrls: ['./order-details.component.css']
 })
-export class OrderDetailsComponent {
-  order: any = null;
+export class OrderDetailsComponent implements OnInit {
+  order: Order | null = null;
   loading = true;
   errorMessage: string | null = null;
   private orderId: string | null = null;
@@ -72,15 +88,16 @@ export class OrderDetailsComponent {
     this.loading = false;
     this.errorMessage = null;
     this.cdr.detectChanges();
-    console.log('Loaded mock order detail; attempting API...');
+    console.log('Loaded mock order; attempting API...');
 
     this.authService.currentUser().pipe(take(1)).subscribe({
       next: (user) => {
         this.adminApi.getOrderById(this.orderId!, user?.id).subscribe({
-          next: (data: any) => {
+          next: (res: any) => {
             this.zone.run(() => {
-              console.log('Order API success:', data);
-              this.order = data;
+              console.log('Order API success:', res);
+              // Unwrap the API envelope: { success, status, message, data: { ... } }
+              this.order = res?.data ?? res;
               this.loading = false;
               this.errorMessage = null;
               this.cdr.detectChanges();
@@ -88,7 +105,7 @@ export class OrderDetailsComponent {
           },
           error: (err) => {
             this.zone.run(() => {
-              console.warn('Order API failed, using mock data', err);
+              console.warn('Order API failed, keeping mock data', err);
               this.loading = false;
               this.errorMessage = null;
               this.cdr.detectChanges();
@@ -105,20 +122,33 @@ export class OrderDetailsComponent {
     });
   }
 
+  getItemTotal(item: OrderItem): number {
+    return item.quantity * item.price;
+  }
+
   markShipped() {
-    console.log('markShipped called for order:', this.order?.id || this.order?.order_number);
+    if (!this.order) return;
+    console.log('markShipped called for order:', this.order.order_number);
     this.adminApi.updateOrderStatus(this.order.id, 'SHIPPED')
-      .subscribe(() => this.order.status = 'SHIPPED');
+      .subscribe(() => {
+        if (this.order) this.order.status = 'SHIPPED';
+        this.cdr.detectChanges();
+      });
   }
 
   cancelOrder() {
-    console.log('cancelOrder called for order:', this.order?.id || this.order?.order_number);
+    if (!this.order) return;
+    console.log('cancelOrder called for order:', this.order.order_number);
     this.adminApi.updateOrderStatus(this.order.id, 'CANCELLED')
-      .subscribe(() => this.order.status = 'CANCELLED');
+      .subscribe(() => {
+        if (this.order) this.order.status = 'CANCELLED';
+        this.cdr.detectChanges();
+      });
   }
 
   openRefund() {
-    console.log('openRefund called for order:', this.order?.id || this.order?.order_number);
+    if (!this.order) return;
+    console.log('openRefund called for order:', this.order.order_number);
     const refundAmount = prompt('Enter refund amount:');
     if (refundAmount === null) return;
     const reason = prompt('Enter refund reason:') || '';
