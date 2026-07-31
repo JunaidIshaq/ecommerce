@@ -19,17 +19,12 @@
       <tr>
         <th>Image</th>
         <th>Product Name</th>
-        <th>Slug</th>
-        <th>Product ID</th>
         <th>Price</th>
         <th>Stock</th>
-        <th>Rating</th>
         <th>Available Qty</th>
         <th>Reserved Qty</th>
         <th>Sold Qty</th>
         <th>Status</th>
-        <th>Created At</th>
-        <th>Updated At</th>
         <th style="width:180px;">Actions</th>
       </tr>
       </thead>
@@ -48,20 +43,11 @@
         <!-- Product Name -->
         <td class="product-name">{{ item.product?.name || 'N/A' }}</td>
 
-        <!-- Slug -->
-        <td class="product-slug">{{ item.product?.slug || 'N/A' }}</td>
-
-        <!-- Product ID -->
-        <td>{{ item.product_id | slice:0:8 }}...</td>
-
         <!-- Price -->
         <td>${{ item.product?.price | number:'1.2-2' }}</td>
 
         <!-- Stock -->
         <td>{{ item.product?.stock ?? 'N/A' }}</td>
-
-        <!-- Rating -->
-        <td>{{ item.product?.rating | number:'1.1-1' }}</td>
 
         <!-- Available Qty (editable) -->
         <td>
@@ -100,12 +86,6 @@
             {{ editValues[item.id].available_quantity < 5 ? 'Low Stock' : 'In Stock' }}
           </span>
         </td>
-
-        <!-- Created At -->
-        <td class="date-cell">{{ item.created_at | date:'short' }}</td>
-
-        <!-- Updated At -->
-        <td class="date-cell">{{ item.updated_at | date:'short' }}</td>
 
         <!-- Actions -->
         <td class="actions-cell">
