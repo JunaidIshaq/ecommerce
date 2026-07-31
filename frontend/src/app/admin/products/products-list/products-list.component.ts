@@ -168,9 +168,9 @@ export class ProductsListComponent implements OnInit {
     console.log('loadProducts called');
 
     // First, show mock data immediately
-    this.totalProducts = MOCK_PRODUCTS.length;
+    this.products = MOCK_PRODUCTS;
+    this.totalProducts = this.products.length;
     this.totalPages = Math.ceil(this.totalProducts / this.pageSize);
-    this.products = MOCK_PRODUCTS.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
     console.log('Loaded mock products:', this.products.length);
 
     // Then try to fetch from API
@@ -189,10 +189,6 @@ export class ProductsListComponent implements OnInit {
                 this.products = data.items;
                 this.totalProducts = data.totalItems;
                 this.totalPages = data.totalPages;
-              } else if (Array.isArray(data)) {
-                this.products = data.slice((this.currentPage - 1) * this.pageSize, this.currentPage * this.pageSize);
-                this.totalProducts = data.length;
-                this.totalPages = Math.ceil(this.totalProducts / this.pageSize);
               }
 
               this.cdr.detectChanges();
@@ -200,13 +196,13 @@ export class ProductsListComponent implements OnInit {
           },
           error: (err) => {
             console.warn('Products API failed, using mock data', err);
-            // Already showing mock data, no action needed
+            // Already showing mock data
           }
         });
       },
       error: (err) => {
         console.warn('Auth service error:', err);
-        // Already showing mock data, no action needed
+        // Already showing mock data
       }
     });
   }

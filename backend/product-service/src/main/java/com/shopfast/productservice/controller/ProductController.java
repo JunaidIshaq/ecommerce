@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Tag(name = "Products", description = "Product CRUD and Search APIs")
 @RestController
 @RequestMapping("/api/v1/product")
@@ -65,6 +67,17 @@ public class ProductController {
             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
     ) {
         return ResponseEntity.ok(productService.getAllProductIds(pageNumber, pageSize));
+    }
+
+    @Operation(summary = "Get all products for admin service (internal)", security = @SecurityRequirement(name = "bearerAuth"))
+    @GetMapping("/internal/admin/product/pageNumber/{pageNumber}/pageSize/{pageSize}")
+    public ResponseEntity<PagedResponse<ProductDto>> getAllProductsForAdmin(
+            @RequestHeader("userId") String userId,
+            @PathVariable("pageNumber") Integer pageNumber,
+            @PathVariable("pageSize") Integer pageSize
+    ) {
+        log.info("Admin user {} requesting products - pageNumber: {}, pageSize: {}", userId, pageNumber, pageSize);
+        return ResponseEntity.ok(productService.getAllProducts(pageNumber, pageSize));
     }
 
     @Operation(summary = "Get all products for admin (paginated)", security = @SecurityRequirement(name = "bearerAuth"))

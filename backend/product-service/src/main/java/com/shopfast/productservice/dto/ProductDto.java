@@ -1,6 +1,5 @@
 package com.shopfast.productservice.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.shopfast.productservice.model.Product;
 import jakarta.validation.constraints.NotBlank;
