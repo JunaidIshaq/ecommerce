@@ -1,43 +1,11 @@
-import {Component, OnInit, ChangeDetectorRef, NgZone, Inject, PLATFORM_ID} from '@angular/core';
+import {ChangeDetectorRef, Component, Inject, NgZone, OnInit, PLATFORM_ID} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
 import {AdminApiService} from '../../services/admin-api.service';
 import {StockAdjustmentDialogComponent} from '../stock-adjustment-dialog/stock-adjustment-dialog.component';
-import {CommonModule, NgFor, NgIf} from '@angular/common';
+import {CommonModule, DecimalPipe, NgFor, NgIf} from '@angular/common';
 import {AuthService} from '../../../services/auth.service';
-import {isPlatformBrowser} from '@angular/common';
 import {take} from 'rxjs/operators';
-
-const MOCK_INVENTORY = [
-  {
-    id: '1',
-    product_id: '95bf2fe5-0bb2-446d-94fe-cb57c17a7f5c',
-    available_quantity: 12,
-    reserved_quantity: 3,
-    sold_quantity: 5,
-    created_at: '2026-01-21T10:05:06.400252Z',
-    updated_at: '2026-01-21T10:05:06.400254Z'
-  },
-  {
-    id: '2',
-    product_id: '4c50d048-dc7d-4efc-9117-b07854feefca',
-    available_quantity: 3,
-    reserved_quantity: 1,
-    sold_quantity: 2,
-    created_at: '2026-01-21T10:05:06.398661Z',
-    updated_at: '2026-01-21T10:05:06.398663Z'
-  },
-  {
-    id: '3',
-    product_id: '894f58fa-02df-4a6e-a353-9258ada4810b',
-    available_quantity: 0,
-    reserved_quantity: 0,
-    sold_quantity: 0,
-    created_at: '2026-01-21T10:05:06.397105Z',
-    updated_at: '2026-01-21T10:05:06.397107Z'
-  }
-];
-
 
 @Component({
   selector: 'inventory-list',
@@ -48,7 +16,8 @@ const MOCK_INVENTORY = [
     StockAdjustmentDialogComponent,
     CommonModule,
     NgFor,
-    NgIf
+    NgIf,
+    DecimalPipe
   ],
   templateUrl: './inventory-list.component.html',
   styleUrl: './inventory-list.component.css'
@@ -67,66 +36,159 @@ export class InventoryListComponent implements OnInit {
   totalItems = 0;
   totalPages = 0;
 
+  // Edit state: tracks current input values per inventory id
+  editValues: { [id: string]: { available_quantity: number; reserved_quantity: number; sold_quantity: number } } = {};
+  originalValues: { [id: string]: { available_quantity: number; reserved_quantity: number; sold_quantity: number } } = {};
+  savingItems: Set<string> = new Set();
+  saveSuccess: Set<string> = new Set();
+  saveError: { [id: string]: string } = {};
+
+  loading = false;
+  apiError = '';
+
   constructor(
     private adminApiService: AdminApiService,
     private authService: AuthService,
     private zone: NgZone,
     private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {
-    console.log('InventoryListComponent: Constructor called');
-  }
+  ) {}
 
   ngOnInit() {
-    console.log('InventoryListComponent: ngOnInit called');
     this.loadInventory();
   }
 
   loadInventory() {
-    console.log('loadInventory called');
+    this.loading = true;
+    this.apiError = '';
 
-    // First, show mock data immediately
-    this.inventory = MOCK_INVENTORY;
-    this.totalItems = this.inventory.length;
-    this.totalPages = Math.ceil(this.totalItems / this.pageSize);
-    console.log('Loaded mock inventory:', this.inventory.length);
-
-    // Then try to fetch from API
     this.authService.currentUser().pipe(take(1)).subscribe({
       next: (user) => {
         this.userId = user?.id;
-        console.log('User from auth:', user);
-        console.log('Calling inventory API with userId:', this.userId);
 
         this.adminApiService.getInventory(this.currentPage, this.pageSize, this.userId).subscribe({
           next: (data: any) => {
             this.zone.run(() => {
-              console.log('Inventory API success:', data);
-
               if (data && data.items && Array.isArray(data.items)) {
                 this.inventory = data.items;
-                this.totalItems = data.totalItems;
-                this.totalPages = data.totalPages;
+                this.totalItems = data.totalItems ?? data.items.length;
+                this.totalPages = data.totalPages ?? Math.ceil(this.totalItems / this.pageSize);
               } else if (Array.isArray(data)) {
                 this.inventory = data;
                 this.totalItems = data.length;
                 this.totalPages = Math.ceil(this.totalItems / this.pageSize);
               }
 
+              this.initEditValues();
+              this.loading = false;
               this.cdr.detectChanges();
             });
           },
           error: (err) => {
-            console.warn('Inventory API failed, using mock data', err);
-            // Already showing mock data, no action needed
+            console.error('Inventory API failed', err);
+            this.loading = false;
+            this.apiError = 'Failed to load inventory. Please try again.';
+            this.cdr.detectChanges();
           }
         });
       },
       error: (err) => {
-        console.warn('Auth service error:', err);
-        // Already showing mock data, no action needed
+        console.error('Auth service error:', err);
+        this.loading = false;
+        this.apiError = 'Authentication error. Please refresh.';
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  /** Initialise edit state from loaded inventory items */
+  private initEditValues() {
+    this.editValues = {};
+    this.originalValues = {};
+    this.savingItems.clear();
+    this.saveSuccess.clear();
+    this.saveError = {};
+
+    for (const item of this.inventory) {
+      const snap = {
+        available_quantity: item.available_quantity ?? 0,
+        reserved_quantity: item.reserved_quantity ?? 0,
+        sold_quantity: item.sold_quantity ?? 0
+      };
+      this.editValues[item.id] = { ...snap };
+      this.originalValues[item.id] = { ...snap };
+    }
+  }
+
+  isDirty(item: any): boolean {
+    const ev = this.editValues[item.id];
+    const ov = this.originalValues[item.id];
+    if (!ev || !ov) return false;
+    return ev.available_quantity !== ov.available_quantity ||
+      ev.reserved_quantity !== ov.reserved_quantity ||
+      ev.sold_quantity !== ov.sold_quantity;
+  }
+
+  isSaving(item: any): boolean {
+    return this.savingItems.has(item.id);
+  }
+
+  isSaved(item: any): boolean {
+    return this.saveSuccess.has(item.id);
+  }
+
+  saveInventory(item: any) {
+    const ev = this.editValues[item.id];
+    if (!ev || this.isSaving(item)) return;
+
+    this.savingItems.add(item.id);
+    this.saveSuccess.delete(item.id);
+    delete this.saveError[item.id];
+
+    this.adminApiService.updateInventory(
+      item.id,
+      ev.available_quantity,
+      ev.reserved_quantity,
+      ev.sold_quantity,
+      this.userId
+    ).subscribe({
+      next: () => {
+        this.zone.run(() => {
+          // Update original so isDirty resets
+          this.originalValues[item.id] = { ...ev };
+          // Update item in list
+          item.available_quantity = ev.available_quantity;
+          item.reserved_quantity = ev.reserved_quantity;
+          item.sold_quantity = ev.sold_quantity;
+
+          this.savingItems.delete(item.id);
+          this.saveSuccess.add(item.id);
+
+          // Clear success badge after 3s
+          setTimeout(() => {
+            this.saveSuccess.delete(item.id);
+            this.cdr.detectChanges();
+          }, 3000);
+
+          this.cdr.detectChanges();
+        });
+      },
+      error: (err) => {
+        this.zone.run(() => {
+          this.savingItems.delete(item.id);
+          this.saveError[item.id] = 'Save failed. Try again.';
+          this.cdr.detectChanges();
+        });
+      }
+    });
+  }
+
+  cancelEdit(item: any) {
+    const ov = this.originalValues[item.id];
+    if (ov) {
+      this.editValues[item.id] = { ...ov };
+    }
+    delete this.saveError[item.id];
   }
 
   // Pagination methods
@@ -167,14 +229,21 @@ export class InventoryListComponent implements OnInit {
     return pages;
   }
 
+  onSearch() {
+    this.currentPage = 1;
+    this.loadInventory();
+  }
+
   filteredInventory() {
+    if (!this.searchTerm) return this.inventory;
+    const term = this.searchTerm.toLowerCase();
     return this.inventory.filter(item =>
-      (item.product_id && item.product_id.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
-      (item.id && item.id.toLowerCase().includes(this.searchTerm.toLowerCase()))
+      (item.product?.name && item.product.name.toLowerCase().includes(term)) ||
+      (item.product_id && item.product_id.toLowerCase().includes(term)) ||
+      (item.id && item.id.toLowerCase().includes(term))
     );
   }
 
-  // ✅ THIS IS THE MISSING METHOD
   adjustStock(item: any) {
     this.selectedItem = item;
     this.showDialog = true;
@@ -189,5 +258,4 @@ export class InventoryListComponent implements OnInit {
     this.loadInventory();
     this.closeDialog();
   }
-
 }

@@ -20,32 +20,58 @@
   box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.15);
 }
 
+/* Loading / Error / Empty states */
+.loading-state,
+.error-state,
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.error-state {
+  color: #dc2626;
+  background: #fee2e2;
+  border-radius: 8px;
+}
+
+/* Table container for scrolling */
+.table-container {
+  max-height: 600px;
+  overflow-y: auto;
+  border: 1px solid var(--brand-border);
+  border-radius: 12px;
+}
+
 /* Table Base */
 .admin-table {
   width: 100%;
   border-collapse: collapse;
   background: white;
-  border-radius: 12px;
-  overflow: hidden;
   font-size: 14px;
 }
 
 /* Header Row */
 .admin-table thead {
   background: #f3f4f6;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .admin-table th {
   text-align: left;
-  padding: 12px 14px;
+  padding: 12px 10px;
   font-weight: 600;
   color: var(--brand-dark);
   border-bottom: 1px solid var(--brand-border);
+  white-space: nowrap;
 }
 
 /* Body Rows */
 .admin-table td {
-  padding: 12px 14px;
+  padding: 10px;
   border-bottom: 1px solid var(--brand-border);
   vertical-align: middle;
 }
@@ -55,7 +81,81 @@
   transition: background 0.2s ease;
 }
 
-/* Stock Status */
+/* Product image */
+.product-image {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+
+.no-image {
+  display: inline-block;
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+  text-align: center;
+  background: #f3f4f6;
+  border-radius: 6px;
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+.product-name {
+  font-weight: 500;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-slug {
+  font-size: 12px;
+  color: #6b7280;
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: monospace;
+}
+
+.date-cell {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+/* Editable quantity inputs */
+.qty-input {
+  width: 72px;
+  padding: 6px 8px;
+  border: 1px solid var(--brand-border);
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: white;
+}
+
+.qty-input:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.15);
+  outline: none;
+}
+
+.qty-input.dirty {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.qty-input:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Stock Status badges */
 .low {
   background: #fee2e2;
   color: #991b1b;
@@ -74,15 +174,85 @@
   font-weight: 600;
 }
 
-/* Action button */
-.admin-table button {
-  padding: 6px 10px;
+/* Action buttons */
+.actions-cell {
+  white-space: nowrap;
+}
+
+.btn-save {
+  padding: 5px 10px;
   font-size: 12px;
   border-radius: 6px;
+  border: 1px solid #16a34a;
+  background: #16a34a;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: 4px;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #15803d;
+  border-color: #15803d;
+}
+
+.btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-save.saved {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.btn-cancel {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--brand-border);
+  background: white;
+  color: var(--brand-dark);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: 4px;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-adjust {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--brand-primary);
+  background: var(--brand-primary);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-right: 4px;
+}
+
+.btn-adjust:hover {
+  background: #5b54e6;
+  border-color: #5b54e6;
+}
+
+.save-error {
+  display: block;
+  font-size: 11px;
+  color: #dc2626;
+  margin-top: 2px;
 }
 
 /* Responsive Support */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .admin-table {
     display: block;
     overflow-x: auto;
@@ -101,7 +271,7 @@
   flex-wrap: wrap;
 }
 
-.pagination-btn {
+.btn-page {
   padding: 8px 14px;
   border: 1px solid var(--brand-border);
   background: white;
@@ -112,18 +282,18 @@
   color: var(--brand-dark);
 }
 
-.pagination-btn:hover:not(:disabled) {
+.btn-page:hover:not(:disabled) {
   background: #f3f4f6;
   border-color: var(--brand-primary);
 }
 
-.pagination-btn.active {
+.btn-page.active {
   background: var(--brand-primary);
   color: white;
   border-color: var(--brand-primary);
 }
 
-.pagination-btn:disabled {
+.btn-page:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

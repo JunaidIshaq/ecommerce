@@ -1,6 +1,8 @@
 package com.shopfast.inventoryservice.util;
 
+import com.shopfast.common.dto.ProductDto;
 import com.shopfast.inventoryservice.dto.InventoryResponseDto;
+import com.shopfast.inventoryservice.dto.InventoryWithProductDto;
 import com.shopfast.inventoryservice.model.InventoryItem;
 
 public class InventoryMapper {
@@ -15,5 +17,18 @@ public class InventoryMapper {
         inventoryResponseDto.setCreatedAt(inventoryItem.getCreatedAt().toString());
         inventoryResponseDto.setUpdatedAt(inventoryItem.getUpdatedAt().toString());
         return inventoryResponseDto;
+    }
+
+    public static InventoryWithProductDto getInventoryWithProductDto(InventoryItem inventoryItem, ProductDto productDto) {
+        return InventoryWithProductDto.builder()
+                .id(inventoryItem.getId().toString())
+                .productId(inventoryItem.getProductId().toString())
+                .availableQuantity(inventoryItem.getAvailableQuantity())
+                .reservedQuantity(inventoryItem.getReservedQuantity())
+                .soldQuantity(inventoryItem.getSoldQuantity())
+                .createdAt(inventoryItem.getCreatedAt().toString())
+                .updatedAt(inventoryItem.getUpdatedAt().toString())
+                .product(productDto)
+                .build();
     }
 }

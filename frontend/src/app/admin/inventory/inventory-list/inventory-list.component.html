@@ -1,63 +1,147 @@
 <app-admin-card>
   <div class="page-header">
     <h2>Inventory Management</h2>
-    <input type="text" placeholder="Search inventory..." [(ngModel)]="searchTerm" />
+    <input type="text" placeholder="Search by product name or ID..." [(ngModel)]="searchTerm" (input)="onSearch()" />
   </div>
 
-  <table class="admin-table">
-    <thead>
-    <tr>
-      <th>Inventory ID</th>
-      <th>Product ID</th>
-      <th>Available Qty</th>
-      <th>Reserved Qty</th>
-      <th>Sold Qty</th>
-      <th>Status</th>
-      <th style="width:160px;">Actions</th>
-    </tr>
-    </thead>
+  <!-- Loading / Error states -->
+  <div *ngIf="loading" class="loading-state">Loading inventory...</div>
+  <div *ngIf="apiError" class="error-state">{{ apiError }}</div>
 
-    <tbody>
-    <tr *ngFor="let item of filteredInventory()">
-      <td>{{ item.id | slice:0:8 }}...</td>
-      <td>{{ item.product_id | slice:0:8 }}...</td>
-      <td>{{ item.available_quantity }}</td>
-      <td>{{ item.reserved_quantity }}</td>
-      <td>{{ item.sold_quantity }}</td>
-      <td>
-          <span [class.low]="item.available_quantity < 5" [class.ok]="item.available_quantity >= 5">
-            {{ item.available_quantity < 5 ? 'Low Stock' : 'In Stock' }}
+  <!-- Empty state -->
+  <div *ngIf="!loading && filteredInventory().length === 0" class="empty-state">
+    <p>No inventory items found.</p>
+  </div>
+
+  <div class="table-container" *ngIf="!loading && filteredInventory().length > 0">
+    <table class="admin-table">
+      <thead>
+      <tr>
+        <th>Image</th>
+        <th>Product Name</th>
+        <th>Slug</th>
+        <th>Product ID</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Rating</th>
+        <th>Available Qty</th>
+        <th>Reserved Qty</th>
+        <th>Sold Qty</th>
+        <th>Status</th>
+        <th>Created At</th>
+        <th>Updated At</th>
+        <th style="width:180px;">Actions</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let item of filteredInventory()">
+        <!-- Product Image -->
+        <td>
+          <img *ngIf="item.product?.images && item.product.images.length > 0"
+               [src]="item.product.images[0]"
+               alt="{{ item.product?.name }}"
+               class="product-image" />
+          <span *ngIf="!item.product?.images || item.product.images.length === 0" class="no-image">N/A</span>
+        </td>
+
+        <!-- Product Name -->
+        <td class="product-name">{{ item.product?.name || 'N/A' }}</td>
+
+        <!-- Slug -->
+        <td class="product-slug">{{ item.product?.slug || 'N/A' }}</td>
+
+        <!-- Product ID -->
+        <td>{{ item.product_id | slice:0:8 }}...</td>
+
+        <!-- Price -->
+        <td>${{ item.product?.price | number:'1.2-2' }}</td>
+
+        <!-- Stock -->
+        <td>{{ item.product?.stock ?? 'N/A' }}</td>
+
+        <!-- Rating -->
+        <td>{{ item.product?.rating | number:'1.1-1' }}</td>
+
+        <!-- Available Qty (editable) -->
+        <td>
+          <input type="number"
+                 class="qty-input"
+                 [class.dirty]="isDirty(item)"
+                 [disabled]="isSaving(item)"
+                 [(ngModel)]="editValues[item.id].available_quantity"
+                 min="0" />
+        </td>
+
+        <!-- Reserved Qty (editable) -->
+        <td>
+          <input type="number"
+                 class="qty-input"
+                 [class.dirty]="isDirty(item)"
+                 [disabled]="isSaving(item)"
+                 [(ngModel)]="editValues[item.id].reserved_quantity"
+                 min="0" />
+        </td>
+
+        <!-- Sold Qty (editable) -->
+        <td>
+          <input type="number"
+                 class="qty-input"
+                 [class.dirty]="isDirty(item)"
+                 [disabled]="isSaving(item)"
+                 [(ngModel)]="editValues[item.id].sold_quantity"
+                 min="0" />
+        </td>
+
+        <!-- Status -->
+        <td>
+          <span [class.low]="editValues[item.id].available_quantity < 5"
+                [class.ok]="editValues[item.id].available_quantity >= 5">
+            {{ editValues[item.id].available_quantity < 5 ? 'Low Stock' : 'In Stock' }}
           </span>
-      </td>
-      <td>
-        <button class="btn-primary" (click)="adjustStock(item)">Adjust</button>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+        </td>
+
+        <!-- Created At -->
+        <td class="date-cell">{{ item.created_at | date:'short' }}</td>
+
+        <!-- Updated At -->
+        <td class="date-cell">{{ item.updated_at | date:'short' }}</td>
+
+        <!-- Actions -->
+        <td class="actions-cell">
+          <button class="btn-save"
+                  (click)="saveInventory(item)"
+                  [disabled]="!isDirty(item) || isSaving(item)"
+                  [class.saved]="isSaved(item)">
+            {{ isSaving(item) ? 'Saving...' : (isSaved(item) ? 'Saved ✓' : 'Save') }}
+          </button>
+          <button class="btn-cancel"
+                  (click)="cancelEdit(item)"
+                  [disabled]="!isDirty(item) || isSaving(item)">
+            Cancel
+          </button>
+          <button class="btn-adjust" (click)="adjustStock(item)">Adjust</button>
+          <span *ngIf="saveError[item.id]" class="save-error">{{ saveError[item.id] }}</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 
   <!-- Pagination -->
-  <div class="pagination" *ngIf="totalPages > 1">
-    <button
-      class="pagination-btn"
-      (click)="previousPage()"
-      [disabled]="currentPage === 1">
-      Previous
+  <div class="pagination" *ngIf="totalPages > 1 && !loading">
+    <button class="btn-page" (click)="previousPage()" [disabled]="currentPage === 1">
+      &laquo; Previous
     </button>
 
-    <button
-      *ngFor="let page of getPageNumbers()"
-      class="pagination-btn"
-      [class.active]="page === currentPage"
-      (click)="goToPage(page)">
+    <button class="btn-page" *ngFor="let page of getPageNumbers()"
+            (click)="goToPage(page)"
+            [class.active]="page === currentPage">
       {{ page }}
     </button>
 
-    <button
-      class="pagination-btn"
-      (click)="nextPage()"
-      [disabled]="currentPage === totalPages">
-      Next
+    <button class="btn-page" (click)="nextPage()" [disabled]="currentPage === totalPages">
+      Next &raquo;
     </button>
 
     <span class="page-info">
@@ -66,7 +150,7 @@
   </div>
 </app-admin-card>
 
-<!-- 👇 ADD DIALOG HERE (OUTSIDE THE CARD) -->
+<!-- Stock Adjustment Dialog -->
 <stock-adjustment-dialog
   *ngIf="showDialog"
   [item]="selectedItem"

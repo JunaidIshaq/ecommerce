@@ -69,6 +69,16 @@ export class AdminApiService {
     });
   }
 
+  updateInventory(inventoryId: string, available_quantity: number, reserved_quantity: number, sold_quantity: number, userId?: string) {
+    return this.http.put(`${this.baseUrlOrder}/api/v1/admin/inventory/${inventoryId}`, {
+      available_quantity,
+      reserved_quantity,
+      sold_quantity
+    }, {
+      headers: userId ? { 'userId': userId } : {}
+    });
+  }
+
   updateStock(productId: number, quantity: number) {
     return this.http.put(`${this.baseUrl}/inventory/${productId}/stock?quantity=${quantity}`, {});
   }

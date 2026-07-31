@@ -1,10 +1,13 @@
 package com.shopfast.inventoryservice.service;
 
+import com.shopfast.common.dto.PagedResponse;
+import com.shopfast.common.dto.ProductDto;
 import com.shopfast.common.events.InventoryEvent;
+import com.shopfast.inventoryservice.client.ProductClient;
 import com.shopfast.inventoryservice.dto.AdjustQuantityDto;
 import com.shopfast.inventoryservice.dto.InventoryRequestDto;
 import com.shopfast.inventoryservice.dto.InventoryResponseDto;
-import com.shopfast.common.dto.PagedResponse;
+import com.shopfast.inventoryservice.dto.InventoryWithProductDto;
 import com.shopfast.inventoryservice.events.KafkaInventoryProducer;
 import com.shopfast.inventoryservice.model.InventoryItem;
 import com.shopfast.inventoryservice.repository.InventoryRepository;
@@ -36,10 +39,13 @@ public class InventoryService {
 
     private final MeterRegistry meterRegistry;
 
-    public InventoryService(InventoryRepository inventoryRepository, KafkaInventoryProducer kafkaInventoryProducer, MeterRegistry meterRegistry) {
+    private final ProductClient productClient;
+
+    public InventoryService(InventoryRepository inventoryRepository, KafkaInventoryProducer kafkaInventoryProducer, MeterRegistry meterRegistry, ProductClient productClient) {
         this.inventoryRepository = inventoryRepository;
         this.kafkaInventoryProducer = kafkaInventoryProducer;
         this.meterRegistry = meterRegistry;
+        this.productClient = productClient;
     }
 
     // CRUD
@@ -69,6 +75,32 @@ public class InventoryService {
         List<InventoryResponseDto> inventoryResponseDtos = inventoryPage.stream().map(InventoryMapper::getInventoryResponseDto).toList();
         return new PagedResponse<>(
                 inventoryResponseDtos,
+                inventoryPage.getTotalElements(),
+                inventoryPage.getTotalPages(),
+                pageNumber,
+                pageSize
+        );
+    }
+
+    @Cacheable(
+            value = "inventoryWithProduct",
+            key = "'pageNumber_' + #pageNumber + '_pageSize_' + #pageSize"
+    )
+    public PagedResponse<InventoryWithProductDto> getAllInventoryItemsWithProduct(
+            @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
+    ) {
+        log.info("Fetching all inventory records with product information");
+        PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<InventoryItem> inventoryPage = inventoryRepository.findAll(pageable);
+        
+        List<InventoryWithProductDto> inventoryWithProductDtos = inventoryPage.stream().map(inventoryItem -> {
+            ProductDto productDto = productClient.getProductById(inventoryItem.getProductId());
+            return InventoryMapper.getInventoryWithProductDto(inventoryItem, productDto);
+        }).toList();
+        
+        return new PagedResponse<>(
+                inventoryWithProductDtos,
                 inventoryPage.getTotalElements(),
                 inventoryPage.getTotalPages(),
                 pageNumber,

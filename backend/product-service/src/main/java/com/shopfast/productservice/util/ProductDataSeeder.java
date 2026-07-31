@@ -3,17 +3,22 @@ package com.shopfast.productservice.util;
 import com.github.javafaker.Faker;
 import com.shopfast.common.dto.CategoryDto;
 import com.shopfast.common.dto.PagedResponse;
+import com.shopfast.common.events.ProductEvent;
 import com.shopfast.productservice.client.CategoryClient;
+import com.shopfast.productservice.events.KafkaProductProducer;
 import com.shopfast.productservice.model.Product;
 import com.shopfast.productservice.repository.ProductRepository;
 import com.shopfast.productservice.service.ProductService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -30,6 +35,9 @@ public class ProductDataSeeder {
 
     private static final int PRODUCT_COUNT = 1000;
 
+    @Autowired
+    private KafkaProductProducer kafkaProductProducer;
+
     // Elasticsearch disabled - simplified constructor
     public ProductDataSeeder(ProductRepository productRepository,
                              ProductService productService,
@@ -41,6 +49,28 @@ public class ProductDataSeeder {
 
     @PostConstruct
     public void seed() {
+        productRepository.findAll().forEach(product -> {
+            Product saved = productRepository.save(product);
+
+            // Publish product created event
+            ProductEvent event = new ProductEvent(
+                    UUID.randomUUID().toString(),
+                    "PRODUCT_CREATED",
+                    1,
+                    Instant.now(),
+                    Map.of(
+                            "productId", product.getId(),
+                            "name", product.getName(),
+                            "categoryId", product.getCategoryId(),
+                            "price", product.getPrice()
+                    )
+            );
+
+            kafkaProductProducer.publishProductEvent(event);
+            log.info("✅ Product event published for {}", product.getId());
+
+        });
+
         if (!seedProducts) {
             log.info("🟢 Product seeding disabled (set app.seed-products=true to enable)");
             return;

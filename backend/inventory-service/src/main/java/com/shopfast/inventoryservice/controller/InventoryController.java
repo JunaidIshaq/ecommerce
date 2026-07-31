@@ -1,15 +1,15 @@
 package com.shopfast.inventoryservice.controller;
 
+import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.inventoryservice.dto.AdjustQuantityDto;
 import com.shopfast.inventoryservice.dto.InventoryRequestDto;
 import com.shopfast.inventoryservice.dto.InventoryResponseDto;
-import com.shopfast.common.dto.PagedResponse;
+import com.shopfast.inventoryservice.dto.InventoryWithProductDto;
 import com.shopfast.inventoryservice.service.InventoryService;
 import com.shopfast.inventoryservice.util.InventoryMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.HeaderParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -49,13 +49,13 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryService.getAllInventoryItems(pageNumber, pageSize));
     }
 
-    @Operation(summary = "Get all inventory records")
+    @Operation(summary = "Get all inventory records with product information (Admin)")
     @GetMapping("/internal/admin/inventory/pageNumber/{pageNumber}/pageSize/{pageSize}")
-    public ResponseEntity<PagedResponse<InventoryResponseDto>> getAllAdminInventoryItems(
+    public ResponseEntity<PagedResponse<InventoryWithProductDto>> getAllAdminInventoryItems(
             @RequestHeader(name = "userId") String userId,
             @PathVariable(name = "pageNumber") int pageNumber,
             @PathVariable(name = "pageSize") int pageSize) {
-        return ResponseEntity.ok(inventoryService.getAllInventoryItems(pageNumber, pageSize));
+        return ResponseEntity.ok(inventoryService.getAllInventoryItemsWithProduct(pageNumber, pageSize));
     }
 
 
