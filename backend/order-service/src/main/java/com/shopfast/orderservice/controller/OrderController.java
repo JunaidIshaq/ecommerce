@@ -1,13 +1,15 @@
 package com.shopfast.orderservice.controller;
 
 import com.shopfast.orderservice.client.CartClient;
+import com.shopfast.orderservice.client.ProductClient;
 import com.shopfast.orderservice.dto.CheckoutRequestDto;
+import com.shopfast.orderservice.dto.OrderItemDto;
 import com.shopfast.orderservice.dto.OrderRequestDto;
 import com.shopfast.orderservice.dto.OrderResponseDto;
+import com.shopfast.orderservice.dto.ProductDetailDto;
 import com.shopfast.orderservice.model.Order;
 import com.shopfast.orderservice.repository.OrderRepository;
 import com.shopfast.orderservice.service.OrderService;
-import com.shopfast.orderservice.util.OrderMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -32,14 +34,17 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
-    private CartClient cartClient;
+    private final CartClient cartClient;
 
-    public OrderController(OrderService orderService, OrderRepository orderRepository, CartClient cartClient) {
+    private final ProductClient productClient;
+
+    public OrderController(OrderService orderService, OrderRepository orderRepository, CartClient cartClient, ProductClient productClient) {
         this.orderService = orderService;
         this.orderRepository = orderRepository;
         this.cartClient = cartClient;
+        this.productClient = productClient;
     }
 
     // For Manual Orders Only
@@ -58,14 +63,36 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<List<OrderResponseDto>> myOrders() {
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.ok(orderService.getOrdersForUser(userId).stream().map(OrderResponseDto::from).toList());
+        return ResponseEntity.ok(orderService.getOrdersForUser(userId).stream()
+                .map(order -> enrichOrderResponse(OrderResponseDto.from(order), order))
+                .toList());
     }
-
 
     @Operation(summary = "Get order by id")
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponseDto> getOrder(@PathVariable("id") UUID id) {
-        return orderService.getOrderById(id).map(OrderResponseDto::from).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return orderService.getOrderById(id)
+                .map(order -> enrichOrderResponse(OrderResponseDto.from(order), order))
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    private OrderResponseDto enrichOrderResponse(OrderResponseDto response, Order order) {
+        if (order.getItems() != null) {
+            response.setItems(order.getItems().stream()
+                    .map(item -> {
+                        ProductDetailDto product = productClient.fetchProductById(item.getProductId());
+                        return OrderItemDto.builder()
+                                .productId(item.getProductId())
+                                .quantity(item.getQuantity())
+                                .price(item.getPrice())
+                                .imageUrl(product != null ? product.getImageUrl() : null)
+                                .images(product != null ? product.getImages() : null)
+                                .build();
+                    })
+                    .toList());
+        }
+        return response;
     }
 
     @Operation(summary = "Cancel order")

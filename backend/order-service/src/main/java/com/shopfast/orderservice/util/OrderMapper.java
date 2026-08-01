@@ -24,10 +24,9 @@ public class OrderMapper {
     }
 
     public static OrderItemDto getOrderItemDto(OrderItem orderItem) {
-        OrderItemDto orderItemDto = new OrderItemDto();
-        orderItemDto.setPrice(orderItem.getPrice());
-        orderItemDto.setProductId(orderItem.getProductId());
-        orderItemDto.setQuantity(orderItem.getQuantity());
-        return orderItemDto;
+       return OrderItemDto.builder().price(orderItem.getPrice())
+                        .productId(orderItem.getProductId())
+                                .quantity(orderItem.getQuantity()).build();
+
     }
 }

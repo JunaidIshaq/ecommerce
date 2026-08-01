@@ -3,12 +3,15 @@ package com.shopfast.orderservice.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
+@Builder
 @Data
 public class OrderItemDto implements Serializable {
 
@@ -23,5 +26,10 @@ public class OrderItemDto implements Serializable {
 
     @NotNull
     private BigDecimal price;
+
+    @JsonProperty("image_url")
+    private String imageUrl;
+
+    private List<String> images;
 
 }

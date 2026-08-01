@@ -70,6 +70,11 @@ public class OrderResponseDto implements Serializable {
                 .totalAmount(order.getTotalAmount().toString())
                 .paymentMethod(order.getPaymentMethod())
                 .paymentStatus(order.getPaymentStatus())
+                .items(order.getItems() != null ? order.getItems().stream().map(i -> OrderItemDto.builder()
+                        .productId(i.getProductId())
+                        .quantity(i.getQuantity())
+                        .price(i.getPrice())
+                        .build()).toList() : null)
                 .createdAt(order.getCreatedAt() != null ? order.getCreatedAt().toString() : null)
                 .updatedAt(order.getUpdatedAt() != null ? order.getUpdatedAt().toString() : null)
                 .build();

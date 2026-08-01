@@ -92,7 +92,8 @@ public class OrderService {
     }
 
     public Optional<Order> getOrderById(UUID orderId) {
-        return orderRepository.findById(orderId);
+        return Optional.of(orderRepository.findById(orderId)
+                .orElseThrow(() -> new NoSuchElementException(String.format("Order not found : %s", orderId))));
     }
 
     @Transactional
