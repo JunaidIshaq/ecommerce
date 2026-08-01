@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NgIf, NgForOf } from '@angular/common';
 import { OrderService } from '../../services/order.service';
@@ -50,7 +50,8 @@ export class CustomerOrderDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private orderService: OrderService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -99,5 +100,39 @@ export class CustomerOrderDetailComponent implements OnInit {
   formatCurrency(value: number | undefined): string {
     const v = value ?? 0;
     return '$' + v.toFixed(2);
+  }
+
+  getStatusClass(status: string | undefined): string {
+    if (!status) return '';
+    return status.toLowerCase();
+  }
+
+  getPaymentStatusClass(paymentStatus: string | undefined): string {
+    if (!paymentStatus) return '';
+    const status = paymentStatus.toLowerCase();
+    if (status === 'paid' || status === 'confirmed' || status === 'success') {
+      return 'payment-success';
+    } else if (status === 'failed' || status === 'payment_failed') {
+      return 'payment-failed';
+    } else if (status === 'pending') {
+      return 'payment-pending';
+    }
+    return '';
+  }
+
+  formatPaymentMethod(method: string | undefined): string {
+    if (!method) return 'N/A';
+    const methodMap: { [key: string]: string } = {
+      'COD': 'Cash on Delivery',
+      'CARD': 'Credit / Debit Card',
+      'CREDIT_CARD': 'Credit Card',
+      'DEBIT_CARD': 'Debit Card',
+      'CASH': 'Cash on Delivery'
+    };
+    return methodMap[method.toUpperCase()] || method;
+  }
+
+  goBack(): void {
+    this.router.navigate(['/']);
   }
 }

@@ -18,6 +18,7 @@ export interface Order {
   subtotal?: number;
   tax?: number;
   discount?: number;
+  shippingCost?: number;
   totalAmount?: number;
   items?: OrderItem[];
   createdAt?: string;
