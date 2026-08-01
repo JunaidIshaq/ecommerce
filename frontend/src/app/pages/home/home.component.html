@@ -1,10 +1,41 @@
-<!-- HERO SECTION -->
 <!-- HERO / BANNER SECTION -->
 <section class="hero">
+  <!-- Animated Background Shapes -->
+  <div class="hero-bg-shapes">
+    <div class="shape shape-1" [style.transform]="getParallaxTransform(20)"></div>
+    <div class="shape shape-2" [style.transform]="getParallaxTransform(15)"></div>
+    <div class="shape shape-3" [style.transform]="getParallaxTransform(25)"></div>
+    <div class="shape shape-4" [style.transform]="getParallaxTransform(18)"></div>
+    <div class="shape shape-5" [style.transform]="getParallaxTransform(22)"></div>
+  </div>
+
+  <!-- Floating Product Cards -->
+  <div class="floating-items">
+    <div class="floating-card" *ngFor="let item of floatingItems" [style.animation-delay]="item.delay + 's'" [style.top]="item.top" [style.left]="item.left" [style.right]="item.right" [style.bottom]="item.bottom" [style.transform]="getFloatingParallax(10)">
+      <div class="floating-card-inner" [ngClass]="item.colorClass">
+        <span class="floating-emoji">{{ item.emoji }}</span>
+        <span class="floating-label">{{ item.label }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Content -->
   <div class="hero-content">
-    <h1>Welcome to <span>ShopFast</span></h1>
-    <p>Discover exclusive deals and trending products.</p>
-    <a routerLink="/product" class="btn-primary">Shop Now</a>
+    <div class="hero-badge">🚚 Free Shipping on Orders Over $50</div>
+    <h1 class="hero-title">
+      <span class="title-line">{{ currentTitleText }}<span class="cursor">|</span></span>
+    </h1>
+    <p class="hero-subtitle">From farm-fresh produce to daily essentials — get everything you need delivered to your doorstep.</p>
+    <div class="hero-actions">
+      <a routerLink="/product" class="btn-primary btn-shop">Shop Now</a>
+      <a routerLink="/product" class="btn-secondary btn-explore">Explore Categories</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item" *ngFor="let stat of stats; let i = index">
+        <span class="stat-number">{{ animatedStats[i].value | number }}{{ animatedStats[i].suffix }}</span>
+        <span class="stat-label">{{ stat.label }}</span>
+      </div>
+    </div>
   </div>
 </section>
 
