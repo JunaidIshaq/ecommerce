@@ -62,13 +62,13 @@
               <div class="notif-icon-box">
                 <i class="fa"
                    [ngClass]="{
-               'fa-shopping-bag': n.type === 'ORDER_CREATED',
-               'fa-check-circle': n.type === 'ORDER_DELIVERED',
-               'fa-truck': n.type === 'ORDER_SHIPPED',
-               'fa-ban': n.type === 'ORDER_CANCELLED',
-               'fa-bolt': n.type === 'PROMOTION',
-               'fa-envelope': true
-             }">
+                'fa-shopping-bag': n.type === 'ORDER_CREATED',
+                'fa-check-circle': n.type === 'ORDER_DELIVERED',
+                'fa-truck': n.type === 'ORDER_SHIPPED',
+                'fa-ban': n.type === 'ORDER_CANCELLED',
+                'fa-bolt': n.type === 'PROMOTION',
+                'fa-envelope': true
+              }">
                 </i>
               </div>
 
@@ -95,6 +95,7 @@
 
       <!-- Auth -->
       <ng-container *ngIf="(user$ | async) as u; else guest">
+        <a routerLink="/orders" class="nav-link">My Orders</a>
         <span class="user">Hi, {{ u.email }}</span>
         <button (click)="logout()" class="btn-logout">Logout</button>
       </ng-container>
@@ -115,6 +116,7 @@
   <div class="mobile-menu" [class.open]="menuOpen">
     <a routerLink="/product" (click)="closeMenu()">Products</a>
     <a routerLink="/profile" (click)="closeMenu()">Profile</a>
+    <a routerLink="/orders" (click)="closeMenu()" *ngIf="(user$ | async)">My Orders</a>
     <a routerLink="/cart" (click)="closeMenu()">Cart ({{ (cartCount$ | async) || 0 }})</a>
     <a routerLink="/login" (click)="closeMenu()" *ngIf="!(user$ | async)">Login</a>
     <a routerLink="/signup" (click)="closeMenu()" *ngIf="!(user$ | async)">Sign Up</a>

@@ -8,6 +8,7 @@ import {SignupComponent} from './pages/signup/signup.component';
 import {ProfileComponent} from './pages/profile/profile.component';
 import {ProductDetailComponent} from './pages/product-detail/product-detail.component';
 import {CustomerOrderDetailComponent} from './pages/order-detail/order-detail.component';
+import {OrderHistoryComponent} from './pages/order-history/order-history.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -22,6 +23,7 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'signup', component: SignupComponent },
   { path: 'profile', component: ProfileComponent },
+  { path: 'orders', component: OrderHistoryComponent },
   { path: 'order/:id', component: CustomerOrderDetailComponent },
 
   // 🛡 ADMIN PANEL (Lazy Loaded)

@@ -59,8 +59,7 @@ export class HeaderComponent implements OnInit {
   loadNotifications(): void {
     if (this.loading || this.lastPage) return;
 
-    this.user$ = this.auth.currentUser();
-    this.user$.pipe(take(1)).subscribe(u => this.userId = u?.id!);
+    this.auth.currentUser().pipe(take(1)).subscribe(u => this.userId = u?.id!);
     this.loading = true;
 
     this.notificationService.getUserNotifications(this.userId, this.page, this.size)

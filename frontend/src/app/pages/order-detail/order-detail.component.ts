@@ -102,6 +102,16 @@ export class CustomerOrderDetailComponent implements OnInit {
     return '$' + v.toFixed(2);
   }
 
+  getPrimaryImage(item: any): string | null {
+    if (item.images && item.images.length > 0) {
+      return item.images[0];
+    }
+    if (item.image_url) {
+      return item.image_url;
+    }
+    return null;
+  }
+
   getStatusClass(status: string | undefined): string {
     if (!status) return '';
     return status.toLowerCase();

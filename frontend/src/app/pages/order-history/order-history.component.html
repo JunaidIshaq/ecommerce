@@ -1,0 +1,118 @@
+<!-- Order History Page -->
+<div class="order-history-page">
+  <div class="page-header">
+    <div class="header-content">
+      <div>
+        <h1>My Orders</h1>
+        <p class="subtitle">View and track all your previous orders</p>
+      </div>
+      <a routerLink="/product" class="btn-continue-shopping">
+        <i class="fa fa-shopping-bag"></i> Continue Shopping
+      </a>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading your orders...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="!loading && errorMessage">
+    <div class="error-icon">⚠️</div>
+    <p>{{ errorMessage }}</p>
+    <button class="btn-retry" (click)="loadOrders()">Try Again</button>
+  </div>
+
+  <!-- Orders List -->
+  <div class="orders-list" *ngIf="!loading && !errorMessage && orders.length > 0">
+    <div class="order-card" *ngFor="let order of orders">
+      <div class="order-card-header">
+        <div class="order-info">
+          <div class="order-number-row">
+            <h3 class="order-number">{{ order.order_number || 'Order #' + order.id }}</h3>
+            <span class="order-id-badge">ID: {{ order.id }}</span>
+          </div>
+          <span class="order-date">{{ formatDate(order.created_at) }}</span>
+        </div>
+        <div class="order-statuses">
+          <span class="status-badge" [ngClass]="getStatusClass(order.status)">
+            {{ order.status || 'Unknown' }}
+          </span>
+          <span class="payment-badge" [ngClass]="getPaymentStatusClass(order.payment_status)">
+            {{ order.payment_status || 'N/A' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="order-card-body">
+        <div class="order-items-preview">
+          <div class="item-thumb" *ngFor="let item of order.items.slice(0, 3)">
+            <img *ngIf="getPrimaryImage(item)" [src]="getPrimaryImage(item)" alt="Product" />
+            <div class="item-thumb-placeholder" *ngIf="!getPrimaryImage(item)">
+              <i class="fa fa-image"></i>
+            </div>
+          </div>
+          <div class="more-items" *ngIf="order.items.length > 3">
+            +{{ order.items.length - 3 }} more
+          </div>
+        </div>
+
+        <div class="order-summary">
+          <div class="summary-item">
+            <span class="label">Items</span>
+            <span class="value">{{ order.items.length }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Payment</span>
+            <span class="value">{{ formatPaymentMethod(order.payment_method) }}</span>
+          </div>
+          <div class="summary-item total">
+            <span class="label">Total</span>
+            <span class="value">{{ formatCurrency(toNumber(order.total_amount)) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="order-card-footer">
+        <a [routerLink]="['/order', order.id]" class="btn-view-details">
+          View Details <i class="fa fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && !errorMessage && orders.length === 0">
+    <div class="empty-icon">📦</div>
+    <h2>No Orders Yet</h2>
+    <p>You haven't placed any orders. Start shopping to see your orders here!</p>
+    <a routerLink="/product" class="btn-shop">Browse Products</a>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-container" *ngIf="!loading && !errorMessage && totalPages > 1">
+    <div class="pagination-info">
+      Showing {{ (currentPage - 1) * pageSize + 1 }} - {{ paginationEnd }} of {{ totalItems }} orders
+    </div>
+    <div class="pagination">
+      <button class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+        ‹ Prev
+      </button>
+
+      <button class="page-btn" *ngFor="let page of pages" [class.active]="page === currentPage" (click)="goToPage(page)">
+        {{ page }}
+      </button>
+
+      <button class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+        Next ›
+      </button>
+    </div>
+  </div>
+
+  <!-- Pagination Info (single page) -->
+  <div class="pagination-info-single" *ngIf="!loading && !errorMessage && totalItems > 0 && totalPages <= 1">
+    Showing {{ totalItems }} order{{ totalItems !== 1 ? 's' : '' }}
+  </div>
+</div>

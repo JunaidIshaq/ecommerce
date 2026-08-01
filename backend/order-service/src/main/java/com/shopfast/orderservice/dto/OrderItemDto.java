@@ -27,9 +27,19 @@ public class OrderItemDto implements Serializable {
     @NotNull
     private BigDecimal price;
 
+    @JsonProperty("product_name")
+    private String productName;
+
+    @JsonProperty("product_slug")
+    private String productSlug;
+
+    @JsonProperty("product_description")
+    private String productDescription;
+
     @JsonProperty("image_url")
     private String imageUrl;
 
     private List<String> images;
 
 }
+

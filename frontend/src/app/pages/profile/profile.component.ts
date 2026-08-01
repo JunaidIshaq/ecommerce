@@ -4,12 +4,13 @@ import { Router } from '@angular/router';
 import {Observable} from 'rxjs';
 import {User} from '../../models/user.model';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule],       // ✅ Add this
+  imports: [CommonModule, RouterLink],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })

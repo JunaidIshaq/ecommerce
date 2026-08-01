@@ -1,5 +1,6 @@
 package com.shopfast.orderservice.controller;
 
+import com.shopfast.common.dto.GenericApiResponseDto;
 import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.orderservice.client.CartClient;
 import com.shopfast.orderservice.client.ProductClient;
@@ -86,11 +87,11 @@ public class OrderController {
 
     @Operation(summary = "Get order by id")
     @GetMapping("/{id}")
-    public ResponseEntity<OrderResponseDto> getOrder(@PathVariable("id") UUID id) {
+    public ResponseEntity<GenericApiResponseDto<OrderResponseDto>> getOrder(@RequestHeader("userId") String userId, @PathVariable("id") UUID id) {
         return orderService.getOrderById(id)
                 .map(order -> enrichOrderResponse(OrderResponseDto.from(order), order))
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .map(orderResponse -> ResponseEntity.ok(GenericApiResponseDto.success(orderResponse, "Order fetched successfully")))
+                .orElse(ResponseEntity.ok(GenericApiResponseDto.error("Order not found", 404)));
     }
 
     private OrderResponseDto enrichOrderResponse(OrderResponseDto response, Order order) {
@@ -102,6 +103,9 @@ public class OrderController {
                                 .productId(item.getProductId())
                                 .quantity(item.getQuantity())
                                 .price(item.getPrice())
+                                .productName(product != null ? product.getName() : null)
+                                .productSlug(product != null ? product.getSlug() : null)
+                                .productDescription(product != null ? product.getDescription() : null)
                                 .imageUrl(product != null ? product.getImageUrl() : null)
                                 .images(product != null ? product.getImages() : null)
                                 .build();
