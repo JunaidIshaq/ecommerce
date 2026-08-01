@@ -26,8 +26,8 @@ export class CheckoutComponent {
   couponCode = '';
   user$: Observable<User | null>;
 
-  // Payment method: 'card' | 'cod'
-  paymentMethod: 'card' | 'cod' = 'cod';
+  // Payment method: 'CARD' | 'COD' (matches backend enum)
+  paymentMethod: 'CARD' | 'COD' = 'COD';
 
   // Card details
   cardNumber = '';
@@ -58,7 +58,7 @@ export class CheckoutComponent {
   }
 
   isCardFormValid(): boolean {
-    if (this.paymentMethod !== 'card') return true;
+    if (this.paymentMethod !== 'CARD') return true;
     return !!(
       this.cardNumber.replace(/\s/g, '').length >= 15 &&
       this.cardHolderName.trim().length >= 2 &&
@@ -111,7 +111,7 @@ export class CheckoutComponent {
           body.couponCode = this.couponCode;
         }
 
-        if (this.paymentMethod === 'card') {
+        if (this.paymentMethod === 'CARD') {
           body.cardNumber = this.cardNumber.replace(/\s/g, '');
           body.cardHolderName = this.cardHolderName;
           body.expiryDate = this.expiryDate;

@@ -19,8 +19,8 @@
       <!-- Payment Method -->
       <h3 class="section-title">Payment Method</h3>
       <div class="payment-methods">
-        <label class="payment-option" [class.active]="paymentMethod === 'cod'">
-          <input type="radio" name="paymentMethod" value="cod" [(ngModel)]="paymentMethod">
+        <label class="payment-option" [class.active]="paymentMethod === 'COD'">
+          <input type="radio" name="paymentMethod" value="COD" [(ngModel)]="paymentMethod">
           <span class="option-content">
             <span class="option-icon">💵</span>
             <span class="option-text">
@@ -29,8 +29,8 @@
             </span>
           </span>
         </label>
-        <label class="payment-option" [class.active]="paymentMethod === 'card'">
-          <input type="radio" name="paymentMethod" value="card" [(ngModel)]="paymentMethod">
+        <label class="payment-option" [class.active]="paymentMethod === 'CARD'">
+          <input type="radio" name="paymentMethod" value="CARD" [(ngModel)]="paymentMethod">
           <span class="option-content">
             <span class="option-icon">💳</span>
             <span class="option-text">
@@ -42,7 +42,7 @@
       </div>
 
       <!-- Card Details Form -->
-      <div class="card-details" *ngIf="paymentMethod === 'card'">
+      <div class="card-details" *ngIf="paymentMethod === 'CARD'">
         <h4>Card Details</h4>
         <label>Card Number
           <input type="text" [(ngModel)]="cardNumber" (input)="formatCardNumber($event)" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
@@ -75,10 +75,10 @@
       <p>Total: <strong>${{ total() | number:'1.2-2' }}</strong></p>
       <p>Shipping: <strong>FREE</strong></p>
       <p>Estimated delivery: 3–5 days</p>
-      <div class="payment-summary" *ngIf="paymentMethod === 'cod'">
+      <div class="payment-summary" *ngIf="paymentMethod === 'COD'">
         <p class="cod-note">💵 Pay on delivery</p>
       </div>
-      <div class="payment-summary" *ngIf="paymentMethod === 'card'">
+      <div class="payment-summary" *ngIf="paymentMethod === 'CARD'">
         <p class="card-note">🔒 Secure payment</p>
       </div>
     </div>
