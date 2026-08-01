@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Order } from '../models/order.model';
 import { AuthService } from './auth.service';
 import { environment } from '../../environments/environment';
@@ -35,7 +35,9 @@ export class OrderService {
   getOrderById(id: string | number): Observable<Order> {
     const userId = this.getUserId();
     const headers = userId ? new HttpHeaders().set('userId', userId) : new HttpHeaders();
-    return this.http.get<Order>(`${this.baseUrl}/api/v1/order/${id}`, { headers });
+    return this.http.get<any>(`${this.baseUrl}/api/v1/order/${id}`, { headers }).pipe(
+      map((res: any) => res?.data as Order)
+    );
   }
 
   getOrders(pageNumber: number = 1, pageSize: number = 10, userId?: string): Observable<PaginatedOrdersResponse> {

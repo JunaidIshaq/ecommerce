@@ -65,13 +65,14 @@ export class CustomerOrderDetailComponent implements OnInit {
       this.orderService.getOrderById(id).subscribe({
         next: (data) => {
           console.log('[CustomerOrderDetail] API success:', data);
-          this.order = data;
+          if (data?.id) {
+            this.order = data;
+          }
           this.loading = false;
           this.cdr.detectChanges();
         },
         error: (err) => {
-          console.warn('[CustomerOrderDetail] API failed, using mock data', err);
-          this.errorMessage = err.error?.message || 'Failed to load order details. Using cached data.';
+          console.warn('[CustomerOrderDetail] API failed, keeping mock data', err);
           this.loading = false;
           this.cdr.detectChanges();
         }

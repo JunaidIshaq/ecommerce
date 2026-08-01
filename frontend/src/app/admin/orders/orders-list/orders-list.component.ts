@@ -1,8 +1,7 @@
-import {ChangeDetectorRef, Component, NgZone, OnInit, Inject, PLATFORM_ID} from '@angular/core';
-import { CommonModule, NgFor, NgIf, DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { isPlatformBrowser } from '@angular/common';
-import { AdminApiService } from '../../services/admin-api.service';
+import {ChangeDetectorRef, Component, Inject, NgZone, OnInit, PLATFORM_ID} from '@angular/core';
+import {CommonModule, DatePipe, NgFor, NgIf} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {AdminApiService} from '../../services/admin-api.service';
 import {RouterLink} from '@angular/router';
 import {AdminCardComponent} from '../../shared/admin-card/admin-card.component';
 import {AuthService} from '../../../services/auth.service';
