@@ -7,5 +7,6 @@ export const environment = {
   notificationPort: 8091,
   cartPort: 8088,
   checkoutPort: 8084,
-  baseDomain: null
+  baseDomain: null,
+  passwordEncryptionKey: 'MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI='
 };

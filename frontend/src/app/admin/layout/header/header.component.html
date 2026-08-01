@@ -26,7 +26,7 @@
     </div>
 
     <!-- Admin Profile -->
-    <div class="profile-wrapper">
+    <div class="profile-wrapper" (click)="toggleProfileMenu()">
       <div class="profile-info">
         <div class="avatar">A</div>
         <div class="admin-details">
@@ -35,10 +35,10 @@
         </div>
       </div>
 
-      <div class="profile-menu">
-        <button>My Profile</button>
-        <button>Activity Logs</button>
-        <button class="logout-btn">Logout</button>
+      <div class="profile-menu" [class.open]="isProfileMenuOpen">
+        <button (click)="onProfileMenuClick($event)">My Profile</button>
+        <button (click)="onProfileMenuClick($event)">Activity Logs</button>
+        <button class="logout-btn" (click)="logout()">Logout</button>
       </div>
     </div>
 

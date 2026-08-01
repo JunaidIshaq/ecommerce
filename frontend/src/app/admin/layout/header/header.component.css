@@ -141,6 +141,10 @@
   z-index: 10;
 }
 
+.profile-menu.open {
+  display: flex;
+}
+
 .profile-menu button {
   background: none;
   border: none;
@@ -158,9 +162,4 @@
 .logout-btn {
   color: var(--brand-danger);
   font-weight: 600;
-}
-
-/* Show dropdown on hover (temporary until we add click logic) */
-.profile-wrapper:hover .profile-menu {
-  display: flex;
 }

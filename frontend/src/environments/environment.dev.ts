@@ -7,5 +7,6 @@ export const environment = {
   notificationPort: null,
   cartPort: null,
   checkoutPort: null,
-  baseDomain: 'https://shopfast.live'
+  baseDomain: 'https://shopfast.live',
+  passwordEncryptionKey: 'MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI='
 };

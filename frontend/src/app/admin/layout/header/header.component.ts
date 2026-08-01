@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-admin-header',
@@ -9,14 +10,40 @@ import { Router, NavigationEnd } from '@angular/router';
 })
 export class HeaderComponent {
   pageTitle = 'Dashboard';
+  isProfileMenuOpen = false;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private auth: AuthService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         const url = event.urlAfterRedirects.split('/').pop();
         this.pageTitle = this.formatTitle(url || 'dashboard');
       }
     });
+  }
+
+  toggleProfileMenu() {
+    this.isProfileMenuOpen = !this.isProfileMenuOpen;
+  }
+
+  closeProfileMenu() {
+    this.isProfileMenuOpen = false;
+  }
+
+  onProfileMenuClick(event: Event) {
+    event.stopPropagation();
+  }
+
+  logout() {
+    this.auth.logout();
+    this.router.navigate(['/login']);
+  }
+
+  @HostListener('document:click', ['$event.target'])
+  onDocumentClick(target: EventTarget | null) {
+    const profileWrapper = document.querySelector('.profile-wrapper');
+    if (profileWrapper && target && !profileWrapper.contains(target as Node)) {
+      this.closeProfileMenu();
+    }
   }
 
   formatTitle(text: string) {

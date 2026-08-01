@@ -73,5 +73,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body("JSON Parsing Error: " + ex.getMessage());
     }
 
+    // Invalid credentials (wrong password)
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidCredentials(InvalidCredentialsException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", 401);
+        response.put("error", "Unauthorized");
+        response.put("message", "Invalid password");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
 
 }

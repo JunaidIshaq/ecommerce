@@ -4,10 +4,14 @@ import com.shopfast.authservice.client.UserClient;
 import com.shopfast.authservice.dto.AuthResponse;
 import com.shopfast.authservice.dto.LoginRequestDto;
 import com.shopfast.authservice.dto.UserInternalDto;
+import com.shopfast.authservice.exception.InvalidCredentialsException;
+import com.shopfast.common.utils.PasswordEncryptionUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,9 +22,13 @@ public class AuthService {
 
     private final TokenService tokenService;
 
-    public AuthService(UserClient userClient, TokenService tokenService) {
+    private final SecretKey encryptionKey;
+
+    public AuthService(UserClient userClient, TokenService tokenService,
+                       @Value("${app.password.encryption.key}") String base64EncryptionKey) {
         this.userClient = userClient;
         this.tokenService = tokenService;
+        this.encryptionKey = PasswordEncryptionUtil.fromBase64Key(base64EncryptionKey);
     }
 
     public AuthResponse login(LoginRequestDto request) {
@@ -33,9 +41,12 @@ public class AuthService {
                 throw new IllegalArgumentException("User not active !");
             }
 
-            boolean match = BCrypt.checkpw(request.getPassword(), userDto.getPassword());
+            // Decrypt the incoming encrypted password before BCrypt comparison
+            String decryptedPassword = PasswordEncryptionUtil.decrypt(request.getPassword(), encryptionKey);
+
+            boolean match = BCrypt.checkpw(decryptedPassword, userDto.getPassword());
             if (!match) {
-                throw new IllegalArgumentException("Invalid credentials");
+                throw new InvalidCredentialsException("Invalid password");
             }
 
             String userId = userDto.getId().toString();
@@ -52,6 +63,8 @@ public class AuthService {
                     .refreshToken(refresh)
                     .refreshTokenExpiresIn(tokenService.jwtUtils.getRefreshTokenExpiresIn())
                     .build();
+        } catch (InvalidCredentialsException e) {
+            throw e; // Let GlobalExceptionHandler return 401 with "Invalid password"
         } catch (Exception e) {
             throw new RuntimeException("User not exists with this email : " + request.getEmail() );
         }
