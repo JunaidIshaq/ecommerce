@@ -1,5 +1,6 @@
 package com.shopfast.orderservice.controller;
 
+import com.shopfast.common.dto.PagedResponse;
 import com.shopfast.orderservice.client.CartClient;
 import com.shopfast.orderservice.client.ProductClient;
 import com.shopfast.orderservice.dto.CheckoutRequestDto;
@@ -13,6 +14,8 @@ import com.shopfast.orderservice.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -61,11 +65,23 @@ public class OrderController {
 
     @Operation(summary = "List orders for current user")
     @GetMapping
-    public ResponseEntity<List<OrderResponseDto>> myOrders() {
-        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getName();
-        return ResponseEntity.ok(orderService.getOrdersForUser(userId).stream()
+    public ResponseEntity<PagedResponse<OrderResponseDto>> myOrders(
+            @RequestHeader("userId") String userId,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
+//        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getName();
+        Pageable pageable = Pageable.ofSize(pageSize).withPage(pageNumber);
+        Page<Order> orderPage = orderService.getOrdersForUser(userId, pageable);
+        List<OrderResponseDto> items = orderPage.getContent().stream()
                 .map(order -> enrichOrderResponse(OrderResponseDto.from(order), order))
-                .toList());
+                .toList();
+        PagedResponse<OrderResponseDto> response = new PagedResponse<>();
+        response.setItems(items);
+        response.setTotalItems(orderPage.getTotalElements());
+        response.setTotalPages(orderPage.getTotalPages());
+        response.setPage(orderPage.getNumber());
+        response.setSize(orderPage.getSize());
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Get order by id")

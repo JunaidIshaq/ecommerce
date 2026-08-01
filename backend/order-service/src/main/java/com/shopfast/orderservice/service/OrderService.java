@@ -14,6 +14,8 @@ import com.shopfast.orderservice.repository.OrderRepository;
 import com.shopfast.orderservice.repository.ProcessedCommandRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -87,8 +89,8 @@ public class OrderService {
         return saved;
     }
 
-    public List<Order> getOrdersForUser(String userId) {
-        return orderRepository.findByUserId(userId);
+    public Page<Order> getOrdersForUser(String userId, Pageable pageable) {
+        return orderRepository.findByUserId(userId, pageable);
     }
 
     public Optional<Order> getOrderById(UUID orderId) {
