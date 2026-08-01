@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Order } from '../models/order.model';
+import { AuthService } from './auth.service';
 import { environment } from '../../environments/environment';
+import { isPlatformBrowser } from '@angular/common';
+import { Inject, PLATFORM_ID } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -10,9 +13,27 @@ export class OrderService {
     ? `${environment.baseDomain}`
     : `http://localhost:${environment.checkoutPort}`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
+
+  private getUserId(): string | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return null;
+    try {
+      const user = JSON.parse(userStr);
+      return user?.id || null;
+    } catch {
+      return null;
+    }
+  }
 
   getOrderById(id: string | number): Observable<Order> {
-    return this.http.get<Order>(`${this.baseUrl}/api/v1/order/${id}`);
+    const userId = this.getUserId();
+    const headers = userId ? new HttpHeaders().set('X-User-Id', userId) : new HttpHeaders();
+    return this.http.get<Order>(`${this.baseUrl}/api/v1/order/${id}`, { headers });
   }
 }

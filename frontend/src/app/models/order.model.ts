@@ -1,25 +1,24 @@
 export interface OrderItem {
-  productId: string;
-  productName: string;
+  product_id: string;
+  product_name?: string;
   price: number;
   quantity: number;
-  image?: string;
+  images?: any;
+  image_url?: string | null;
 }
 
 export interface Order {
-  id: number;
-  order_number?: string;
-  userEmail?: string;
-  shippingAddress?: string;
-  phone?: string;
-  paymentMethod?: string;
-  paymentStatus?: string;
-  status?: string;
-  subtotal?: number;
-  tax?: number;
-  discount?: number;
-  shippingCost?: number;
-  totalAmount?: number;
-  items?: OrderItem[];
-  createdAt?: string;
+  id: string;
+  user_id: string;
+  order_number: string;
+  status: string;
+  sub_total: string;
+  discount: string;
+  total_amount: string;
+  order_status: string | null;
+  payment_method: string;
+  payment_status: string;
+  items: OrderItem[];
+  created_at: string;
+  updated_at: string;
 }

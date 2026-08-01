@@ -14,8 +14,8 @@
       <h2>Order #{{ order.order_number || order.id }}</h2>
       <span class="status" [ngClass]="getStatusClass(order.status)">{{ order.status }}</span>
     </div>
-    <p class="order-date" *ngIf="order.createdAt">
-      Placed on {{ order.createdAt | date: 'medium' }}
+    <p class="order-date" *ngIf="order.created_at">
+      Placed on {{ order.created_at | date: 'medium' }}
     </p>
   </div>
 
@@ -24,23 +24,22 @@
     <!-- Shipping Address -->
     <div class="section shipping-section">
       <h3>Shipping Address</h3>
-      <p>{{ order.shippingAddress || 'N/A' }}</p>
-      <p *ngIf="order.phone">Phone: {{ order.phone }}</p>
-      <p *ngIf="order.userEmail">Email: {{ order.userEmail }}</p>
+      <p>User ID: {{ order.user_id || 'N/A' }}</p>
+      <p *ngIf="order.order_status">Order Status: {{ order.order_status }}</p>
     </div>
 
     <!-- Payment Information -->
     <div class="section payment-section">
       <h3>Payment Information</h3>
-      <p>Status: <strong [ngClass]="getPaymentStatusClass(order.paymentStatus)">{{ order.paymentStatus || 'N/A' }}</strong></p>
-      <p>Method: {{ formatPaymentMethod(order.paymentMethod) }}</p>
-      <p *ngIf="order.totalAmount">Total Paid: <strong>{{ formatCurrency(order.totalAmount) }}</strong></p>
+      <p>Status: <strong [ngClass]="getPaymentStatusClass(order.payment_status)">{{ order.payment_status || 'N/A' }}</strong></p>
+      <p>Method: {{ formatPaymentMethod(order.payment_method) }}</p>
+      <p *ngIf="order.total_amount">Total Paid: <strong>{{ formatCurrency(toNumber(order.total_amount)) }}</strong></p>
     </div>
   </div>
 
   <!-- Order Items -->
   <div class="section items-section">
-    <h3>Order Items ({{ order.items?.length || 0 }})</h3>
+    <h3>Order Items ({{ order.items.length || 0 }})</h3>
     <div class="table-wrapper">
       <table class="order-table">
         <thead>
@@ -55,8 +54,8 @@
         <tr *ngFor="let item of order.items">
           <td class="product-cell">
             <div class="product-info">
-              <span class="product-name">{{ item.productName }}</span>
-              <span class="product-id muted" *ngIf="item.productId">ID: {{ item.productId }}</span>
+              <span class="product-name">{{ item.product_name || item.product_id }}</span>
+              <span class="product-id muted" *ngIf="item.product_id">ID: {{ item.product_id }}</span>
             </div>
           </td>
           <td>{{ formatCurrency(item.price) }}</td>
@@ -72,19 +71,11 @@
   <div class="summary">
     <div class="summary-row">
       <span>Subtotal</span>
-      <span>{{ formatCurrency(itemsTotal) }}</span>
+      <span>{{ formatCurrency(toNumber(order.sub_total)) }}</span>
     </div>
-    <div class="summary-row" *ngIf="order.tax && order.tax > 0">
-      <span>Tax</span>
-      <span>{{ formatCurrency(order.tax) }}</span>
-    </div>
-    <div class="summary-row" *ngIf="order.discount && order.discount > 0">
+    <div class="summary-row" *ngIf="toNumber(order.discount) > 0">
       <span>Discount</span>
-      <span>-{{ formatCurrency(order.discount) }}</span>
-    </div>
-    <div class="summary-row shipping-row" *ngIf="order.shippingCost && order.shippingCost > 0">
-      <span>Shipping</span>
-      <span>{{ formatCurrency(order.shippingCost) }}</span>
+      <span>-{{ formatCurrency(toNumber(order.discount)) }}</span>
     </div>
     <div class="summary-row total">
       <span>Total</span>

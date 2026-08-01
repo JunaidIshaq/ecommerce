@@ -6,33 +6,32 @@ import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 
 const MOCK_ORDER: Order = {
-  id: 1001,
+  id: '1001',
+  user_id: 'user-001',
   order_number: 'ORD-1001',
-  userEmail: 'john.doe@gmail.com',
-  shippingAddress: '123 Main St, Springfield, IL 62704',
-  phone: '+1-555-0101',
-  paymentMethod: 'Credit Card',
-  paymentStatus: 'PAID',
   status: 'PLACED',
-  subtotal: 249.99,
-  tax: 15.00,
-  discount: 0,
-  totalAmount: 264.99,
-  createdAt: '2026-02-01T10:30:00',
+  sub_total: '249.99',
+  discount: '0',
+  total_amount: '264.99',
+  order_status: null,
+  payment_method: 'COD',
+  payment_status: 'PENDING',
   items: [
     {
-      productId: 'prod-001',
-      productName: 'Wireless Headphones',
+      product_id: 'prod-001',
+      product_name: 'Wireless Headphones',
       price: 89.99,
       quantity: 2
     },
     {
-      productId: 'prod-002',
-      productName: 'USB-C Cable',
+      product_id: 'prod-002',
+      product_name: 'USB-C Cable',
       price: 35.00,
       quantity: 1
     }
-  ]
+  ],
+  created_at: '2026-02-01T10:30:00',
+  updated_at: '2026-02-01T10:30:00'
 };
 
 @Component({
@@ -89,12 +88,13 @@ export class CustomerOrderDetailComponent implements OnInit {
   }
 
   get orderTotal(): number {
-    return (
-      (this.order?.totalAmount ??
-        (this.itemsTotal +
-          (this.order?.tax || 0) -
-          (this.order?.discount || 0))) || 0
-    );
+    const total = this.toNumber(this.order?.total_amount);
+    const discount = this.toNumber(this.order?.discount);
+    return this.itemsTotal - discount;
+  }
+
+  toNumber(value: string | undefined | null): number {
+    return parseFloat(value || '0');
   }
 
   formatCurrency(value: number | undefined): string {
