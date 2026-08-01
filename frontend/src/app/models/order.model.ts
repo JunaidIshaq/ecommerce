@@ -1,6 +1,8 @@
 export interface OrderItem {
   product_id: string;
   product_name?: string;
+  product_slug?: string | null;
+  product_description?: string | null;
   price: number;
   quantity: number;
   images?: any;
@@ -19,6 +21,6 @@ export interface Order {
   payment_method: string;
   payment_status: string;
   items: OrderItem[];
-  created_at: string;
-  updated_at: string;
+  created_at: string | null;
+  updated_at: string | null;
 }

@@ -11,29 +11,36 @@
   <!-- Order Header -->
   <div class="order-header">
     <div class="header-row">
-      <h2>Order #{{ order.order_number || order.id }}</h2>
+      <h2>{{ order.order_number || 'Order #' + order.id }}</h2>
       <span class="status" [ngClass]="getStatusClass(order.status)">{{ order.status }}</span>
     </div>
     <p class="order-date" *ngIf="order.created_at">
       Placed on {{ order.created_at | date: 'medium' }}
     </p>
+    <p class="order-date muted" *ngIf="order.updated_at && order.updated_at !== order.created_at">
+      Last updated: {{ order.updated_at | date: 'medium' }}
+    </p>
   </div>
 
   <!-- Order Info Grid -->
   <div class="order-grid">
-    <!-- Shipping Address -->
-    <div class="section shipping-section">
-      <h3>Shipping Address</h3>
-      <p>User ID: {{ order.user_id || 'N/A' }}</p>
-      <p *ngIf="order.order_status">Order Status: {{ order.order_status }}</p>
+    <!-- Order Information -->
+    <div class="section">
+      <h3>Order Information</h3>
+      <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+      <p><strong>Status:</strong> {{ order.status }}</p>
+      <p *ngIf="order.order_status"><strong>Order Status:</strong> {{ order.order_status }}</p>
+      <p><strong>User ID:</strong> {{ order.user_id }}</p>
+      <p><strong>Created:</strong> {{ order.created_at ? (order.created_at | date:'medium') : 'N/A' }}</p>
+      <p><strong>Updated:</strong> {{ order.updated_at ? (order.updated_at | date:'medium') : 'N/A' }}</p>
     </div>
 
     <!-- Payment Information -->
-    <div class="section payment-section">
+    <div class="section">
       <h3>Payment Information</h3>
-      <p>Status: <strong [ngClass]="getPaymentStatusClass(order.payment_status)">{{ order.payment_status || 'N/A' }}</strong></p>
-      <p>Method: {{ formatPaymentMethod(order.payment_method) }}</p>
-      <p *ngIf="order.total_amount">Total Paid: <strong>{{ formatCurrency(toNumber(order.total_amount)) }}</strong></p>
+      <p><strong>Payment Method:</strong> {{ formatPaymentMethod(order.payment_method) }}</p>
+      <p><strong>Payment Status:</strong> <span [ngClass]="getPaymentStatusClass(order.payment_status)">{{ order.payment_status || 'N/A' }}</span></p>
+      <p *ngIf="order.total_amount"><strong>Total Paid:</strong> {{ formatCurrency(toNumber(order.total_amount)) }}</p>
     </div>
   </div>
 
@@ -45,6 +52,7 @@
         <thead>
         <tr>
           <th>Product</th>
+          <th>Description</th>
           <th>Price</th>
           <th>Qty</th>
           <th>Total</th>
@@ -55,7 +63,7 @@
           <td class="product-cell">
             <div class="product-info">
               <div class="product-image" *ngIf="getPrimaryImage(item)">
-                <img [src]="getPrimaryImage(item)" alt="Product" />
+                <img [src]="getPrimaryImage(item)" alt="{{ item.product_name }}" />
               </div>
               <div class="product-image-placeholder" *ngIf="!getPrimaryImage(item)">
                 <i class="fa fa-image"></i>
@@ -63,8 +71,13 @@
               <div class="product-text">
                 <span class="product-name">{{ item.product_name || item.product_id }}</span>
                 <span class="product-id muted" *ngIf="item.product_id">ID: {{ item.product_id }}</span>
+                <span class="muted" *ngIf="item.product_slug">{{ item.product_slug }}</span>
               </div>
             </div>
+          </td>
+          <td class="description-cell">
+            <span *ngIf="item.product_description">{{ item.product_description | slice:0:120 }}{{ item.product_description.length > 120 ? '...' : '' }}</span>
+            <span *ngIf="!item.product_description" class="muted">No description</span>
           </td>
           <td>{{ formatCurrency(item.price) }}</td>
           <td>{{ item.quantity }}</td>
@@ -87,7 +100,7 @@
     </div>
     <div class="summary-row total">
       <span>Total</span>
-      <span>{{ formatCurrency(orderTotal) }}</span>
+      <span>{{ formatCurrency(toNumber(order.total_amount)) }}</span>
     </div>
   </div>
 

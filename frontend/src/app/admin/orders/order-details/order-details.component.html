@@ -22,10 +22,10 @@
       <span class="status" [ngClass]="order.status.toLowerCase()">{{ order.status }}</span>
     </div>
 
-    <p class="order-date">
+    <p class="order-date" *ngIf="order.created_at">
       Placed on {{ order.created_at | date:'medium' }}
     </p>
-    <p class="order-date muted" *ngIf="order.updated_at !== order.created_at">
+    <p class="order-date muted" *ngIf="order.updated_at && order.updated_at !== order.created_at">
       Last updated: {{ order.updated_at | date:'medium' }}
     </p>
 
@@ -34,15 +34,21 @@
 
       <div class="section">
         <h3>Order Info</h3>
+        <p><strong>Order Number:</strong> {{ order.order_number }}</p>
         <p><strong>Status:</strong> {{ order.status }}</p>
-        <p><strong>Discount:</strong> ${{ order.discount }}</p>
+        <p *ngIf="order.order_status"><strong>Order Status:</strong> {{ order.order_status }}</p>
         <p><strong>Subtotal:</strong> ${{ order.sub_total }}</p>
+        <p><strong>Discount:</strong> ${{ order.discount }}</p>
         <p><strong>Total:</strong> ${{ order.total_amount }}</p>
       </div>
 
       <div class="section">
         <h3>Customer</h3>
         <p><strong>User ID:</strong> {{ order.user_id }}</p>
+        <p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+        <p><strong>Payment Status:</strong> {{ order.payment_status }}</p>
+        <p><strong>Created:</strong> {{ order.created_at ? (order.created_at | date:'medium') : 'N/A' }}</p>
+        <p><strong>Updated:</strong> {{ order.updated_at ? (order.updated_at | date:'medium') : 'N/A' }}</p>
       </div>
 
     </div>

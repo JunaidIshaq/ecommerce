@@ -19,53 +19,47 @@ export interface OrderItem {
 
 export interface Order {
   id: string;
-  discount: string;
-  status: string;
-  items: OrderItem[];
   user_id: string;
   order_number: string;
+  status: string;
   sub_total: string;
+  discount: string;
   total_amount: string;
-  created_at: string;
-  updated_at: string;
+  order_status: string | null;
+  payment_method: string;
+  payment_status: string;
+  items: OrderItem[];
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 const MOCK_ORDER: Order = {
-  id: '65731af7-0fa1-43c6-a227-cc90dc6147ec',
+  id: 'a8cf6a43-a750-4c58-b86b-97265eee50df',
+  user_id: 'bd75776e-c3f7-48d2-943d-f9aee4196dd1',
+  order_number: 'Order-F6B2C505',
+  status: 'CONFIRMED',
+  sub_total: '822.44',
   discount: '0.00',
-  status: 'CREATED',
+  total_amount: '822.44',
+  order_status: null,
+  payment_method: 'COD',
+  payment_status: 'CONFIRMED',
   items: [
     {
       quantity: 1,
       price: 822.44,
+      images: [
+        'https://picsum.photos/seed/5/600/400'
+      ],
       product_id: '39cd2aab-0e04-461b-b7fd-42fb70b55d2b',
       product_name: 'Small Marble Bag',
       product_slug: 'sleek-paper-knife',
       product_description: 'Veritatis quasi et corrupti omnis culpa facilis modi repellat eum omnis iusto velit accusamus omnis quia aut voluptates consequatur architecto reprehenderit quas enim aut illo error alias nihil sit rem sunt consequatur quia pariatur veritatis quis laudantium nulla dolorem ipsa praesentium maiores et quaerat eos distinctio officia officia tenetur aliquam voluptas enim exercitationem eos eveniet maiores dolor animi ducimus vel assumenda laudantium incidunt fugiat sint at optio quod ut et libero occaecati itaque id aut dolorem quisquam officia magnam velit laudantium consectetur similique vero aut est dignissimos sit aut quibusdam maxime hic dicta sapiente sapiente enim adipisci et nulla aut est minus.',
-      image_url: 'https://picsum.photos/seed/5/600/400',
-      images: [
-        'https://picsum.photos/seed/5/600/400'
-      ]
-    },
-    {
-      quantity: 1,
-      price: 71.61,
-      product_id: '755c8917-2f55-46e4-8917-5f8165df7255',
-      product_name: 'Practical Linen Hat',
-      product_slug: 'incredible-silk-clock',
-      product_description: 'Et odio et voluptatem voluptate accusamus quisquam et impedit sit est quia labore reprehenderit repudiandae veritatis eius sed itaque voluptatem doloribus quo velit maiores libero facilis voluptatem alias quia est quo minus eligendi nostrum et et laboriosam voluptatum aspernatur omnis reprehenderit repellendus nihil quaerat quas laborum amet consequatur omnis vel maxime totam qui repellat laboriosam eius impedit eaque fugiat eveniet vitae quos accusamus pariatur laudantium aut quaerat qui quae numquam fugit facere quia magni iusto excepturi nisi magnam aut consequatur totam delectus fugiat vel suscipit harum sapiente veritatis et quidem possimus repudiandae et repellat fugiat est id ipsum dignissimos ratione sint.',
-      image_url: 'https://picsum.photos/seed/4/600/400',
-      images: [
-        'https://picsum.photos/seed/4/600/400'
-      ]
+      image_url: null
     }
   ],
-  user_id: 'bd75776e-c3f7-48d2-943d-f9aee4196dd1',
-  order_number: 'Order-76587C00',
-  sub_total: '894.05',
-  total_amount: '894.05',
-  created_at: '2026-07-23T14:01:59.487577Z',
-  updated_at: '2026-07-23T14:01:59.487609Z'
+  created_at: null,
+  updated_at: '2026-08-01T12:11:38.871629Z'
 };
 
 @Component({

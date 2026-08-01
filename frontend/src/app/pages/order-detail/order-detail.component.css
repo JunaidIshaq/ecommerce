@@ -195,6 +195,18 @@
   color: #6b7280;
 }
 
+.description-cell {
+  max-width: 320px;
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+.muted {
+  color: #6b7280;
+  font-size: 12px;
+}
+
 .summary {
   background: #ffffff;
   border: 1px solid #e5e7eb;

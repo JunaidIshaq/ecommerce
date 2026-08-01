@@ -68,10 +68,10 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<PagedResponse<OrderResponseDto>> myOrders(
             @RequestHeader("userId") String userId,
-            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize) {
 //        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getName();
-        Pageable pageable = Pageable.ofSize(pageSize).withPage(pageNumber);
+        Pageable pageable = Pageable.ofSize(pageSize).withPage(pageNumber - 1);
         Page<Order> orderPage = orderService.getOrdersForUser(userId, pageable);
         List<OrderResponseDto> items = orderPage.getContent().stream()
                 .map(order -> enrichOrderResponse(OrderResponseDto.from(order), order))
