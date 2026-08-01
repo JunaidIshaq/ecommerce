@@ -2,6 +2,7 @@
   <h1>Checkout</h1>
   <div class="grid">
     <form class="card" (ngSubmit)="placeOrder()">
+      <!-- Shipping Address -->
       <h3>Shipping Address</h3>
       <label>Full Name <input [(ngModel)]="address.fullName" name="fullName" required></label>
       <label>Street <input [(ngModel)]="address.street" name="street" required></label>
@@ -14,10 +15,57 @@
         <label>Country <input [(ngModel)]="address.country" name="country" required></label>
       </div>
       <label>Phone <input [(ngModel)]="address.phone" name="phone"></label>
+
+      <!-- Payment Method -->
+      <h3 class="section-title">Payment Method</h3>
+      <div class="payment-methods">
+        <label class="payment-option" [class.active]="paymentMethod === 'cod'">
+          <input type="radio" name="paymentMethod" value="cod" [(ngModel)]="paymentMethod">
+          <span class="option-content">
+            <span class="option-icon">💵</span>
+            <span class="option-text">
+              <strong>Cash on Delivery</strong>
+              <small>Pay when you receive your order</small>
+            </span>
+          </span>
+        </label>
+        <label class="payment-option" [class.active]="paymentMethod === 'card'">
+          <input type="radio" name="paymentMethod" value="card" [(ngModel)]="paymentMethod">
+          <span class="option-content">
+            <span class="option-icon">💳</span>
+            <span class="option-text">
+              <strong>Credit / Debit Card</strong>
+              <small>Pay securely with your card</small>
+            </span>
+          </span>
+        </label>
+      </div>
+
+      <!-- Card Details Form -->
+      <div class="card-details" *ngIf="paymentMethod === 'card'">
+        <h4>Card Details</h4>
+        <label>Card Number
+          <input type="text" [(ngModel)]="cardNumber" (input)="formatCardNumber($event)" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+        </label>
+        <label>Cardholder Name
+          <input type="text" [(ngModel)]="cardHolderName" name="cardHolderName" placeholder="John Doe">
+        </label>
+        <div class="row2">
+          <label>Expiry Date
+            <input type="text" [(ngModel)]="expiryDate" (input)="formatExpiryDate($event)" name="expiryDate" placeholder="MM/YY" maxlength="5">
+          </label>
+          <label>CVV
+            <input type="password" [(ngModel)]="cvv" name="cvv" placeholder="123" maxlength="4">
+          </label>
+        </div>
+      </div>
+
+      <!-- Coupon Code -->
       <label>Coupon Code
         <input [(ngModel)]="couponCode" name="couponCode" placeholder="Enter coupon (optional)">
       </label>
-      <button class="place" [disabled]="placing" type="submit">
+
+      <button class="place" [disabled]="placing || !isFormValid()" type="submit">
         {{ placing ? 'Placing...' : 'Place Order' }}
       </button>
     </form>
@@ -27,6 +75,12 @@
       <p>Total: <strong>${{ total() | number:'1.2-2' }}</strong></p>
       <p>Shipping: <strong>FREE</strong></p>
       <p>Estimated delivery: 3–5 days</p>
+      <div class="payment-summary" *ngIf="paymentMethod === 'cod'">
+        <p class="cod-note">💵 Pay on delivery</p>
+      </div>
+      <div class="payment-summary" *ngIf="paymentMethod === 'card'">
+        <p class="card-note">🔒 Secure payment</p>
+      </div>
     </div>
   </div>
 </section>

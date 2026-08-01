@@ -1,5 +1,6 @@
 package com.shopfast.orderservice.dto;
 
+import com.shopfast.orderservice.enums.PaymentMethod;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -24,5 +25,15 @@ public class CheckoutRequestDto implements Serializable {
     private String country;
 
     private String phone;
+
+    private PaymentMethod paymentMethod;
+
+    private String cardNumber;
+
+    private String cardHolderName;
+
+    private String expiryDate;
+
+    private String cvv;
 
 }

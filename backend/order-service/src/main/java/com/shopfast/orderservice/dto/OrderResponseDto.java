@@ -2,13 +2,12 @@ package com.shopfast.orderservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.shopfast.orderservice.enums.OrderStatus;
+import com.shopfast.orderservice.enums.PaymentMethod;
 import com.shopfast.orderservice.model.Order;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.AnyKeyJavaType;
-import org.springframework.http.ResponseEntity;
 
 import java.io.Serializable;
 import java.util.List;
@@ -44,7 +43,13 @@ public class OrderResponseDto implements Serializable {
 
     @JsonProperty("order_status")
     private OrderStatus orderStatus;
-    
+
+    @JsonProperty("payment_method")
+    private PaymentMethod paymentMethod;
+
+    @JsonProperty("payment_status")
+    private OrderStatus paymentStatus;
+
     @JsonProperty("items")
     private List<OrderItemDto> items;
 
@@ -56,11 +61,17 @@ public class OrderResponseDto implements Serializable {
 
     public static OrderResponseDto from(Order order) {
         return OrderResponseDto.builder()
+                .id(order.getId() != null ? order.getId().toString() : null)
+                .userId(order.getUserId())
                 .orderNumber(order.getOrderNumber())
-                .subTotal(order.getSubTotal().toString())
-                .discount(order.getDiscount().toString())
-                .totalAmount(order.getTotalAmount().toString())
                 .status(order.getStatus().toString())
+                .subTotal(order.getSubTotal().toString())
+                .discount(order.getDiscount() != null ? order.getDiscount().toString() : "0")
+                .totalAmount(order.getTotalAmount().toString())
+                .paymentMethod(order.getPaymentMethod())
+                .paymentStatus(order.getPaymentStatus())
+                .createdAt(order.getCreatedAt() != null ? order.getCreatedAt().toString() : null)
+                .updatedAt(order.getUpdatedAt() != null ? order.getUpdatedAt().toString() : null)
                 .build();
     }
 

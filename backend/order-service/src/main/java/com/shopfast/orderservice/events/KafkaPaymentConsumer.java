@@ -100,7 +100,8 @@ public class KafkaPaymentConsumer {
             } else if ("PAYMENT_FAILED".equals(eventType)) {
                 log.warn("Payment FAILED for order {}", orderId);
 
-                order.setStatus(OrderStatus.CANCELLED);
+                order.setStatus(OrderStatus.PAYMENT_FAILED);
+                order.setPaymentStatus(OrderStatus.PAYMENT_FAILED);
                 orderRepository.save(order);
 
                 // Release reserved stock

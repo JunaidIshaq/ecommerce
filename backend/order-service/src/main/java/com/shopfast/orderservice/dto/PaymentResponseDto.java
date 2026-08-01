@@ -1,0 +1,49 @@
+package com.shopfast.orderservice.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.util.UUID;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PaymentResponseDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @JsonProperty("id")
+    private UUID id;
+
+    @JsonProperty("order_id")
+    private UUID orderId;
+
+    @JsonProperty("user_id")
+    private UUID userId;
+
+    @JsonProperty("amount")
+    private double amount;
+
+    @JsonProperty("status")
+    private String status;
+
+    @JsonProperty("transaction_id")
+    private String transactionId;
+
+    @JsonProperty("created_at")
+    private String createdAt;
+
+    @JsonProperty("updated_at")
+    private String updatedAt;
+
+    @JsonProperty("client_secret")
+    private String clientSecret;
+
+    @JsonProperty("payment_method")
+    private String paymentMethod;
+}

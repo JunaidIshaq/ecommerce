@@ -9,8 +9,12 @@ import com.shopfast.common.events.NotificationEvent;
 import com.shopfast.common.events.OrderCommand;
 import com.shopfast.orderservice.client.CartClient;
 import com.shopfast.orderservice.client.CouponClient;
+import com.shopfast.orderservice.client.PaymentClient;
+import com.shopfast.orderservice.client.PaymentRequest;
 import com.shopfast.orderservice.dto.CheckoutRequestDto;
+import com.shopfast.orderservice.dto.PaymentResponseDto;
 import com.shopfast.orderservice.enums.OrderStatus;
+import com.shopfast.orderservice.enums.PaymentMethod;
 import com.shopfast.orderservice.events.KafkaNotificationProducer;
 import com.shopfast.orderservice.events.KafkaOrderProducer;
 import com.shopfast.orderservice.model.Order;
@@ -21,6 +25,7 @@ import com.shopfast.orderservice.repository.OrderItemRepository;
 import com.shopfast.orderservice.repository.OrderRepository;
 import com.shopfast.orderservice.repository.ProcessedCommandRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -31,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class CheckoutService {
 
@@ -41,8 +47,9 @@ public class CheckoutService {
     private final ProcessedCommandRepository processedCommandRepository;
     private final CouponClient couponClient;
     private final KafkaNotificationProducer kafkaNotificationProducer;
+    private final PaymentClient paymentClient;
 
-    public CheckoutService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, CartClient cartClient, KafkaOrderProducer kafkaOrderProducer, ProcessedCommandRepository processedCommandRepository, CouponClient couponClient, KafkaNotificationProducer kafkaNotificationProducer) {
+    public CheckoutService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, CartClient cartClient, KafkaOrderProducer kafkaOrderProducer, ProcessedCommandRepository processedCommandRepository, CouponClient couponClient, KafkaNotificationProducer kafkaNotificationProducer, PaymentClient paymentClient) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.cartClient = cartClient;
@@ -50,10 +57,11 @@ public class CheckoutService {
         this.processedCommandRepository = processedCommandRepository;
         this.couponClient = couponClient;
         this.kafkaNotificationProducer = kafkaNotificationProducer;
+        this.paymentClient = paymentClient;
     }
 
     @Transactional
-    public Order checkout (String userId, CheckoutRequestDto checkoutRequestDto) {
+    public Order checkout(String userId, CheckoutRequestDto checkoutRequestDto) {
         // 1) Load Cart
         var cartItems = cartClient.getCartInternal(userId);
         if(cartItems == null || cartItems.isEmpty()) {
@@ -109,6 +117,15 @@ public class CheckoutService {
         order.setDiscount(BigDecimal.valueOf(discount));
         order.setTotalAmount(BigDecimal.valueOf(total));
 
+        // Set payment method and initial payment status
+        if (checkoutRequestDto != null && checkoutRequestDto.getPaymentMethod() != null) {
+            order.setPaymentMethod(checkoutRequestDto.getPaymentMethod());
+            order.setPaymentStatus(OrderStatus.PENDING);
+        } else {
+            order.setPaymentMethod(PaymentMethod.COD);
+            order.setPaymentStatus(OrderStatus.PENDING);
+        }
+
         List<OrderItem> items = new ArrayList<>();
         for(CartItemDto cartItem : cartItems) {
             OrderItem orderItem = new OrderItem();
@@ -124,46 +141,94 @@ public class CheckoutService {
 
         order = orderRepository.save(order);
 
-        // 4) Publish RESERVE command for each item (or aggregated payload)
-        String commandId = UUID.randomUUID().toString();
-        OrderCommand orderCommand = new OrderCommand();
-        orderCommand.setCommandId(commandId);
-        orderCommand.setCommandType("RESERVE");
-        orderCommand.setOccurredAt(Instant.now());
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("orderId", order.getId().toString());
-        payload.put("userId", order.getUserId());
+        // 4) Process payment
+        try {
+            // Build payment request for payment-service
+            PaymentRequest paymentRequest = PaymentRequest.builder()
+                    .orderId(order.getId())
+                    .userId(UUID.fromString(userId))
+                    .amount(total)
+                    .method(checkoutRequestDto != null && checkoutRequestDto.getPaymentMethod() != null
+                            ? checkoutRequestDto.getPaymentMethod()
+                            : PaymentMethod.COD)
+                    .cardNumber(checkoutRequestDto != null ? checkoutRequestDto.getCardNumber() : null)
+                    .cardHolderName(checkoutRequestDto != null ? checkoutRequestDto.getCardHolderName() : null)
+                    .expiryDate(checkoutRequestDto != null ? checkoutRequestDto.getExpiryDate() : null)
+                    .cvv(checkoutRequestDto != null ? checkoutRequestDto.getCvv() : null)
+                    .build();
 
-        // Include Items List
-        payload.put("items", order.getItems().stream().map(i -> Map.of(
-                "productId", i.getProductId().toString(),
-                "quantity", i.getQuantity()
-        )).toList());
-        orderCommand.setPayload(payload);
+            PaymentResponseDto paymentResponse = paymentClient.processPayment(userId, paymentRequest);
 
-        // Persist processed command to avoid re-processing later (optional)
-        processedCommandRepository.save(ProcessedCommand.builder()
-                .commandId(commandId)
-                .processedAt(Instant.now())
-                .build());
+            // Update order with payment status
+            if ("SUCCESS".equalsIgnoreCase(paymentResponse.getStatus())) {
+                order.setPaymentStatus(OrderStatus.CONFIRMED);
+                order.setStatus(OrderStatus.CONFIRMED);
+            } else if ("FAILED".equalsIgnoreCase(paymentResponse.getStatus())) {
+                order.setPaymentStatus(OrderStatus.PAYMENT_FAILED);
+                order.setStatus(OrderStatus.PAYMENT_FAILED);
+            } else {
+                order.setPaymentStatus(OrderStatus.PENDING);
+            }
+            orderRepository.save(order);
 
-        kafkaOrderProducer.publishOrderCommand(orderCommand);
-        // Order Producer -> Inventory Service
-        kafkaOrderProducer.reserveOrder(order);
+            // If payment succeeded, proceed with inventory reservation
+            if ("SUCCESS".equalsIgnoreCase(paymentResponse.getStatus())) {
+                // Publish RESERVE command for each item
+                String commandId = UUID.randomUUID().toString();
+                OrderCommand orderCommand = new OrderCommand();
+                orderCommand.setCommandId(commandId);
+                orderCommand.setCommandType("RESERVE");
+                orderCommand.setOccurredAt(Instant.now());
+                Map<String, Object> payload = new HashMap<>();
+                payload.put("orderId", order.getId().toString());
+                payload.put("userId", order.getUserId());
+
+                payload.put("items", order.getItems().stream().map(i -> Map.of(
+                        "productId", i.getProductId().toString(),
+                        "quantity", i.getQuantity()
+                )).toList());
+                orderCommand.setPayload(payload);
+
+                processedCommandRepository.save(ProcessedCommand.builder()
+                        .commandId(commandId)
+                        .processedAt(Instant.now())
+                        .build());
+
+                kafkaOrderProducer.publishOrderCommand(orderCommand);
+                kafkaOrderProducer.reserveOrder(order);
+
+                // Clear cart
+                try {
+                    cartClient.clearCartInternal(order.getUserId());
+                    log.info("Cart cleared for user {}", order.getUserId());
+                } catch (Exception ex) {
+                    log.error("Failed to clear cart for user {}: {}", order.getUserId(), ex.getMessage());
+                }
+            } else if ("FAILED".equalsIgnoreCase(paymentResponse.getStatus())) {
+                // Payment failed - release inventory if reserved
+                kafkaOrderProducer.releaseOrder(order);
+            }
+
+        } catch (Exception ex) {
+            log.error("Payment processing failed for order {}: {}", order.getId(), ex.getMessage());
+            order.setPaymentStatus(OrderStatus.PAYMENT_FAILED);
+            order.setStatus(OrderStatus.PAYMENT_FAILED);
+            orderRepository.save(order);
+            throw new IllegalArgumentException("Payment failed: " + ex.getMessage());
+        }
 
         // Notification Producer -> Notification Service
         NotificationEvent notificationEvent = new NotificationEvent();
-        notificationEvent.setSubject("Order Created");
+        notificationEvent.setSubject("Order " + order.getStatus());
         notificationEvent.setNotificationType(NotificationType.ORDER_CREATED);
         notificationEvent.setNotificationChannel(NotificationChannel.EMAIL);
-        notificationEvent.setContent("Order has been placed");
+        notificationEvent.setContent("Order has been placed with status: " + order.getStatus());
         notificationEvent.setRecipient("junaidnumlcs@gmail.com");
         notificationEvent.setReferenceId(order.getOrderNumber());
         notificationEvent.setUserId(userId);
         notificationEvent.setEventSource("order-service");
         kafkaNotificationProducer.send(notificationEvent);
 
-        // 5) Move to CREATED (Inventory will update to RESERVED via events listener you already have)
         return order;
     }
 }

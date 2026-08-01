@@ -1,28 +1,28 @@
-package com.shopfast.paymentservice.dto;
+package com.shopfast.orderservice.client;
 
-import com.shopfast.paymentservice.enums.PaymentMethod;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import com.shopfast.orderservice.enums.PaymentMethod;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.UUID;
 
 @Data
-public class PaymentRequestDto implements Serializable {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PaymentRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @NotNull
     private UUID orderId;
 
-    @NotNull
     private UUID userId;
 
-    @Min(0)
     private double amount;
 
-    @NotNull
     private PaymentMethod method;
 
     private String cardNumber;
@@ -32,5 +32,4 @@ public class PaymentRequestDto implements Serializable {
     private String expiryDate;
 
     private String cvv;
-
 }

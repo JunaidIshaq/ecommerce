@@ -81,6 +81,11 @@ export class CartService {
     return this.http.post<any>(`${this.baseUrlCheckout}/api/v1/order/checkout`, body, { headers });
   }
 
+  checkoutWithPayment(userId: string, body: any) {
+    const headers = new HttpHeaders().set('X-User-Id', userId);
+    return this.http.post<any>(`${this.baseUrlCheckout}/api/v1/order/checkout`, body, { headers });
+  }
+
   // 🔹 Load cart from backend
   loadCart() {
     if (this.isLoggedIn()) {

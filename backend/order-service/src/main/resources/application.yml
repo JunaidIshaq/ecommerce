@@ -107,3 +107,7 @@ product:
 inventory:
   service:
     url: ${INVENTORY_SERVICE_URL:http://inventory-service:8083}
+
+payment:
+  service:
+    url: ${PAYMENT_SERVICE_URL:http://payment-service:8085}

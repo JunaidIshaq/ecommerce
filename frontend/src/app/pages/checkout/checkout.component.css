@@ -41,6 +41,103 @@
   font-size:14px;
 }
 
+/* Section titles */
+.section-title{
+  margin-top:24px;
+  margin-bottom:12px;
+  font-size:18px;
+  color:#333;
+  border-bottom:2px solid #eee;
+  padding-bottom:8px;
+}
+
+/* Payment method selection */
+.payment-methods{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:20px;
+}
+
+.payment-option{
+  display:block;
+  cursor:pointer;
+  position:relative;
+}
+
+.payment-option input[type="radio"]{
+  position:absolute;
+  opacity:0;
+  width:0;
+  height:0;
+}
+
+.option-content{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:16px;
+  border:2px solid #e5e7eb;
+  border-radius:12px;
+  background:#f9fafb;
+  transition:all 0.2s ease;
+}
+
+.payment-option:hover .option-content{
+  border-color:#2563eb;
+  background:#eff6ff;
+}
+
+.payment-option.active .option-content{
+  border-color:#2563eb;
+  background:#eff6ff;
+  box-shadow:0 0 0 3px rgba(37,99,235,0.1);
+}
+
+.option-icon{
+  font-size:28px;
+  line-height:1;
+}
+
+.option-text{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.option-text strong{
+  font-size:15px;
+  color:#111827;
+}
+
+.option-text small{
+  font-size:12px;
+  color:#6b7280;
+}
+
+/* Card details form */
+.card-details{
+  background:#f9fafb;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:20px;
+}
+
+.card-details h4{
+  margin:0 0 16px 0;
+  font-size:16px;
+  color:#374151;
+}
+
+.card-details label{
+  margin-bottom:12px;
+}
+
+.card-details input{
+  background:#fff;
+}
+
 /* 🔥 MAKE BUTTON CLEARLY VISIBLE */
 .place{
   width:100%;
@@ -66,9 +163,35 @@
   align-self:start;
 }
 
+.payment-summary{
+  margin-top:16px;
+  padding-top:16px;
+  border-top:1px solid #eee;
+}
+
+.cod-note{
+  color:#059669;
+  font-weight:500;
+  margin:0;
+}
+
+.card-note{
+  color:#2563eb;
+  font-weight:500;
+  margin:0;
+}
+
 /* Mobile fix */
 @media(max-width:900px){
   .grid{
     grid-template-columns:1fr;
+  }
+
+  .payment-methods{
+    grid-template-columns:1fr;
+  }
+
+  .row2{
+    gap:20px;
   }
 }

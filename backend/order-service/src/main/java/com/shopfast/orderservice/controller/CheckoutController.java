@@ -4,6 +4,7 @@ import com.shopfast.orderservice.dto.CheckoutRequestDto;
 import com.shopfast.orderservice.dto.OrderResponseDto;
 import com.shopfast.orderservice.model.Order;
 import com.shopfast.orderservice.service.CheckoutService;
+import com.shopfast.orderservice.util.OrderMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +26,6 @@ public class CheckoutController {
     public ResponseEntity<OrderResponseDto> checkout(@RequestHeader("X-User-Id") String userId,
                                                      @RequestBody(required = false) CheckoutRequestDto checkoutRequestDto) {
         Order order = checkoutService.checkout(userId, checkoutRequestDto);
-        return ResponseEntity.ok(OrderResponseDto.from(order));
+        return ResponseEntity.ok(OrderMapper.getOrderResponseDto(order));
     }
 }

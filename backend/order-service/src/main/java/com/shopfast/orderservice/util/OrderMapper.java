@@ -17,6 +17,8 @@ public class OrderMapper {
         orderResponseDto.setUserId(order.getUserId());
         orderResponseDto.setSubTotal(String.valueOf(order.getSubTotal()));
         orderResponseDto.setTotalAmount(String.valueOf(order.getTotalAmount()));
+        orderResponseDto.setPaymentMethod(order.getPaymentMethod());
+        orderResponseDto.setPaymentStatus(order.getPaymentStatus());
         orderResponseDto.setItems(order.getItems().stream().map(OrderMapper::getOrderItemDto).toList());
         return orderResponseDto;
     }

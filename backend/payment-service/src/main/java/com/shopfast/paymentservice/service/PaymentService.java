@@ -3,13 +3,13 @@ package com.shopfast.paymentservice.service;
 import com.shopfast.common.events.PaymentEvent;
 import com.shopfast.paymentservice.dto.PaymentRequestDto;
 import com.shopfast.paymentservice.dto.StripePaymentIntentRequest;
+import com.shopfast.paymentservice.enums.PaymentMethod;
 import com.shopfast.paymentservice.enums.PaymentStatus;
 import com.shopfast.paymentservice.events.KafkaPaymentProducer;
 import com.shopfast.paymentservice.idempotency.RedisPaymentIdempotencyStore;
 import com.shopfast.paymentservice.model.Payment;
 import com.shopfast.paymentservice.repository.PaymentRepository;
 import com.shopfast.paymentservice.repository.ProcessedCommandRepository;
-import com.shopfast.paymentservice.service.StripeService;
 import com.stripe.exception.StripeException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +28,9 @@ public class PaymentService {
     private final RedisPaymentIdempotencyStore idempotencyStore;
     private final StripeService stripeService;
 
-    public PaymentService(PaymentRepository paymentRepository, 
-                         ProcessedCommandRepository processedCommandRepository, 
-                         KafkaPaymentProducer kafkaPaymentProducer, 
+    public PaymentService(PaymentRepository paymentRepository,
+                         ProcessedCommandRepository processedCommandRepository,
+                         KafkaPaymentProducer kafkaPaymentProducer,
                          RedisPaymentIdempotencyStore idempotencyStore,
                          StripeService stripeService) {
         this.paymentRepository = paymentRepository;
@@ -51,6 +51,13 @@ public class PaymentService {
         }
 
         try {
+            // Validate card details if payment method is CARD
+            if (paymentRequestDto.getMethod() == PaymentMethod.CARD) {
+                if (!validateCardDetails(paymentRequestDto)) {
+                    throw new IllegalArgumentException("Invalid card details");
+                }
+            }
+
             // 1. Create payment record (INITIATED)
             Payment payment = Payment.builder()
                     .orderId(paymentRequestDto.getOrderId())
@@ -65,8 +72,8 @@ public class PaymentService {
             // 2. Process based on payment method
             boolean success;
             String transactionId;
-            
-            if (paymentRequestDto.getMethod() == com.shopfast.paymentservice.enums.PaymentMethod.STRIPE) {
+
+            if (paymentRequestDto.getMethod() == PaymentMethod.STRIPE) {
                 // For Stripe, create PaymentIntent
                 try {
                     StripePaymentIntentRequest stripeRequest = StripePaymentIntentRequest.builder()
@@ -78,19 +85,19 @@ public class PaymentService {
                             .build();
 
                     var paymentIntentResponse = stripeService.createPaymentIntent(stripeRequest);
-                    
+
                     // Update payment with Stripe details
                     saved.setPaymentIntentId(paymentIntentResponse.getId());
                     saved.setClientSecret(paymentIntentResponse.getClientSecret());
                     saved.setStatus(PaymentStatus.PENDING);
                     saved.setTransactionId(paymentIntentResponse.getId());
                     paymentRepository.save(saved);
-                    
+
                     // For Stripe, we don't determine success here - webhook will update status
                     success = true; // Return success to indicate PaymentIntent created
                     transactionId = paymentIntentResponse.getId();
-                    
-                    log.info("Stripe PaymentIntent created for payment: {}, clientSecret: {}", 
+
+                    log.info("Stripe PaymentIntent created for payment: {}, clientSecret: {}",
                         saved.getId(), paymentIntentResponse.getClientSecret());
                 } catch (Exception e) {
                     log.error("Failed to create Stripe PaymentIntent", e);
@@ -99,17 +106,25 @@ public class PaymentService {
                     paymentRepository.save(saved);
                     throw e;
                 }
+            } else if (paymentRequestDto.getMethod() == PaymentMethod.COD) {
+                // Cash on Delivery - always success, payment will be collected on delivery
+                success = true;
+                transactionId = "COD-" + UUID.randomUUID();
+                saved.setStatus(PaymentStatus.SUCCESS);
+                saved.setTransactionId(transactionId);
+                paymentRepository.save(saved);
+                log.info("COD payment recorded for order: {}", orderIdStr);
             } else {
-                // For other payment methods (CARD, PAYPAL, COD), use mock gateway
+                // For CARD (mock), validate and process
                 success = mockPaymentGateway(saved);
-                transactionId = success ? "TXN-" + UUID.randomUUID() : "TXN-FAILED" + UUID.randomUUID();
+                transactionId = success ? "TXN-" + UUID.randomUUID() : "TXN-FAILED-" + UUID.randomUUID();
                 saved.setStatus(success ? PaymentStatus.SUCCESS : PaymentStatus.FAILED);
                 saved.setTransactionId(transactionId);
                 paymentRepository.save(saved);
             }
 
             // 3. Publish payment event (only for non-pending statuses)
-            if (paymentRequestDto.getMethod() != com.shopfast.paymentservice.enums.PaymentMethod.STRIPE || success) {
+            if (paymentRequestDto.getMethod() != PaymentMethod.STRIPE || success) {
                 PaymentEvent event = new PaymentEvent();
                 event.setEventId(UUID.randomUUID().toString());
                 event.setEventType(saved.getStatus() == PaymentStatus.SUCCESS ? "PAYMENT_SUCCESS" : "PAYMENT_FAILED");
@@ -127,12 +142,32 @@ public class PaymentService {
                 kafkaPaymentProducer.publish(event);
             }
 
-            log.info("✅ Payment {} processed with method {}", saved.getId(), paymentRequestDto.getMethod());
+            log.info("Payment {} processed with method {}", saved.getId(), paymentRequestDto.getMethod());
             return saved;
         } catch (Exception ex) {
             idempotencyStore.clear(orderIdStr);
             throw ex;
         }
+    }
+
+    private boolean validateCardDetails(PaymentRequestDto dto) {
+        if (dto.getCardNumber() == null || dto.getCardNumber().replaceAll("\\s", "").length() < 15) {
+            log.warn("Invalid card number length");
+            return false;
+        }
+        if (dto.getCardHolderName() == null || dto.getCardHolderName().trim().length() < 2) {
+            log.warn("Invalid card holder name");
+            return false;
+        }
+        if (dto.getExpiryDate() == null || !dto.getExpiryDate().matches("\\d{2}/\\d{2}")) {
+            log.warn("Invalid expiry date format");
+            return false;
+        }
+        if (dto.getCvv() == null || dto.getCvv().length() < 3) {
+            log.warn("Invalid CVV");
+            return false;
+        }
+        return true;
     }
 
     // Very simple mock: succeed 90% of the time for non-Stripe methods
