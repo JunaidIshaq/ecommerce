@@ -45,12 +45,12 @@ public class OrderController {
     // For Manual Orders Only
     @Operation(summary = "Place an order")
     @PostMapping
-    public ResponseEntity<Order> placeOrder(@Valid @RequestBody OrderRequestDto dto) {
+    public ResponseEntity<OrderResponseDto> placeOrder(@Valid @RequestBody OrderRequestDto dto) {
         // prefer userId from JWT
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getName();
         dto.setUserId(userId);
         Order saved = orderService.placeOrder(dto);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(OrderResponseDto.from(saved));
     }
 
 
@@ -58,37 +58,36 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<List<OrderResponseDto>> myOrders() {
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getName();
-//        return ResponseEntity.ok(orderService.getOrdersForUser(userId));
-          return ResponseEntity.ok(orderRepository.findAll().stream().map(OrderMapper::getOrderResponseDto).toList());
+        return ResponseEntity.ok(orderService.getOrdersForUser(userId).stream().map(OrderResponseDto::from).toList());
     }
 
 
     @Operation(summary = "Get order by id")
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrder(@PathVariable("id") UUID id) {
-        return orderService.getOrderById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<OrderResponseDto> getOrder(@PathVariable("id") UUID id) {
+        return orderService.getOrderById(id).map(OrderResponseDto::from).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Cancel order")
     @PatchMapping("/{id}/cancel")
-    public ResponseEntity<Order> cancel(@PathVariable("id") UUID id) {
+    public ResponseEntity<OrderResponseDto> cancel(@PathVariable("id") UUID id) {
         Order canceled = orderService.cancelOrder(id);
-        return ResponseEntity.ok(canceled);
+        return ResponseEntity.ok(OrderResponseDto.from(canceled));
     }
 
     @Operation(summary = "Confirm order")
     @PatchMapping("/{id}/confirm")
-    public ResponseEntity<Order> confirm(@PathVariable("id") UUID id) {
-        Order canceled = orderService.confirmOrder(id);
-        return ResponseEntity.ok(canceled);
+    public ResponseEntity<OrderResponseDto> confirm(@PathVariable("id") UUID id) {
+        Order confirmed = orderService.confirmOrder(id);
+        return ResponseEntity.ok(OrderResponseDto.from(confirmed));
     }
 
-    @Operation(summary = "Confirm order")
+    @Operation(summary = "Checkout order")
     @PatchMapping("/checkout")
     public ResponseEntity<OrderResponseDto> checkout(@RequestHeader("user_id") String userId, @RequestBody CheckoutRequestDto dto) {
         var items = cartClient.getCartInternal(userId);
-        var order = orderService.createFromCart(userId, items, dto.getCouponCode());
-//        return ResponseEntity.ok(OrderResponseDto.from(order);
+//        Order order = orderService.createFromCart(userId, items, dto.getCouponCode());
+//        return ResponseEntity.ok(OrderResponseDto.from(order));
         return null;
     }
 

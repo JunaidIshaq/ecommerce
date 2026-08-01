@@ -119,17 +119,29 @@ export class CheckoutComponent {
         }
 
         this.cart.checkoutWithPayment(user.id, body).subscribe({
-          next: (order) => {
+          next: (res: any) => {
             this.cart.clear().subscribe();
+            // Backend may wrap order in { data: {...} } or return it directly
+            const order = res?.data ?? res;
+            console.log('[Checkout] Order response:', order);
+
             if (order.payment_status === 'CONFIRMED' || order.payment_status === 'SUCCESS') {
-              this.toast.success('🎉 Order placed Successfully ! Order ID: ' + order.order_number);
-              this.router.navigate(['/order', order.id]);
+              this.toast.success('🎉 Order placed Successfully ! Order ID: ' + (order.order_number || order.id));
+              if (order.id) {
+                this.router.navigate(['/order', order.id]);
+              } else {
+                this.router.navigate(['/']);
+              }
             } else if (order.payment_status === 'PAYMENT_FAILED' || order.payment_status === 'FAILED') {
               this.toast.error('Payment failed. Please try again.');
               this.placing = false;
             } else {
-              this.toast.success('🎉 Order placed Successfully ! Order ID: ' + order.order_number);
-              this.router.navigate(['/order', order.id]);
+              this.toast.success('🎉 Order placed Successfully ! Order ID: ' + (order.order_number || order.id));
+              if (order.id) {
+                this.router.navigate(['/order', order.id]);
+              } else {
+                this.router.navigate(['/']);
+              }
             }
           },
           error: (err) => {
