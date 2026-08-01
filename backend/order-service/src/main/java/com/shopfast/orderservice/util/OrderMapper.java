@@ -16,9 +16,12 @@ public class OrderMapper {
         orderResponseDto.setStatus(order.getStatus().toString());
         orderResponseDto.setUserId(order.getUserId());
         orderResponseDto.setSubTotal(String.valueOf(order.getSubTotal()));
+        orderResponseDto.setDiscount(order.getDiscount() != null ? order.getDiscount().toString() : "0");
         orderResponseDto.setTotalAmount(String.valueOf(order.getTotalAmount()));
         orderResponseDto.setPaymentMethod(order.getPaymentMethod());
         orderResponseDto.setPaymentStatus(order.getPaymentStatus());
+        orderResponseDto.setCreatedAt(order.getCreatedAt() != null ? order.getCreatedAt().toString() : null);
+        orderResponseDto.setUpdatedAt(order.getUpdatedAt() != null ? order.getUpdatedAt().toString() : null);
         orderResponseDto.setItems(order.getItems().stream().map(OrderMapper::getOrderItemDto).toList());
         return orderResponseDto;
     }

@@ -41,9 +41,6 @@ public class OrderResponseDto implements Serializable {
     @JsonProperty("total_amount")
     private String totalAmount;
 
-    @JsonProperty("order_status")
-    private OrderStatus orderStatus;
-
     @JsonProperty("payment_method")
     private PaymentMethod paymentMethod;
 

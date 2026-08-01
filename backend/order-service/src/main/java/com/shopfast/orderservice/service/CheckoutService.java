@@ -160,7 +160,12 @@ public class CheckoutService {
             PaymentResponseDto paymentResponse = paymentClient.processPayment(userId, paymentRequest);
 
             // Update order with payment status
-            if ("SUCCESS".equalsIgnoreCase(paymentResponse.getStatus())) {
+            // For COD, payment is collected on delivery - keep status PENDING
+            // For CARD/STRIPE, update based on payment response
+            if (checkoutRequestDto != null && checkoutRequestDto.getPaymentMethod() == PaymentMethod.COD) {
+                order.setPaymentStatus(OrderStatus.PENDING);
+                order.setStatus(OrderStatus.CREATED);
+            } else if ("SUCCESS".equalsIgnoreCase(paymentResponse.getStatus())) {
                 order.setPaymentStatus(OrderStatus.CONFIRMED);
                 order.setStatus(OrderStatus.CONFIRMED);
             } else if ("FAILED".equalsIgnoreCase(paymentResponse.getStatus())) {
