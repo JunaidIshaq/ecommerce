@@ -50,3 +50,7 @@ certbot/
 # Monitoring data
 grafana_data/
 prometheus_data/
+
+# Local secrets - never commit
+.env
+docker-compose.yml.bak

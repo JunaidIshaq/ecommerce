@@ -4,7 +4,7 @@ services:
   #    container_name: mongo
   #    restart: always
   #    ports:
-  #      - "27017:27017"
+  #      - "127.0.0.1:27017:27017"
   #    healthcheck:
   #      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
   #      interval: 10s
@@ -39,7 +39,7 @@ services:
       dockerfile: eureka-server/Dockerfile
     container_name: eureka-server
     ports:
-      - "8761:8761"
+      - "127.0.0.1:8761:8761"
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8761/eureka/actuator/health || exit 1" ]
       interval: 10s
@@ -56,7 +56,7 @@ services:
     container_name: api-gateway
     environment:
       - SPRING_REDIS_HOST=redis
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/eureka/
     ports:
       - "8080:8080"
@@ -94,7 +94,7 @@ services:
         soft: -1
         hard: -1
     ports:
-      - "9200:9200"
+      - "127.0.0.1:9200:9200"
     healthcheck:
       test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
       interval: 1m
@@ -114,7 +114,7 @@ services:
   #      - SERVER_BASEPATH=/elastic/
   #      - SERVER_DEFAULT_CLUSTER=http://elasticsearch:9200
   #    ports:
-  #      - "9999:8080"
+  #      - "127.0.0.1:9999:8080"
   #    volumes:
   #      - /root/elasticvue-config/config.js:/usr/share/nginx/html/config.js:ro
   #      - /root/elasticvue-config/index.html:/usr/share/nginx/html/index.html:ro
@@ -144,9 +144,9 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/product_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - CATEGORY_SERVICE_URL=http://category-service:8082/api/v1/category
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - SERVER_PORT=8081
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -162,7 +162,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8081:8081"
+      - "127.0.0.1:8081:8081"
     networks:
       - product-net
 
@@ -181,9 +181,9 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/category_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - PRODUCT_SERVICE_URL=http://product-service:8081/api/v1/product
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - SERVER_PORT=8082
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -200,7 +200,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8082:8082"
+      - "127.0.0.1:8082:8082"
     networks:
       - product-net
 
@@ -212,10 +212,10 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/inventory_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - SERVER_PORT=8083
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
@@ -228,7 +228,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8083:8083"
+      - "127.0.0.1:8083:8083"
     depends_on:
       redis:
         condition: service_healthy
@@ -249,9 +249,9 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/order_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - KAFKA_BOOTSTRAP=kafka:9092
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - SERVER_PORT=8084
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
@@ -264,7 +264,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8084:8084"
+      - "127.0.0.1:8084:8084"
     depends_on:
       redis:
         condition: service_healthy
@@ -287,11 +287,11 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/payment_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - KAFKA_BOOTSTRAP=kafka:9092
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - SERVER_PORT=8085
       - EUREKA_URL=http://eureka-server:8761/eureka/eureka/
     healthcheck:
@@ -303,7 +303,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8085:8085"
+      - "127.0.0.1:8085:8085"
     depends_on:
       kafka:
         condition: service_healthy
@@ -324,11 +324,11 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/user_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - KAFKA_BOOTSTRAP=kafka:9092
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - SERVER_PORT=8086
       - EUREKA_URL=http://eureka-server:8761/eureka/eureka/
     healthcheck:
@@ -340,7 +340,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8086:8086"
+      - "127.0.0.1:8086:8086"
     depends_on:
       kafka:
         condition: service_healthy
@@ -357,15 +357,15 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auth_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - USER_SERVICE_URL=http://user-service:8086
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       # Required: the committed default was removed from application.yml because it was a
       # publicly-known key. Override via a .env file / real secret store for production.
-      - APP_PASSWORD_ENCRYPTION_KEY=${APP_PASSWORD_ENCRYPTION_KEY:-MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=}
+      - APP_PASSWORD_ENCRYPTION_KEY=${APP_PASSWORD_ENCRYPTION_KEY:?APP_PASSWORD_ENCRYPTION_KEY must be set in .env}
       - SERVER_PORT=8087
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8087/actuator/health || exit 1" ]
@@ -376,7 +376,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8087:8087"
+      - "127.0.0.1:8087:8087"
     networks:
       - product-net
     depends_on:
@@ -397,9 +397,9 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/cart_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - KAFKA_BOOTSTRAP=kafka:9092
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - SERVER_PORT=8088
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
@@ -412,7 +412,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8088:8088"
+      - "127.0.0.1:8088:8088"
     depends_on:
       redis:
         condition: service_healthy
@@ -433,9 +433,9 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/coupon_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - KAFKA_BOOTSTRAP=kafka:9092
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - SERVER_PORT=8089
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
@@ -448,7 +448,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8089:8089"
+      - "127.0.0.1:8089:8089"
     depends_on:
       redis:
         condition: service_healthy
@@ -469,9 +469,9 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/review_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - KAFKA_BOOTSTRAP=kafka:9092
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - SERVER_PORT=8090
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
@@ -484,7 +484,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8090:8090"
+      - "127.0.0.1:8090:8090"
     depends_on:
       redis:
         condition: service_healthy
@@ -503,9 +503,9 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/notification_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - KAFKA_BOOTSTRAP=kafka:9092
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - SERVER_PORT=8091
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
@@ -519,7 +519,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8091:8091"
+      - "127.0.0.1:8091:8091"
     depends_on:
       kafka:
         condition: service_healthy
@@ -534,7 +534,7 @@ services:
     environment:
       - ELASTIC_URI=http://elasticsearch:9200
       - KAFKA_BOOTSTRAP=kafka:9092
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - SERVER_PORT=8092
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
@@ -548,7 +548,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8092:8092"
+      - "127.0.0.1:8092:8092"
     depends_on:
       redis:
         condition: service_healthy
@@ -567,9 +567,9 @@ services:
     environment:
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/admin_db
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - KAFKA_BOOTSTRAP=kafka:9092
-      - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - SERVER_PORT=8093
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
@@ -592,7 +592,7 @@ services:
     extra_hosts:
       - "host.docker.internal:172.17.0.1"
     ports:
-      - "8093:8093"
+      - "127.0.0.1:8093:8093"
     depends_on:
       kafka:
         condition: service_healthy
@@ -606,7 +606,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - "2181:2181"
+      - "127.0.0.1:2181:2181"
     healthcheck:
       test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181", "|", "grep", "imok"]
       interval: 10s
@@ -627,7 +627,7 @@ services:
       timeout: 10s
       retries: 10
     ports:
-      - "9092:9092"
+      - "127.0.0.1:9092:9092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -642,7 +642,7 @@ services:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
     ports:
-      - "9093:8080"
+      - "127.0.0.1:9093:8080"
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
@@ -663,10 +663,10 @@ services:
     container_name: postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       POSTGRES_DB: postgres
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - ./init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
       - pgdata:/var/lib/postgresql/data
@@ -682,7 +682,7 @@ services:
     image: redis:7
     container_name: redis
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -702,7 +702,7 @@ services:
     #      - SERVER_HOST=0.0.0.0
     #      - XPACK_SECURITY_ENABLED=false
     #    ports:
-    #      - "5601:5601"
+    #      - "127.0.0.1:5601:5601"
     #    depends_on:
     #      elasticsearch:
     #        condition: service_healthy
@@ -721,8 +721,8 @@ services:
     #    volumes:
     #      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
     #    ports:
-    #      - "5000:5000"     # TCP input for app logs
-    #      - "9600:9600"     # Logstash monitoring API
+    #      - "127.0.0.1:5000:5000"     # TCP input for app logs
+    #      - "127.0.0.1:9600:9600"     # Logstash monitoring API
     #    depends_on:
     #      - elasticsearch
     #    networks:
@@ -737,7 +737,7 @@ services:
     #      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     #      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
     #    ports:
-    #      - "9090:9090"
+    #      - "127.0.0.1:9090:9090"
     #    command:
     #      - '--config.file=/etc/prometheus/prometheus.yml'
     #      - '--web.enable-lifecycle'  # allows reload via API
@@ -752,7 +752,7 @@ services:
     #      - GF_SECURITY_ADMIN_PASSWORD=admin
     #      - GF_USERS_ALLOW_SIGN_UP=false
     #    ports:
-    #      - "3000:3000"
+    #      - "127.0.0.1:3000:3000"
     #    depends_on:
     #      - prometheus
     #    volumes:
@@ -771,7 +771,7 @@ services:
 #      - KAFKA_ZOOKEEPER=zookeeper:2181
 #      # optional: specify topics regex or other envs per image docs
 #    ports:
-#      - "9308:9308"   # exporter metrics port
+#      - "127.0.0.1:9308:9308"   # exporter metrics port
 #    depends_on:
 #      - kafka
 #    networks:
