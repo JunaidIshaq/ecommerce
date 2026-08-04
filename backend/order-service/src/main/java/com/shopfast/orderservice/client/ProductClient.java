@@ -33,21 +33,49 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductClient {
 
+    private static final String PRODUCT_API_PATH = "/api/v1/product";
+
     private final RestTemplate restTemplate;
 
     @Value("${product.service.url:http://localhost:8080/api/v1/product}")
     private String productServiceUrl;
 
+    /**
+     * Returns the product API root, whether or not {@code product.service.url} already
+     * includes the {@code /api/v1/product} prefix.
+     *
+     * <p>The convention is not consistent across the estate: {@code category-service},
+     * {@code coupon-service}, {@code payment-service}, {@code review-service} and
+     * {@code user-service} configure the URL <em>with</em> the prefix, while
+     * {@code order-service}, {@code admin-service}, {@code auth-service},
+     * {@code cart-service} and {@code inventory-service} configure it as the bare host.
+     * This client appended paths as if the prefix were always present, so in order-service
+     * it requested {@code http://product-service:8081/batch}, which product-service answered
+     * with "No static resource batch" - surfaced as a 500 and swallowed by the caller, so
+     * every order rendered with null product names, descriptions and images.</p>
+     *
+     * <p>Normalising here rather than editing one YAML line means the client keeps working
+     * under either convention, including if {@code PRODUCT_SERVICE_URL} is overridden at
+     * deploy time with the other form.</p>
+     */
+    private String productApiRoot() {
+        String base = productServiceUrl == null ? "" : productServiceUrl.trim();
+        while (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
+        }
+        return base.endsWith(PRODUCT_API_PATH) ? base : base + PRODUCT_API_PATH;
+    }
+
     public List<String> fetchAllProducts() {
         ResponseEntity<PagedResponse> response = restTemplate.getForEntity(
-                productServiceUrl + "/ids?pageNumber=1&pageSize=1000", PagedResponse.class);
+                productApiRoot() + "/ids?pageNumber=1&pageSize=1000", PagedResponse.class);
         return Objects.requireNonNull(response.getBody()).getItems();
     }
 
     public ProductDetailDto fetchProductById(UUID productId) {
         try {
             ResponseEntity<ProductDetailDto> response = restTemplate.getForEntity(
-                    productServiceUrl + "/" + productId, ProductDetailDto.class);
+                    productApiRoot() + "/" + productId, ProductDetailDto.class);
             return response.getBody();
         } catch (HttpClientErrorException.NotFound e) {
             log.warn("Product {} not found in product-service", productId);
@@ -81,7 +109,7 @@ public class ProductClient {
         String ids = distinctIds.stream().map(UUID::toString).collect(Collectors.joining(","));
         try {
             ResponseEntity<List<ProductDetailDto>> response = restTemplate.exchange(
-                    productServiceUrl + "/batch?ids=" + ids,
+                    productApiRoot() + "/batch?ids=" + ids,
                     HttpMethod.GET,
                     null,
                     new ParameterizedTypeReference<List<ProductDetailDto>>() {});
