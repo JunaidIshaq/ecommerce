@@ -1,4 +1,14 @@
 spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          # Without explicit timeouts a slow downstream holds request threads until the
+          # OS socket timeout, which is how one sick service takes the whole mesh down.
+          default:
+            connectTimeout: 2000
+            readTimeout: 5000
+            loggerLevel: basic
   application:
     name: cart-service
 

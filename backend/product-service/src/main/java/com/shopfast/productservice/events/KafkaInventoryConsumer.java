@@ -32,20 +32,18 @@ public class KafkaInventoryConsumer {
             return;
         }
 
-        // Idempotency: attempt to mark; if false => already processed
-        boolean marked = processedEventStore.markProcessed(event.getEventId());
-        if (!marked) {
-            log.info("Event {} already processed, skipping", event.getEventId());
-            return;
-        }
-        
         try {
             Map<String, Object> payload = event.getPayload();
             String productId = payload.get("productId").toString();
-            int available = (int) payload.get("availableQuantity");
-            
+            int available = ((Number) payload.get("availableQuantity")).intValue();
+
             // Update product availability
             productService.updateStockAndAvailability(productId, available);
+
+            // Mark only AFTER the update succeeded. Marking first meant a failed handler
+            // was replayed, found itself flagged as "processed", and silently dropped the
+            // event - leaving product stock permanently out of sync with inventory.
+            processedEventStore.markProcessed(event.getEventId());
             log.info("Processed inventory event {} for product {}", event.getEventId(), productId);
 
         } catch (Exception ex) {

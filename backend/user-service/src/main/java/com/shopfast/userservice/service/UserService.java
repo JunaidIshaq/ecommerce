@@ -9,7 +9,7 @@ import com.shopfast.userservice.events.KafkaUserProducer;
 import com.shopfast.userservice.model.User;
 import com.shopfast.userservice.repository.UserRepository;
 import com.shopfast.userservice.util.UserMapper;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

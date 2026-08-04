@@ -34,6 +34,9 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
+        acks: all
+        retries: 10
+        delivery.timeout.ms: 120000
         enable.idempotence: true
         max.in.flight.requests.per.connection:
 

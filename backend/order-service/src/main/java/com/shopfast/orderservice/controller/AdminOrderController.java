@@ -79,9 +79,13 @@ public class AdminOrderController {
 
         return orderRepository.findById(id)
                 .map(order -> {
+                    // One batch call instead of one HTTP round trip per line item.
+                    java.util.Map<UUID, ProductDetailDto> products = productClient.fetchProductsByIds(
+                            order.getItems().stream().map(i -> i.getProductId()).toList());
+
                     List<AdminOrderItemDetailDto> enrichedItems = order.getItems().stream()
                             .map(item -> {
-                                ProductDetailDto product = productClient.fetchProductById(item.getProductId());
+                                ProductDetailDto product = products.get(item.getProductId());
                                 return AdminOrderItemDetailDto.builder()
                                         .productId(item.getProductId())
                                         .productName(product != null ? product.getName() : null)

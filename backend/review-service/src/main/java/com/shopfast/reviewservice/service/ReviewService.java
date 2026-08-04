@@ -7,7 +7,7 @@ import com.shopfast.reviewservice.model.RatingSummary;
 import com.shopfast.reviewservice.model.Review;
 import com.shopfast.reviewservice.repository.RatingSummaryRepository;
 import com.shopfast.reviewservice.repository.ReviewRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

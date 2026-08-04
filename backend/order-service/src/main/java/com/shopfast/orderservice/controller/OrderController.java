@@ -96,9 +96,13 @@ public class OrderController {
 
     private OrderResponseDto enrichOrderResponse(OrderResponseDto response, Order order) {
         if (order.getItems() != null) {
+            // One batch call instead of one HTTP round trip per line item.
+            java.util.Map<java.util.UUID, ProductDetailDto> products = productClient.fetchProductsByIds(
+                    order.getItems().stream().map(i -> i.getProductId()).toList());
+
             response.setItems(order.getItems().stream()
                     .map(item -> {
-                        ProductDetailDto product = productClient.fetchProductById(item.getProductId());
+                        ProductDetailDto product = products.get(item.getProductId());
                         return OrderItemDto.builder()
                                 .productId(item.getProductId())
                                 .quantity(item.getQuantity())

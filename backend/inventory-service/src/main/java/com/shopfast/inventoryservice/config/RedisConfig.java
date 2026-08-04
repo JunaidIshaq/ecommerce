@@ -14,6 +14,7 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 
 import java.time.Duration;
+import java.util.Map;
 
 @Configuration
 public class RedisConfig {
@@ -38,8 +39,19 @@ public class RedisConfig {
                         RedisSerializationContext.SerializationPair.fromSerializer(serializer)
                 );
 
+        // Stock numbers go stale fast and a stale read can be shown as "in stock" to a
+        // customer, so the inventory caches get a much shorter TTL than the 15-minute
+        // default. Eviction on write is the primary mechanism; the TTL is the backstop
+        // for changes that happen outside this service (e.g. direct DB fixes).
+        Map<String, RedisCacheConfiguration> perCache = Map.of(
+                "inventoryByProduct", config.entryTtl(Duration.ofSeconds(30)),
+                "inventory", config.entryTtl(Duration.ofSeconds(60)),
+                "inventoryWithProduct", config.entryTtl(Duration.ofSeconds(60))
+        );
+
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
+                .withInitialCacheConfigurations(perCache)
                 .build();
     }
 }

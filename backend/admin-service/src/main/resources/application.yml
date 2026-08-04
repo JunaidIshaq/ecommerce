@@ -1,11 +1,21 @@
 spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          # Without explicit timeouts a slow downstream holds request threads until the
+          # OS socket timeout, which is how one sick service takes the whole mesh down.
+          default:
+            connectTimeout: 2000
+            readTimeout: 5000
+            loggerLevel: basic
   application:
     name: admin-service
 
   datasource:
     url: ${POSTGRES_URI:jdbc:postgresql://postgres:5432/admin_db}
     username: postgres
-    password: postgres
+    password: ${DB_PASSWORD}
 
     hikari:
       maximum-pool-size: 10        # Max connections per service
@@ -17,7 +27,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${JPA_DDL_AUTO:update}
     show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
@@ -34,6 +44,9 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
+        acks: all
+        retries: 10
+        delivery.timeout.ms: 120000
         enable.idempotence: true
         max.in.flight.requests.per.connection: 1
 
@@ -55,7 +68,7 @@ server:
   forward-headers-strategy: framework
 
 jwt:
-  secret: ${JWT_SECRET:supersecretkeythatshouldbereplacedandstoredsecurely}
+  secret: ${JWT_SECRET}
 
 elastic:
   host:
@@ -101,3 +114,62 @@ inventory:
 coupon:
   service:
     url: ${COUPON_SERVICE_URL:http://coupon-service:8089}
+
+# Resilience4j: stop a sick downstream from consuming this service's threads.
+# slidingWindow is COUNT_BASED so behaviour is predictable under low traffic.
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 20
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        slowCallRateThreshold: 50
+        slowCallDurationThreshold: 3s
+        waitDurationInOpenState: 20s
+        permittedNumberOfCallsInHalfOpenState: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        registerHealthIndicator: true
+    instances:
+      cart-service:
+        baseConfig: default
+      coupon-service:
+        baseConfig: default
+      payment-service:
+        baseConfig: default
+        # Payments are never auto-retried, so open slower and recover slower.
+        failureRateThreshold: 70
+        waitDurationInOpenState: 30s
+      product-service:
+        baseConfig: default
+      user-service:
+        baseConfig: default
+      order-service:
+        baseConfig: default
+      inventory-service:
+        baseConfig: default
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 200ms
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - feign.RetryableException
+    instances:
+      cart-service:
+        baseConfig: default
+      coupon-service:
+        baseConfig: default
+      product-service:
+        baseConfig: default
+      user-service:
+        baseConfig: default
+      order-service:
+        baseConfig: default
+      inventory-service:
+        baseConfig: default

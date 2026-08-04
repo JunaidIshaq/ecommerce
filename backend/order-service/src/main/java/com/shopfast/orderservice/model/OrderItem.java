@@ -3,6 +3,7 @@ package com.shopfast.orderservice.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Index;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,7 +28,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "order_items")
+// Items are always loaded via their parent order; PostgreSQL does not index
+// foreign keys automatically, so this join column needs an explicit index.
+@Table(name = "order_items", indexes = {
+        @Index(name = "idx_order_items_order", columnList = "order_id")
+})
 @JsonIgnoreProperties(ignoreUnknown = true)  // Prevent unknown fields from breaking serialization
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderItem {

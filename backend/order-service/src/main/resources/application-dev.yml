@@ -1,4 +1,14 @@
 spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          # Without explicit timeouts a slow downstream holds request threads until the
+          # OS socket timeout, which is how one sick service takes the whole mesh down.
+          default:
+            connectTimeout: 2000
+            readTimeout: 5000
+            loggerLevel: basic
   application:
     name: order-service
 
@@ -34,6 +44,9 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
+        acks: all
+        retries: 10
+        delivery.timeout.ms: 120000
         enable.idempotence: true
         max.in.flight.requests.per.connection: 1
 

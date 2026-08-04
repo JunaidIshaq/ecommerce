@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.shopfast.orderservice.enums.OrderStatus;
 import com.shopfast.orderservice.enums.PaymentMethod;
+import jakarta.persistence.Index;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
@@ -22,6 +23,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
@@ -37,7 +39,12 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "orders")
+// "my orders" is the hottest read in the service and always filters by userId,
+// newest first; without these it degrades to a full scan as the table grows.
+@Table(name = "orders", indexes = {
+        @Index(name = "idx_orders_user_created", columnList = "userId, createdAt"),
+        @Index(name = "idx_orders_status", columnList = "status")
+})
 @JsonIgnoreProperties(ignoreUnknown = true)  // Prevent unknown fields from breaking serialization
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Order {
@@ -74,7 +81,12 @@ public class Order {
     @Column(nullable = false)
     private BigDecimal totalAmount;
 
+    // EAGER is kept deliberately: order responses always render their line items and
+    // the DTO mapping happens outside the transaction. The cost of EAGER on a paged
+    // query is one extra SELECT per order; @BatchSize collapses those into one IN()
+    // query per 50 orders, which removes the N+1 without risking lazy-init errors.
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @BatchSize(size = 50)
     private List<OrderItem> items;
 
     @Embedded

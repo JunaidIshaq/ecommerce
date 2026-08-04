@@ -91,6 +91,12 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllProducts(pn, ps));
     }
 
+    @Operation(summary = "Get many products by id in one call (internal, batch)")
+    @GetMapping("/batch")
+    public ResponseEntity<List<ProductDto>> getProductsByIds(@RequestParam("ids") List<UUID> ids) {
+        return ResponseEntity.ok(productService.getProductsByIds(ids));
+    }
+
     @Operation(summary = "Get Product details based on Id")
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable("id") String id) {

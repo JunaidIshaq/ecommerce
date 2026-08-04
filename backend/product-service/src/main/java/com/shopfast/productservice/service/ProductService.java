@@ -12,7 +12,7 @@ import com.shopfast.productservice.model.Product;
 import com.shopfast.productservice.repository.ProductRepository;
 import com.shopfast.productservice.util.ProductMapper;
 import io.jsonwebtoken.lang.Strings;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -168,6 +168,20 @@ public class ProductService {
     }
 
     @Transactional
+    /**
+     * Bulk lookup used by internal callers (inventory, cart, order) so they can resolve a
+     * page of products in ONE round trip instead of N. Unknown ids are simply absent from
+     * the result rather than raising ProductNotFoundException.
+     */
+    public List<ProductDto> getProductsByIds(List<UUID> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+        return productRepository.findAllById(ids).stream()
+                .map(ProductMapper::getProductDto)
+                .toList();
+    }
+
     @Cacheable(value = "product", key = "#id")
     public ProductDto getProductById(String id) {
         UUID productId = UUID.fromString(id);
@@ -296,6 +310,14 @@ public class ProductService {
      * Updates inStock status of a product, persists it, and reindexes in Elasticsearch.
      */
     @Transactional
+    @Caching(evict = {
+            // Stock changes arrive asynchronously from inventory-service. Without these
+            // evictions the cached product/page payloads kept serving the old stock
+            // value (and the old in/out-of-stock flag) for the full cache TTL.
+            @CacheEvict(value = "product", key = "#productId"),
+            @CacheEvict(value = "productInternalSearch", key = "#productId"),
+            @CacheEvict(value = "productsPage", allEntries = true)
+    })
     public void updateStockAndAvailability(String productId, int stock) {
         log.info("Updating stock for product {} -> {}", productId, stock);
 

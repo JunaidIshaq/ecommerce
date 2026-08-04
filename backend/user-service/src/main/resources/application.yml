@@ -5,10 +5,10 @@ spring:
   datasource:
     url: ${POSTGRES_URI:jdbc:postgresql://postgres:5432/user_db}
     username: postgres
-    password: postgres
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${JPA_DDL_AUTO:update}
     show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
@@ -25,6 +25,9 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
+        acks: all
+        retries: 10
+        delivery.timeout.ms: 120000
         enable.idempotence: true
         max.in.flight.requests.per.connection: 1
 
@@ -55,7 +58,7 @@ server:
   forward-headers-strategy: framework
 
 jwt:
-  secret: ${JWT_SECRET:supersecretkeythatshouldbereplacedandstoredsecurely}
+  secret: ${JWT_SECRET}
   expiration: 3600
 logging:
   level:

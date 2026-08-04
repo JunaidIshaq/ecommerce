@@ -25,7 +25,13 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "payments")
+// Webhook handling looks payments up by paymentIntentId on every callback, and
+// the order saga looks them up by orderId; both were unindexed scans.
+@Table(name = "payments", indexes = {
+        @Index(name = "idx_payments_order", columnList = "orderId"),
+        @Index(name = "idx_payments_intent", columnList = "paymentIntentId"),
+        @Index(name = "idx_payments_status", columnList = "status")
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Payment {

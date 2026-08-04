@@ -7,7 +7,7 @@ import com.shopfast.categoryservice.model.Category;
 import com.shopfast.categoryservice.repository.CategoryRepository;
 import com.shopfast.categoryservice.search.ElasticCategorySearchService;
 import com.shopfast.categoryservice.util.CategoryMapper;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -39,7 +39,9 @@ public class CategoryService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "category", allEntries = true),
-            @CacheEvict(value = "category", key = "#result.id", condition = "#result != null")
+            // Creating a child category changes its parent's children list, which lives
+            // in a different cache region that was previously never evicted on create.
+            @CacheEvict(value = "subcategories", allEntries = true)
     })
     public Category createCategory(Category category) throws IOException {
         log.info("Creating new category {}", category.getName());

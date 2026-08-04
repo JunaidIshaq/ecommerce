@@ -9,20 +9,22 @@ import com.shopfast.inventoryservice.dto.InventoryRequestDto;
 import com.shopfast.inventoryservice.dto.InventoryResponseDto;
 import com.shopfast.inventoryservice.dto.InventoryWithProductDto;
 import com.shopfast.inventoryservice.events.KafkaInventoryProducer;
+import com.shopfast.inventoryservice.exception.InsufficientStockException;
 import com.shopfast.inventoryservice.model.InventoryItem;
 import com.shopfast.inventoryservice.repository.InventoryRepository;
 import com.shopfast.inventoryservice.util.InventoryMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
-import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -31,6 +33,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
@@ -41,15 +44,9 @@ public class InventoryService {
 
     private final ProductClient productClient;
 
-    public InventoryService(InventoryRepository inventoryRepository, KafkaInventoryProducer kafkaInventoryProducer, MeterRegistry meterRegistry, ProductClient productClient) {
-        this.inventoryRepository = inventoryRepository;
-        this.kafkaInventoryProducer = kafkaInventoryProducer;
-        this.meterRegistry = meterRegistry;
-        this.productClient = productClient;
-    }
-
     // CRUD
-    @CacheEvict(value = "inventory", allEntries = true)
+    @Transactional
+    @CacheEvict(value = {"inventory", "inventoryWithProduct"}, allEntries = true)
     public InventoryResponseDto createInventoryItem(InventoryRequestDto dto) {
         log.info("Creating inventory for product {}", dto.getProductId());
         InventoryItem inventoryItem = InventoryItem.builder()
@@ -65,10 +62,8 @@ public class InventoryService {
             value = "inventory",
             key = "'pageNumber_' + #pageNumber + '_pageSize_' + #pageSize"
     )
-    public PagedResponse<InventoryResponseDto> getAllInventoryItems(
-            @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
-    ) {
+    @Transactional(readOnly = true)
+    public PagedResponse<InventoryResponseDto> getAllInventoryItems(int pageNumber, int pageSize) {
         log.info("Fetching all inventory records");
         PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<InventoryItem> inventoryPage = inventoryRepository.findAll(pageable);
@@ -86,19 +81,20 @@ public class InventoryService {
             value = "inventoryWithProduct",
             key = "'pageNumber_' + #pageNumber + '_pageSize_' + #pageSize"
     )
-    public PagedResponse<InventoryWithProductDto> getAllInventoryItemsWithProduct(
-            @RequestParam(name = "pageNumber", defaultValue = "1") int pageNumber,
-            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
-    ) {
+    @Transactional(readOnly = true)
+    public PagedResponse<InventoryWithProductDto> getAllInventoryItemsWithProduct(int pageNumber, int pageSize) {
         log.info("Fetching all inventory records with product information");
         PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<InventoryItem> inventoryPage = inventoryRepository.findAll(pageable);
-        
-        List<InventoryWithProductDto> inventoryWithProductDtos = inventoryPage.stream().map(inventoryItem -> {
-            ProductDto productDto = productClient.getProductById(inventoryItem.getProductId());
-            return InventoryMapper.getInventoryWithProductDto(inventoryItem, productDto);
-        }).toList();
-        
+
+        // Resolve every product in ONE remote call instead of one call per row (N+1).
+        List<UUID> productIds = inventoryPage.stream().map(InventoryItem::getProductId).toList();
+        Map<UUID, ProductDto> productsById = fetchProducts(productIds);
+
+        List<InventoryWithProductDto> inventoryWithProductDtos = inventoryPage.stream()
+                .map(item -> InventoryMapper.getInventoryWithProductDto(item, productsById.get(item.getProductId())))
+                .toList();
+
         return new PagedResponse<>(
                 inventoryWithProductDtos,
                 inventoryPage.getTotalElements(),
@@ -108,72 +104,134 @@ public class InventoryService {
         );
     }
 
+    /**
+     * Cached read for query paths only.
+     *
+     * <p><strong>Never call this from a write transaction.</strong> It can return a
+     * detached, stale instance; mutating and saving that instance silently reverts
+     * concurrent updates. Write paths use {@link #loadForWrite(UUID)} or the atomic
+     * repository updates.</p>
+     */
     @Cacheable(value = "inventoryByProduct", key = "#productId")
+    @Transactional(readOnly = true)
     public InventoryItem getByProductId(UUID productId) {
+        return loadForWrite(productId);
+    }
+
+    /** Uncached, always-fresh read bound to the current persistence context. */
+    private InventoryItem loadForWrite(UUID productId) {
         return inventoryRepository.findByProductId(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Inventory not found for product " + productId));
     }
 
     @Transactional
-    @CacheEvict(value = {"inventory", "inventoryByProduct"}, allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "inventoryByProduct", key = "#productId"),
+            // The paged views embed stock numbers, so any quantity change makes every
+            // cached page stale. Evicting only the per-product key left the list
+            // endpoints serving wrong stock for the whole TTL window.
+            @CacheEvict(value = "inventory", allEntries = true),
+            @CacheEvict(value = "inventoryWithProduct", allEntries = true)
+    })
     public InventoryItem adjustQuantity(UUID productId, AdjustQuantityDto dto) {
-        InventoryItem item = getByProductId(productId);
-        int newQty = item.getAvailableQuantity() + dto.getQuantityChange();
-        if (newQty < 0)
-            throw new IllegalArgumentException("Cannot reduce below 0");
-        item.setAvailableQuantity(newQty);
-        inventoryRepository.save(item);
+        int delta = dto.getQuantityChange();
+        if (inventoryRepository.tryAdjust(productId, delta) != 1) {
+            // Either the row is missing or the adjustment would drive stock negative.
+            loadForWrite(productId); // throws if the product has no inventory row
+            throw new InsufficientStockException(productId, Math.abs(delta), "adjustment would reduce below 0");
+        }
+        InventoryItem item = loadForWrite(productId);
         // 🔁 Call Kafka producer to sync with Product Service
-        publishStockUpdateEvent("INVENTORY_ADJUSTED", item, dto.getQuantityChange());
+        publishStockUpdateEvent("INVENTORY_ADJUSTED", item, delta);
         publishInventoryMetrics(item.getProductId(), item);
         return item;
     }
 
 
     // --- Reserve / Release / Confirm ---
+    // All three use a single conditional UPDATE so the availability check and the
+    // write are one atomic database operation. A read-check-write here would oversell.
 
     @Transactional
-    @CacheEvict(value = {"inventory", "inventoryByProduct"}, allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "inventoryByProduct", key = "#productId"),
+            // The paged views embed stock numbers, so any quantity change makes every
+            // cached page stale. Evicting only the per-product key left the list
+            // endpoints serving wrong stock for the whole TTL window.
+            @CacheEvict(value = "inventory", allEntries = true),
+            @CacheEvict(value = "inventoryWithProduct", allEntries = true)
+    })
     public InventoryItem reserveStock(UUID productId, int quantity) {
-        InventoryItem item = getByProductId(productId);
-        if (item.getAvailableQuantity() < quantity)
-            throw new IllegalArgumentException("Insufficient stock");
-        item.setAvailableQuantity(item.getAvailableQuantity() - quantity);
-        item.setReservedQuantity(item.getReservedQuantity() + quantity);
+        requirePositive(quantity);
+        if (inventoryRepository.tryReserve(productId, quantity) != 1) {
+            loadForWrite(productId);
+            meterRegistry.counter("inventory.reserve.rejected", "productId", productId.toString()).increment();
+            throw new InsufficientStockException(productId, quantity, "not enough available stock");
+        }
+        InventoryItem item = loadForWrite(productId);
         log.info("Reserved {} units of {}", quantity, productId);
-        inventoryRepository.save(item);
-        publishStockUpdateEvent("INVENTORY_ADJUSTED", item, quantity);
+        publishStockUpdateEvent("INVENTORY_ADJUSTED", item, -quantity);
         publishInventoryMetrics(item.getProductId(), item);
         return item;
     }
 
     @Transactional
-    @CacheEvict(value = {"inventory", "inventoryByProduct"}, allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "inventoryByProduct", key = "#productId"),
+            // The paged views embed stock numbers, so any quantity change makes every
+            // cached page stale. Evicting only the per-product key left the list
+            // endpoints serving wrong stock for the whole TTL window.
+            @CacheEvict(value = "inventory", allEntries = true),
+            @CacheEvict(value = "inventoryWithProduct", allEntries = true)
+    })
     public InventoryItem releaseStock(UUID productId, int quantity) {
-        InventoryItem item = getByProductId(productId);
-        if (item.getReservedQuantity() < quantity)
-            throw new IllegalArgumentException("Not enough reserved stock to release");
-        item.setReservedQuantity(item.getReservedQuantity() - quantity);
-        item.setAvailableQuantity(item.getAvailableQuantity() + quantity);
+        requirePositive(quantity);
+        if (inventoryRepository.tryRelease(productId, quantity) != 1) {
+            loadForWrite(productId);
+            throw new InsufficientStockException(productId, quantity, "not enough reserved stock to release");
+        }
+        InventoryItem item = loadForWrite(productId);
         log.info("Released {} units of {}", quantity, productId);
-        inventoryRepository.save(item);
         publishStockUpdateEvent("INVENTORY_ADJUSTED", item, quantity);
         publishInventoryMetrics(item.getProductId(), item);
         return item;
     }
 
     @Transactional
-    @CacheEvict(value = {"inventory", "inventoryByProduct"}, allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "inventoryByProduct", key = "#productId"),
+            // The paged views embed stock numbers, so any quantity change makes every
+            // cached page stale. Evicting only the per-product key left the list
+            // endpoints serving wrong stock for the whole TTL window.
+            @CacheEvict(value = "inventory", allEntries = true),
+            @CacheEvict(value = "inventoryWithProduct", allEntries = true)
+    })
     public InventoryItem confirmReservation(UUID productId, int qty) {
-        InventoryItem item = getByProductId(productId);
-        if (item.getReservedQuantity() < qty)
-            throw new IllegalArgumentException("Not enough reserved stock to confirm");
-        item.setReservedQuantity(item.getReservedQuantity() - qty);
-        item.setSoldQuantity(item.getSoldQuantity() + qty);
+        requirePositive(qty);
+        if (inventoryRepository.tryConfirm(productId, qty) != 1) {
+            loadForWrite(productId);
+            throw new InsufficientStockException(productId, qty, "not enough reserved stock to confirm");
+        }
+        InventoryItem item = loadForWrite(productId);
         log.info("Confirmed {} units sold for {}", qty, productId);
-        item = inventoryRepository.save(item);
         publishInventoryMetrics(item.getProductId(), item);
         return item;
+    }
+
+    private static void requirePositive(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than 0, got " + quantity);
+        }
+    }
+
+    /** One remote call for the whole page; never throws — missing products map to null. */
+    private Map<UUID, ProductDto> fetchProducts(List<UUID> productIds) {
+        try {
+            return productClient.getProductsByIds(productIds);
+        } catch (Exception e) {
+            log.error("Unable to enrich inventory with product data: {}", e.getMessage());
+            return Map.of();
+        }
     }
 
     private void publishStockUpdateEvent(String type, InventoryItem item, int quantityChange) {

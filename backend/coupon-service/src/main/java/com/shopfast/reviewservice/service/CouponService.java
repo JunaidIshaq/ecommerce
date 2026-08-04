@@ -7,7 +7,7 @@ import com.shopfast.common.events.CouponValidateResponseDto;
 import com.shopfast.reviewservice.enums.CouponType;
 import com.shopfast.reviewservice.model.Coupon;
 import com.shopfast.reviewservice.repository.CouponRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

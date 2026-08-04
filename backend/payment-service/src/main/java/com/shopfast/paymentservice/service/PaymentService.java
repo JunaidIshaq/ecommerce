@@ -11,10 +11,13 @@ import com.shopfast.paymentservice.model.Payment;
 import com.shopfast.paymentservice.repository.PaymentRepository;
 import com.shopfast.paymentservice.repository.ProcessedCommandRepository;
 import com.stripe.exception.StripeException;
-import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
@@ -27,6 +30,14 @@ public class PaymentService {
     private final KafkaPaymentProducer kafkaPaymentProducer;
     private final RedisPaymentIdempotencyStore idempotencyStore;
     private final StripeService stripeService;
+
+    /**
+     * Mock card processing is a development aid only. It must never be reachable in an
+     * environment that handles real money, so it is opt-in via configuration and defaults
+     * to OFF.
+     */
+    @Value("${payment.mock-gateway.enabled:false}")
+    private boolean mockGatewayEnabled;
 
     public PaymentService(PaymentRepository paymentRepository,
                          ProcessedCommandRepository processedCommandRepository,
@@ -77,7 +88,7 @@ public class PaymentService {
                 // For Stripe, create PaymentIntent
                 try {
                     StripePaymentIntentRequest stripeRequest = StripePaymentIntentRequest.builder()
-                            .amount((long) (paymentRequestDto.getAmount() * 100)) // Convert to cents
+                            .amount(toMinorUnits(paymentRequestDto.getAmount())) // Convert to cents
                             .currency("usd")
                             .description("Order payment for " + orderIdStr)
                             .metadataOrderId(orderIdStr)
@@ -93,8 +104,9 @@ public class PaymentService {
                     saved.setTransactionId(paymentIntentResponse.getId());
                     paymentRepository.save(saved);
 
-                    // For Stripe, we don't determine success here - webhook will update status
-                    success = true; // Return success to indicate PaymentIntent created
+                    // Stripe is asynchronous: the intent exists but no money has moved yet.
+                    // The webhook is the only authority on success, so nothing is emitted here.
+                    success = false;
                     transactionId = paymentIntentResponse.getId();
 
                     log.info("Stripe PaymentIntent created for payment: {}, clientSecret: {}",
@@ -116,6 +128,11 @@ public class PaymentService {
                 log.info("COD payment recorded for order: {}", orderIdStr);
             } else {
                 // For CARD (mock), validate and process
+                if (!mockGatewayEnabled) {
+                    throw new IllegalStateException(
+                            "Card payments are not available: no real gateway is configured and the mock "
+                                    + "gateway is disabled (payment.mock-gateway.enabled=false)");
+                }
                 success = mockPaymentGateway(saved);
                 transactionId = success ? "TXN-" + UUID.randomUUID() : "TXN-FAILED-" + UUID.randomUUID();
                 saved.setStatus(success ? PaymentStatus.SUCCESS : PaymentStatus.FAILED);
@@ -123,8 +140,9 @@ public class PaymentService {
                 paymentRepository.save(saved);
             }
 
-            // 3. Publish payment event (only for non-pending statuses)
-            if (paymentRequestDto.getMethod() != PaymentMethod.STRIPE || success) {
+            // 3. Publish only terminal outcomes. PENDING/INITIATED payments must not be
+            //    broadcast, otherwise the order saga would read them as failures.
+            if (saved.getStatus() == PaymentStatus.SUCCESS || saved.getStatus() == PaymentStatus.FAILED) {
                 PaymentEvent event = new PaymentEvent();
                 event.setEventId(UUID.randomUUID().toString());
                 event.setEventType(saved.getStatus() == PaymentStatus.SUCCESS ? "PAYMENT_SUCCESS" : "PAYMENT_FAILED");
@@ -176,14 +194,36 @@ public class PaymentService {
         return rand < 0.90;
     }
 
+    /** Converts a major-unit amount to Stripe's integer minor units without truncating cents. */
+    private long toMinorUnits(double amount) {
+        return BigDecimal.valueOf(amount)
+                .setScale(2, RoundingMode.HALF_UP)
+                .movePointRight(2)
+                .longValueExact();
+    }
+
     public Payment getById(UUID paymentId) {
         return paymentRepository.findById(paymentId).orElseThrow(() -> new IllegalArgumentException("Payment not found"));
     }
 
+    @Transactional
     public void updatePaymentFromWebhook(String paymentIntentId, String status, String transactionId) {
+        // Webhook payloads are attacker-reachable input; an unknown status must be rejected
+        // cleanly instead of blowing up with IllegalArgumentException from valueOf.
+        final PaymentStatus newStatus;
+        try {
+            newStatus = PaymentStatus.valueOf(status);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            log.warn("Ignoring webhook for intent {} with unknown status '{}'", paymentIntentId, status);
+            return;
+        }
         paymentRepository.findByPaymentIntentId(paymentIntentId).ifPresentOrElse(
             payment -> {
-                payment.setStatus(PaymentStatus.valueOf(status));
+                if (payment.getStatus() == newStatus) {
+                    log.debug("Webhook replay ignored for payment {} (already {})", payment.getId(), newStatus);
+                    return;
+                }
+                payment.setStatus(newStatus);
                 if (transactionId != null) {
                     payment.setTransactionId(transactionId);
                 }

@@ -5,12 +5,11 @@ import com.shopfast.common.enums.NotificationType;
 import com.shopfast.common.events.CartItemDto;
 import com.shopfast.common.events.CouponLineItemDto;
 import com.shopfast.common.events.CouponValidateRequestDto;
+import com.shopfast.common.events.CouponValidateResponseDto;
 import com.shopfast.common.events.NotificationEvent;
 import com.shopfast.common.events.OrderCommand;
-import com.shopfast.orderservice.client.CartClient;
-import com.shopfast.orderservice.client.CouponClient;
-import com.shopfast.orderservice.client.PaymentClient;
 import com.shopfast.orderservice.client.PaymentRequest;
+import com.shopfast.orderservice.client.RemoteGateway;
 import com.shopfast.orderservice.dto.CheckoutRequestDto;
 import com.shopfast.orderservice.dto.PaymentResponseDto;
 import com.shopfast.orderservice.enums.OrderStatus;
@@ -21,14 +20,16 @@ import com.shopfast.orderservice.model.Order;
 import com.shopfast.orderservice.model.OrderItem;
 import com.shopfast.orderservice.model.ProcessedCommand;
 import com.shopfast.orderservice.model.ShippingAddress;
-import com.shopfast.orderservice.repository.OrderItemRepository;
 import com.shopfast.orderservice.repository.OrderRepository;
 import com.shopfast.orderservice.repository.ProcessedCommandRepository;
-import jakarta.transaction.Transactional;
+import com.shopfast.orderservice.util.OrderNumberGenerator;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,98 +37,142 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Orchestrates the checkout flow.
+ *
+ * <p>Responsibilities intentionally limited to: load cart -> price (with coupon)
+ * -> persist order -> take payment -> reserve stock. All post-payment side effects
+ * (cart clearing, coupon redemption, stock confirmation) are owned exclusively by
+ * {@code KafkaPaymentConsumer} so they happen exactly once.</p>
+ */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CheckoutService {
 
+    /** Monetary values are always stored/compared with 2 decimal places. */
+    private static final int MONEY_SCALE = 2;
+    private static final RoundingMode MONEY_ROUNDING = RoundingMode.HALF_UP;
+
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
-    private final CartClient cartClient;
     private final KafkaOrderProducer kafkaOrderProducer;
     private final ProcessedCommandRepository processedCommandRepository;
-    private final CouponClient couponClient;
     private final KafkaNotificationProducer kafkaNotificationProducer;
-    private final PaymentClient paymentClient;
-
-    public CheckoutService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, CartClient cartClient, KafkaOrderProducer kafkaOrderProducer, ProcessedCommandRepository processedCommandRepository, CouponClient couponClient, KafkaNotificationProducer kafkaNotificationProducer, PaymentClient paymentClient) {
-        this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
-        this.cartClient = cartClient;
-        this.kafkaOrderProducer = kafkaOrderProducer;
-        this.processedCommandRepository = processedCommandRepository;
-        this.couponClient = couponClient;
-        this.kafkaNotificationProducer = kafkaNotificationProducer;
-        this.paymentClient = paymentClient;
-    }
+    private final RemoteGateway remoteGateway;
+    private final OrderNumberGenerator orderNumberGenerator;
 
     @Transactional
-    public Order checkout(String userId, CheckoutRequestDto checkoutRequestDto) {
-        // 1) Load Cart
-        var cartItems = cartClient.getCartInternal(userId);
-        if(cartItems == null || cartItems.isEmpty()) {
+    public Order checkout(String userId, CheckoutRequestDto request) {
+        List<CartItemDto> cartItems = loadCart(userId);
+
+        BigDecimal subTotal = calculateSubTotal(cartItems);
+        BigDecimal discount = resolveDiscount(userId, request, cartItems, subTotal);
+        BigDecimal total = subTotal.subtract(discount).max(BigDecimal.ZERO).setScale(MONEY_SCALE, MONEY_ROUNDING);
+
+        Order order = buildOrder(userId, request, cartItems, subTotal, discount, total);
+        order = orderRepository.save(order); // items cascade from Order
+
+        processPayment(order, request, total);
+
+        publishOrderNotification(order);
+        return order;
+    }
+
+    // ------------------------------------------------------------------ cart
+
+    private List<CartItemDto> loadCart(String userId) {
+        List<CartItemDto> cartItems = remoteGateway.getCart(userId);
+        if (cartItems == null || cartItems.isEmpty()) {
             throw new IllegalArgumentException("Cart is empty");
         }
+        return cartItems;
+    }
 
-        // 2) Price calculation (basic; coupons integrated in step 3)
-        double subTotal = cartItems.stream().mapToDouble(i -> i.getPrice().doubleValue() * i.getQuantity())
-                .sum();
-        double discount = 0.0;
-        double total = Math.max(9, subTotal - discount);
-        // 3) Persist order + items
+    // --------------------------------------------------------------- pricing
+
+    /**
+     * Sum of line totals. Uses {@link BigDecimal} throughout — never {@code double} —
+     * so cent-level rounding errors cannot accumulate.
+     */
+    private BigDecimal calculateSubTotal(List<CartItemDto> cartItems) {
+        return cartItems.stream()
+                .map(i -> i.getPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(MONEY_SCALE, MONEY_ROUNDING);
+    }
+
+    /**
+     * Validates the coupon (if any) and returns the discount, clamped to
+     * {@code [0, subTotal]} so a coupon can never produce a negative total.
+     */
+    private BigDecimal resolveDiscount(String userId,
+                                       CheckoutRequestDto request,
+                                       List<CartItemDto> cartItems,
+                                       BigDecimal subTotal) {
+        if (request == null || request.getCouponCode() == null || request.getCouponCode().isBlank()) {
+            return BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING);
+        }
+
+        CouponValidateRequestDto validateRequest = new CouponValidateRequestDto();
+        validateRequest.setUserId(userId);
+        validateRequest.setCode(request.getCouponCode());
+        validateRequest.setSubTotal(subTotal.doubleValue());
+        validateRequest.setItems(cartItems.stream().map(ci -> {
+            CouponLineItemDto line = new CouponLineItemDto();
+            line.setProductId(ci.getProductId().toString());
+            line.setQuantity(ci.getQuantity());
+            line.setPrice(ci.getPrice().doubleValue());
+            return line;
+        }).toList());
+
+        CouponValidateResponseDto response = remoteGateway.validateCoupon(validateRequest);
+        if (response == null || !response.isValid()) {
+            String reason = response != null && response.getReason() != null ? response.getReason() : "invalid";
+            throw new IllegalArgumentException("Coupon code is invalid: " + reason);
+        }
+
+        return BigDecimal.valueOf(response.getDiscount())
+                .setScale(MONEY_SCALE, MONEY_ROUNDING)
+                .max(BigDecimal.ZERO)
+                .min(subTotal);
+    }
+
+    // ---------------------------------------------------------------- order
+
+    private Order buildOrder(String userId,
+                             CheckoutRequestDto request,
+                             List<CartItemDto> cartItems,
+                             BigDecimal subTotal,
+                             BigDecimal discount,
+                             BigDecimal total) {
         Order order = new Order();
-        if(checkoutRequestDto != null) {
-            if(checkoutRequestDto.getCouponCode() != null && !checkoutRequestDto.getCouponCode().isBlank()){
-            CouponValidateRequestDto requestDto = new CouponValidateRequestDto();
-            requestDto.setUserId(userId);
-            requestDto.setCode(checkoutRequestDto.getCouponCode());
-            requestDto.setSubTotal(subTotal);
-            requestDto.setItems(cartItems.stream().map(ci -> {
-                CouponLineItemDto couponLineItemDto = new CouponLineItemDto();
-                couponLineItemDto.setProductId(ci.getProductId().toString());
-                couponLineItemDto.setQuantity(ci.getQuantity());
-                couponLineItemDto.setPrice(ci.getPrice().doubleValue());
-                return couponLineItemDto;
-            }).toList());
-            var response = couponClient.validate(requestDto);
-            if (response.isValid()) {
-                discount = response.getDiscount();
-                total = Math.max(total, subTotal - discount);
-            } else {
-                throw new IllegalArgumentException("Coupon code is invalid");
-            }
-        }
-            ShippingAddress shippingAddress = ShippingAddress.builder()
-                    .fullName(checkoutRequestDto.getFullName())
-                    .street(checkoutRequestDto.getStreet())
-                    .city(checkoutRequestDto.getCity())
-                    .state(checkoutRequestDto.getState())
-                    .zip(checkoutRequestDto.getZip())
-                    .country(checkoutRequestDto.getCountry())
-                    .phone(checkoutRequestDto.getPhone())
-                    .build();
-            order.setShippingAddress(shippingAddress);
-        }
-        String orderNumber = "Order-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-
-
         order.setUserId(userId);
-        order.setOrderNumber(orderNumber);
+        order.setOrderNumber(orderNumberGenerator.next());
         order.setStatus(OrderStatus.CREATED);
-        order.setSubTotal(BigDecimal.valueOf(subTotal));
-        order.setDiscount(BigDecimal.valueOf(discount));
-        order.setTotalAmount(BigDecimal.valueOf(total));
+        order.setSubTotal(subTotal);
+        order.setDiscount(discount);
+        order.setTotalAmount(total);
+        order.setPaymentStatus(OrderStatus.PENDING);
+        order.setPaymentMethod(resolvePaymentMethod(request));
 
-        // Set payment method and initial payment status
-        if (checkoutRequestDto != null && checkoutRequestDto.getPaymentMethod() != null) {
-            order.setPaymentMethod(checkoutRequestDto.getPaymentMethod());
-            order.setPaymentStatus(OrderStatus.PENDING);
-        } else {
-            order.setPaymentMethod(PaymentMethod.COD);
-            order.setPaymentStatus(OrderStatus.PENDING);
+        if (request != null) {
+            // Persisting the coupon code is required for redemption after payment succeeds.
+            if (request.getCouponCode() != null && !request.getCouponCode().isBlank()) {
+                order.setCouponCode(request.getCouponCode());
+            }
+            order.setShippingAddress(ShippingAddress.builder()
+                    .fullName(request.getFullName())
+                    .street(request.getStreet())
+                    .city(request.getCity())
+                    .state(request.getState())
+                    .zip(request.getZip())
+                    .country(request.getCountry())
+                    .phone(request.getPhone())
+                    .build());
         }
 
-        List<OrderItem> items = new ArrayList<>();
-        for(CartItemDto cartItem : cartItems) {
+        List<OrderItem> items = new ArrayList<>(cartItems.size());
+        for (CartItemDto cartItem : cartItems) {
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
             orderItem.setProductId(cartItem.getProductId());
@@ -135,105 +180,103 @@ public class CheckoutService {
             orderItem.setPrice(cartItem.getPrice());
             items.add(orderItem);
         }
-
-        orderItemRepository.saveAll(items);
         order.setItems(items);
+        return order;
+    }
 
-        order = orderRepository.save(order);
+    private PaymentMethod resolvePaymentMethod(CheckoutRequestDto request) {
+        return request != null && request.getPaymentMethod() != null
+                ? request.getPaymentMethod()
+                : PaymentMethod.COD;
+    }
 
-        // 4) Process payment
+    // -------------------------------------------------------------- payment
+
+    private void processPayment(Order order, CheckoutRequestDto request, BigDecimal total) {
+        PaymentMethod method = resolvePaymentMethod(request);
         try {
-            // Build payment request for payment-service
             PaymentRequest paymentRequest = PaymentRequest.builder()
                     .orderId(order.getId())
-                    .userId(UUID.fromString(userId))
-                    .amount(total)
-                    .method(checkoutRequestDto != null && checkoutRequestDto.getPaymentMethod() != null
-                            ? checkoutRequestDto.getPaymentMethod()
-                            : PaymentMethod.COD)
-                    .cardNumber(checkoutRequestDto != null ? checkoutRequestDto.getCardNumber() : null)
-                    .cardHolderName(checkoutRequestDto != null ? checkoutRequestDto.getCardHolderName() : null)
-                    .expiryDate(checkoutRequestDto != null ? checkoutRequestDto.getExpiryDate() : null)
-                    .cvv(checkoutRequestDto != null ? checkoutRequestDto.getCvv() : null)
+                    .userId(UUID.fromString(order.getUserId()))
+                    .amount(total.doubleValue())
+                    .method(method)
+                    .cardNumber(request != null ? request.getCardNumber() : null)
+                    .cardHolderName(request != null ? request.getCardHolderName() : null)
+                    .expiryDate(request != null ? request.getExpiryDate() : null)
+                    .cvv(request != null ? request.getCvv() : null)
                     .build();
 
-            PaymentResponseDto paymentResponse = paymentClient.processPayment(userId, paymentRequest);
+            PaymentResponseDto paymentResponse = remoteGateway.processPayment(order.getUserId(), paymentRequest);
+            String paymentStatus = paymentResponse != null ? paymentResponse.getStatus() : null;
 
-            // Update order with payment status
-            // For COD, payment is collected on delivery - keep status PENDING
-            // For CARD/STRIPE, update based on payment response
-            if (checkoutRequestDto != null && checkoutRequestDto.getPaymentMethod() == PaymentMethod.COD) {
+            if (method == PaymentMethod.COD) {
+                // COD is collected on delivery; the order stays CREATED/PENDING.
                 order.setPaymentStatus(OrderStatus.PENDING);
                 order.setStatus(OrderStatus.CREATED);
-            } else if ("SUCCESS".equalsIgnoreCase(paymentResponse.getStatus())) {
+                reserveStock(order);
+            } else if ("SUCCESS".equalsIgnoreCase(paymentStatus)) {
                 order.setPaymentStatus(OrderStatus.CONFIRMED);
                 order.setStatus(OrderStatus.CONFIRMED);
-            } else if ("FAILED".equalsIgnoreCase(paymentResponse.getStatus())) {
+                reserveStock(order);
+            } else if ("FAILED".equalsIgnoreCase(paymentStatus)) {
                 order.setPaymentStatus(OrderStatus.PAYMENT_FAILED);
                 order.setStatus(OrderStatus.PAYMENT_FAILED);
             } else {
+                // e.g. Stripe PaymentIntent created — the webhook will settle the status.
                 order.setPaymentStatus(OrderStatus.PENDING);
             }
-            orderRepository.save(order);
-
-            // If payment succeeded, proceed with inventory reservation
-            if ("SUCCESS".equalsIgnoreCase(paymentResponse.getStatus())) {
-                // Publish RESERVE command for each item
-                String commandId = UUID.randomUUID().toString();
-                OrderCommand orderCommand = new OrderCommand();
-                orderCommand.setCommandId(commandId);
-                orderCommand.setCommandType("RESERVE");
-                orderCommand.setOccurredAt(Instant.now());
-                Map<String, Object> payload = new HashMap<>();
-                payload.put("orderId", order.getId().toString());
-                payload.put("userId", order.getUserId());
-
-                payload.put("items", order.getItems().stream().map(i -> Map.of(
-                        "productId", i.getProductId().toString(),
-                        "quantity", i.getQuantity()
-                )).toList());
-                orderCommand.setPayload(payload);
-
-                processedCommandRepository.save(ProcessedCommand.builder()
-                        .commandId(commandId)
-                        .processedAt(Instant.now())
-                        .build());
-
-                kafkaOrderProducer.publishOrderCommand(orderCommand);
-                kafkaOrderProducer.reserveOrder(order);
-
-                // Clear cart
-                try {
-                    cartClient.clearCartInternal(order.getUserId());
-                    log.info("Cart cleared for user {}", order.getUserId());
-                } catch (Exception ex) {
-                    log.error("Failed to clear cart for user {}: {}", order.getUserId(), ex.getMessage());
-                }
-            } else if ("FAILED".equalsIgnoreCase(paymentResponse.getStatus())) {
-                // Payment failed - release inventory if reserved
-                kafkaOrderProducer.releaseOrder(order);
-            }
-
         } catch (Exception ex) {
-            log.error("Payment processing failed for order {}: {}", order.getId(), ex.getMessage());
+            log.error("Payment processing failed for order {}: {}", order.getId(), ex.getMessage(), ex);
             order.setPaymentStatus(OrderStatus.PAYMENT_FAILED);
             order.setStatus(OrderStatus.PAYMENT_FAILED);
-            orderRepository.save(order);
-            throw new IllegalArgumentException("Payment failed: " + ex.getMessage());
+            // Persist the failure, then surface it. Dirty checking flushes on commit.
+            throw new IllegalStateException("Payment failed: " + ex.getMessage(), ex);
         }
+    }
 
-        // Notification Producer -> Notification Service
-        NotificationEvent notificationEvent = new NotificationEvent();
-        notificationEvent.setSubject("Order " + order.getStatus());
-        notificationEvent.setNotificationType(NotificationType.ORDER_CREATED);
-        notificationEvent.setNotificationChannel(NotificationChannel.EMAIL);
-        notificationEvent.setContent("Order has been placed with status: " + order.getStatus());
-        notificationEvent.setRecipient("junaidnumlcs@gmail.com");
-        notificationEvent.setReferenceId(order.getOrderNumber());
-        notificationEvent.setUserId(userId);
-        notificationEvent.setEventSource("order-service");
-        kafkaNotificationProducer.send(notificationEvent);
+    /**
+     * Publishes the RESERVE command. The idempotency marker is written in the same
+     * transaction as the order so a rollback cannot leave a "processed" record behind.
+     */
+    private void reserveStock(Order order) {
+        String commandId = UUID.randomUUID().toString();
 
-        return order;
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("orderId", order.getId().toString());
+        payload.put("userId", order.getUserId());
+        payload.put("items", order.getItems().stream()
+                .map(i -> Map.<String, Object>of(
+                        "productId", i.getProductId().toString(),
+                        "quantity", i.getQuantity()))
+                .toList());
+
+        OrderCommand command = new OrderCommand();
+        command.setCommandId(commandId);
+        command.setCommandType("RESERVE");
+        command.setOccurredAt(Instant.now());
+        command.setPayload(payload);
+
+        processedCommandRepository.save(ProcessedCommand.builder()
+                .commandId(commandId)
+                .processedAt(Instant.now())
+                .build());
+
+        kafkaOrderProducer.publishOrderCommand(command);
+        kafkaOrderProducer.reserveOrder(order);
+    }
+
+    // --------------------------------------------------------- notification
+
+    private void publishOrderNotification(Order order) {
+        NotificationEvent event = new NotificationEvent();
+        event.setSubject("Order " + order.getStatus());
+        event.setNotificationType(NotificationType.ORDER_CREATED);
+        event.setNotificationChannel(NotificationChannel.EMAIL);
+        event.setContent("Order " + order.getOrderNumber() + " has been placed with status: " + order.getStatus());
+        // Recipient is resolved downstream by notification-service from the userId.
+        event.setReferenceId(order.getOrderNumber());
+        event.setUserId(order.getUserId());
+        event.setEventSource("order-service");
+        kafkaNotificationProducer.send(event);
     }
 }

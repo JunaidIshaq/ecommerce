@@ -9,6 +9,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +21,12 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "notifications")
+// The dispatcher polls by (status, channel) on a timer and the UI pages by
+// (userId, createdAt desc); both were full scans over a fast-growing table.
+@Table(name = "notifications", indexes = {
+        @Index(name = "idx_notifications_user_created", columnList = "userId, createdAt"),
+        @Index(name = "idx_notifications_status_channel", columnList = "status, channel")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

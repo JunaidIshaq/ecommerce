@@ -15,6 +15,12 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
+      properties:
+        acks: all
+        enable.idempotence: true
+        retries: 10
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 120000
   elasticsearch:
     uris: ${ELASTIC_URI:http://localhost:9200}
 

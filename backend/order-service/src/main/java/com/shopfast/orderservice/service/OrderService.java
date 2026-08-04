@@ -4,21 +4,26 @@ import com.shopfast.common.enums.NotificationChannel;
 import com.shopfast.common.enums.NotificationType;
 import com.shopfast.common.events.CartItemDto;
 import com.shopfast.common.events.NotificationEvent;
+import com.shopfast.orderservice.domain.OrderStatusTransitions;
 import com.shopfast.orderservice.dto.OrderRequestDto;
 import com.shopfast.orderservice.enums.OrderStatus;
+import com.shopfast.orderservice.enums.PaymentMethod;
 import com.shopfast.orderservice.events.KafkaNotificationProducer;
 import com.shopfast.orderservice.events.KafkaOrderProducer;
 import com.shopfast.orderservice.model.Order;
 import com.shopfast.orderservice.model.OrderItem;
 import com.shopfast.orderservice.repository.OrderRepository;
 import com.shopfast.orderservice.repository.ProcessedCommandRepository;
-import jakarta.transaction.Transactional;
+import com.shopfast.orderservice.util.OrderNumberGenerator;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -27,34 +32,34 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class OrderService {
+
+    private static final int MONEY_SCALE = 2;
+    private static final RoundingMode MONEY_ROUNDING = RoundingMode.HALF_UP;
 
     private final OrderRepository orderRepository;
     private final ProcessedCommandRepository processedCommandRepository;
     private final KafkaOrderProducer kafkaOrderProducer;
     private final KafkaNotificationProducer kafkaNotificationProducer;
-//    private final CouponClient couponClient;
-
-    public OrderService(OrderRepository orderRepository, ProcessedCommandRepository processedCommandRepository, KafkaOrderProducer kafkaOrderProducer, KafkaNotificationProducer kafkaNotificationProducer) {
-        this.orderRepository = orderRepository;
-        this.processedCommandRepository = processedCommandRepository;
-        this.kafkaOrderProducer = kafkaOrderProducer;
-        this.kafkaNotificationProducer = kafkaNotificationProducer;
-    }
+    private final OrderNumberGenerator orderNumberGenerator;
 
     @Transactional
     public Order placeOrder(OrderRequestDto orderRequestDto) {
-        // Calculate totals
+        // Calculate totals — BigDecimal with an explicit scale so cents cannot drift.
         BigDecimal total = orderRequestDto.getItems().stream()
                 .map(i -> i.getPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        String orderNumber = "Order-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(MONEY_SCALE, MONEY_ROUNDING);
 
         Order order = Order.builder()
                 .userId(orderRequestDto.getUserId())
-                .orderNumber(orderNumber)
+                .orderNumber(orderNumberGenerator.next())
                 .status(OrderStatus.PENDING)
+                .paymentStatus(OrderStatus.PENDING)
+                .paymentMethod(PaymentMethod.COD)
                 .subTotal(total)
+                .discount(BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING))
                 .totalAmount(total)
                 .build();
 
@@ -74,28 +79,36 @@ public class OrderService {
         // Order Producer -> Inventory Service
         kafkaOrderProducer.reserveOrder(order);
 
-        // Notification Producer -> Notification Service
+        // Notification Producer -> Notification Service.
+        // Recipient is resolved downstream from userId; never hard-code an address.
         NotificationEvent notificationEvent = new NotificationEvent();
         notificationEvent.setSubject("Order Created");
         notificationEvent.setNotificationType(NotificationType.ORDER_CREATED);
         notificationEvent.setNotificationChannel(NotificationChannel.EMAIL);
-        notificationEvent.setContent("Order has been placed");
-        notificationEvent.setRecipient("junaidnumlcs@gmail.com");
-        notificationEvent.setReferenceId(order.getOrderNumber());
-        notificationEvent.setUserId("28e2ac7f-09ef-4e7e-94df-042a987fa9c9");
+        notificationEvent.setContent("Order " + saved.getOrderNumber() + " has been placed");
+        notificationEvent.setReferenceId(saved.getOrderNumber());
+        notificationEvent.setUserId(saved.getUserId());
         notificationEvent.setEventSource("order-service");
         kafkaNotificationProducer.send(notificationEvent);
 
         return saved;
     }
 
+    @Transactional(readOnly = true)
     public Page<Order> getOrdersForUser(String userId, Pageable pageable) {
         return orderRepository.findByUserId(userId, pageable);
     }
 
+    /** @throws NoSuchElementException if the order does not exist. */
+    @Transactional(readOnly = true)
+    public Order requireOrderById(UUID orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new NoSuchElementException(String.format("Order not found : %s", orderId)));
+    }
+
+    @Transactional(readOnly = true)
     public Optional<Order> getOrderById(UUID orderId) {
-        return Optional.of(orderRepository.findById(orderId)
-                .orElseThrow(() -> new NoSuchElementException(String.format("Order not found : %s", orderId))));
+        return orderRepository.findById(orderId);
     }
 
     @Transactional
@@ -126,38 +139,53 @@ public class OrderService {
     // Invoked by InventoryEvent listener to mark order RESERVED/CONFIRMED/REJECTED
     @Transactional
     public void handleInventoryEvent(String commandCorrelationId, String eventType, Map<String, Object> payload) {
-        //correlationId contains orderId in our design
-
-        String orderId = (String) payload.get("correlationId");
-        if(orderId == null) {
-            //sometimes payload contains orderId in top-level, fallback to payload.orderId
-            orderId = payload.get("orderId").toString();
+        if (payload == null) {
+            log.warn("InventoryEvent with null payload, skipping");
+            return;
         }
-        if(orderId == null) {
+
+        // correlationId carries the orderId in our design; fall back to a top-level orderId.
+        Object rawOrderId = payload.get("correlationId");
+        if (rawOrderId == null) {
+            rawOrderId = payload.get("orderId");
+        }
+        if (rawOrderId == null) {
             log.warn("InventoryEvent without orderId/correlationId, skipping");
             return;
         }
-        UUID orderIdUUID = UUID.fromString(orderId);
-        Order order = orderRepository.findById(orderIdUUID).orElse(null);
-        if(order == null) {
-            log.warn("Order {} not found for inventory event", orderId);
+
+        UUID orderIdUUID;
+        try {
+            orderIdUUID = UUID.fromString(rawOrderId.toString());
+        } catch (IllegalArgumentException ex) {
+            log.warn("InventoryEvent carries a malformed orderId '{}', discarding", rawOrderId);
             return;
         }
 
-        switch(eventType) {
-            case "INVENTORY_RESERVED" -> {
-                order.setStatus(OrderStatus.RESERVED);
-            }
-            case "INVENTORY_CONFIRMED" -> {
-                order.setStatus(OrderStatus.CONFIRMED);
-            }
-            case "INVENTORY_FAILED" -> {
-                order.setStatus(OrderStatus.REJECTED);
-            }
-            case "INVENTORY_RELEASED" -> {
-                order.setStatus(OrderStatus.CANCELLED);
-            }
+        Order order = orderRepository.findById(orderIdUUID).orElse(null);
+        if (order == null) {
+            log.warn("Order {} not found for inventory event", orderIdUUID);
+            return;
         }
+
+        OrderStatus target = switch (eventType == null ? "" : eventType) {
+            case "INVENTORY_RESERVED" -> OrderStatus.RESERVED;
+            case "INVENTORY_CONFIRMED" -> OrderStatus.CONFIRMED;
+            case "INVENTORY_FAILED" -> OrderStatus.REJECTED;
+            case "INVENTORY_RELEASED" -> OrderStatus.CANCELLED;
+            default -> null;
+        };
+
+        if (target == null) {
+            log.info("Unhandled inventory event type {} for order {}", eventType, orderIdUUID);
+            return;
+        }
+        // Guard against out-of-order/replayed events regressing a settled order.
+        if (!OrderStatusTransitions.canApply(orderIdUUID, order.getStatus(), target)) {
+            return;
+        }
+
+        order.setStatus(target);
         orderRepository.save(order);
     }
 

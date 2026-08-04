@@ -2,7 +2,7 @@ package com.shopfast.cartservice.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.shopfast.cartservice.client.ProductClient;
+import com.shopfast.cartservice.client.ProductGateway;
 import com.shopfast.cartservice.dto.CartItemDto;
 import com.shopfast.cartservice.dto.ProductInternalResponseDto;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class CartService {
 
     private final RedisTemplate<String, String> redisTemplate;
 
-    private final ProductClient productClient;
+    private final ProductGateway productGateway;
 
     private final ObjectMapper objectMapper;
 
@@ -45,9 +45,9 @@ public class CartService {
     }
 
 
-    public CartService(RedisTemplate<String, String> redisTemplate, ProductClient productClient, ObjectMapper objectMapper) {
+    public CartService(RedisTemplate<String, String> redisTemplate, ProductGateway productGateway, ObjectMapper objectMapper) {
         this.redisTemplate = redisTemplate;
-        this.productClient = productClient;
+        this.productGateway = productGateway;
         this.objectMapper = objectMapper;
     }
 
@@ -57,7 +57,7 @@ public class CartService {
 
     // Add/Update
     public void addItem(String userId, String productId, Integer quantity) throws JsonProcessingException {
-        ProductInternalResponseDto p = productClient.getProduct(productId);
+        ProductInternalResponseDto p = productGateway.getProduct(productId);
         if (p == null || !p.getActive()) {
             throw new NoSuchElementException("Product not available");
         }
@@ -128,7 +128,7 @@ public class CartService {
     }
 
     public void addUser(String userId, String productId, Integer quantity) throws JsonProcessingException {
-        ProductInternalResponseDto p = productClient.getProduct(productId);
+        ProductInternalResponseDto p = productGateway.getProduct(productId);
         if (p == null || Boolean.FALSE.equals(p.getActive())) {
             throw new NoSuchElementException("Product not available");
         }
@@ -153,7 +153,7 @@ public class CartService {
     }
 
     public void updateUser(String userId, String productId, Integer quantity) throws JsonProcessingException {
-        ProductInternalResponseDto p = productClient.getProduct(productId);
+        ProductInternalResponseDto p = productGateway.getProduct(productId);
         if (p == null || Boolean.FALSE.equals(p.getActive())) {
             throw new NoSuchElementException("Product not available");
         }
@@ -186,7 +186,7 @@ public class CartService {
     /*--------------- GUEST CART ----------------*/
 
     public void addGuest(String anonId, String productId, Integer quantity) throws JsonProcessingException {
-        ProductInternalResponseDto p = productClient.getProduct(productId);
+        ProductInternalResponseDto p = productGateway.getProduct(productId);
         if (p == null || Boolean.FALSE.equals(p.getActive())) {
             throw new NoSuchElementException("Product not available");
         }
@@ -212,7 +212,7 @@ public class CartService {
     }
 
     public void updateGuest(String anonId, String productId, Integer quantity) throws JsonProcessingException {
-        ProductInternalResponseDto p = productClient.getProduct(productId);
+        ProductInternalResponseDto p = productGateway.getProduct(productId);
         if (p == null || Boolean.FALSE.equals(p.getActive())) {
             throw new NoSuchElementException("Product not available");
         }
