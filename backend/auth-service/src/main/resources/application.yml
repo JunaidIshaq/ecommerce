@@ -94,7 +94,9 @@ app:
     encryption:
       # AES-256-GCM encryption key for login password (Base64-encoded 32 bytes)
       # Frontend must encrypt the password using this key before sending to /api/v1/auth/login
-      key: ${APP_PASSWORD_ENCRYPTION_KEY:MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=}
+      # No default on purpose: a committed default here would mean every deployment
+      # that forgot to set it shares one publicly-known password encryption key.
+      key: ${APP_PASSWORD_ENCRYPTION_KEY}
 
 user:
   service:

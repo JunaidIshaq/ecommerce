@@ -363,6 +363,9 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - JWT_SECRET=supersecretkeythatshouldbereplacedandstoredsecurely
+      # Required: the committed default was removed from application.yml because it was a
+      # publicly-known key. Override via a .env file / real secret store for production.
+      - APP_PASSWORD_ENCRYPTION_KEY=${APP_PASSWORD_ENCRYPTION_KEY:-MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=}
       - SERVER_PORT=8087
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8087/actuator/health || exit 1" ]

@@ -92,7 +92,7 @@ category:
 
 product:
   service:
-    url: ${PRODUCT_SERVICE_URL:http://localhost:8081/api/v1/project}
+    url: ${PRODUCT_SERVICE_URL:http://localhost:8081/api/v1/product}
 
 inventory:
   service:
