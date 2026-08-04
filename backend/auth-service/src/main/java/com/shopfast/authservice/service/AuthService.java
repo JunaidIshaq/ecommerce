@@ -6,6 +6,8 @@ import com.shopfast.authservice.dto.LoginRequestDto;
 import com.shopfast.authservice.dto.UserInternalDto;
 import com.shopfast.authservice.exception.InvalidCredentialsException;
 import com.shopfast.common.utils.PasswordEncryptionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -17,6 +19,8 @@ import java.util.Map;
 
 @Service
 public class AuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final UserClient userClient;
 
@@ -66,7 +70,16 @@ public class AuthService {
         } catch (InvalidCredentialsException e) {
             throw e; // Let GlobalExceptionHandler return 401 with "Invalid password"
         } catch (Exception e) {
-            throw new RuntimeException("User not exists with this email : " + request.getEmail() );
+            // Previously every failure here was reported to the caller as
+            // "User not exists with this email", with the cause discarded entirely. That was
+            // actively misleading: a wrong decryption key, a user-service outage and a genuinely
+            // unknown email all produced the identical message and nothing was written to the
+            // log, so there was no way to tell them apart from either side.
+            //
+            // Log the real cause server-side (never the password), and keep the client-facing
+            // message generic so we don't leak which emails are registered.
+            log.error("Login failed for email={} - {}", request.getEmail(), e.toString(), e);
+            throw new InvalidCredentialsException("Invalid email or password");
         }
     }
 
