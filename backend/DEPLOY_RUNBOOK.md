@@ -134,9 +134,16 @@ Hardening the compose file closes the exposure, but two things remain:
 1. **The old JWT secret is permanently compromised** — it is in the git history. Rotating it
    (which `generate-secrets.sh` does) invalidates all existing sessions, so users will need
    to log in again. That is the correct trade.
-2. **No TLS.** Port 8080 serves plain HTTP, so credentials and tokens cross the internet in
-   clear text. Put Nginx or Caddy in front with a Let's Encrypt certificate and bind 8080 to
-   loopback as well. This is the next thing I would do.
+2. **TLS is already handled** — nginx terminates HTTPS for `shopfast.live` and sends
+   `Strict-Transport-Security`, so traffic is encrypted. Port 8080 is still bound to
+   `0.0.0.0` though, which means the API can also be reached over plain HTTP on the raw IP,
+   bypassing nginx and HSTS. Binding it to `127.0.0.1` (nginx proxies from localhost) closes
+   that and costs nothing.
+
+   Related: the client-side password encryption is not a security control. The key sits in
+   the JavaScript bundle, so anyone can read it — the real protection is TLS. Treat
+   `APP_PASSWORD_ENCRYPTION_KEY` as a compatibility constant shared with the frontend, not a
+   secret, and never rotate it on its own.
 3. **`ddl-auto: update` against a production database.** Hibernate is altering your live
    schema on every boot. Introducing Flyway (see `common-lib/IMPLEMENTATION_REPORT.md`
    section 7) should be scheduled before the data matters.
