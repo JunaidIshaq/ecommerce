@@ -8,6 +8,7 @@ import com.shopfast.userservice.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +52,16 @@ public class ProfileService {
     @Transactional
     public User getOrCreate(Jwt jwt) {
         String subject = jwt.getSubject();
+
+        // A token with no `sub` identifies nobody, and must not be used as a lookup
+        // key: Spring Data turns a null argument into `keycloak_id IS NULL`, which
+        // matches every not-yet-linked legacy row rather than none. That surfaced as
+        // a 500 ("10 results were returned"), but the same query with exactly one
+        // unlinked row would have quietly handed a stranger's profile to the caller.
+        // Rejecting the token is the only safe reading.
+        if (!StringUtils.hasText(subject)) {
+            throw new InsufficientAuthenticationException("Token has no subject claim");
+        }
 
         return userRepository.findByKeycloakId(subject)
                 .map(user -> refreshFromToken(user, jwt))
