@@ -48,7 +48,9 @@ keycloak:
   # Discovery document root. The gateway fetches the realm's public JWKS from here
   # and refreshes it automatically when Keycloak rotates signing keys.
   issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8180/realms/shopfast}
-          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:}
+  # Optional internal JWKS URL, so the gateway fetches signing keys over the docker
+  # network instead of hairpinning back out through the public HTTPS endpoint.
+  jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:}
 
 jwt:
   # Legacy HS256 secret, accepted only for the duration of the migration. Clearing
