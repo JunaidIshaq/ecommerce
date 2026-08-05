@@ -4,7 +4,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build --configuration=production
+# The `--` is required: without it npm swallows the flag as its own config and
+# never forwards it to `ng build`.
+RUN npm run build -- --configuration=production
 
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
