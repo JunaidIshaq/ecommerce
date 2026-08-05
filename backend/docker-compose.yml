@@ -431,6 +431,14 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Admin REST API access: auth-service creates/updates users in Keycloak.
+      # Without these, /api/v1/auth/register fails at runtime with a 500.
+      # Must include KEYCLOAK_RELATIVE_PATH (prod serves Keycloak under /auth),
+      # otherwise every Admin REST call returns 404.
+      - KEYCLOAK_BASE_URL=${KEYCLOAK_BASE_URL:-http://keycloak:8180}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM:-shopfast}
+      - KEYCLOAK_ADMIN_CLIENT_ID=${KEYCLOAK_ADMIN_CLIENT_ID:-shopfast-services}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auth_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
