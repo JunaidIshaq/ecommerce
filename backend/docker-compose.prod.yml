@@ -31,6 +31,8 @@ services:
       - "443:8443"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:?KEYCLOAK_ISSUER_URI must be set, e.g. https://auth.example.com/realms/shopfast}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set}
       - SPRING_REDIS_HOST=redis
       - JWT_SECRET=${JWT_SECRET}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/eureka/
@@ -57,6 +59,8 @@ services:
       - shopfast-net
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:?KEYCLOAK_ISSUER_URI must be set, e.g. https://auth.example.com/realms/shopfast}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auth_db
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -92,6 +96,8 @@ services:
       - shopfast-net
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:?KEYCLOAK_ISSUER_URI must be set, e.g. https://auth.example.com/realms/shopfast}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set}
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/user_db
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -127,6 +133,8 @@ services:
       - shopfast-net
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:?KEYCLOAK_ISSUER_URI must be set, e.g. https://auth.example.com/realms/shopfast}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/product_db
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -166,6 +174,8 @@ services:
       - shopfast-net
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:?KEYCLOAK_ISSUER_URI must be set, e.g. https://auth.example.com/realms/shopfast}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set}
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/category_db
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -202,6 +212,8 @@ services:
       - shopfast-net
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:?KEYCLOAK_ISSUER_URI must be set, e.g. https://auth.example.com/realms/shopfast}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/inventory_db
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -237,6 +249,8 @@ services:
       - shopfast-net
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:?KEYCLOAK_ISSUER_URI must be set, e.g. https://auth.example.com/realms/shopfast}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/order_db
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -273,6 +287,8 @@ services:
       - shopfast-net
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:?KEYCLOAK_ISSUER_URI must be set, e.g. https://auth.example.com/realms/shopfast}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set}
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/payment_db
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -308,6 +324,8 @@ services:
       - shopfast-net
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:?KEYCLOAK_ISSUER_URI must be set, e.g. https://auth.example.com/realms/shopfast}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/cart_db
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -342,6 +360,8 @@ services:
       - shopfast-net
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:?KEYCLOAK_ISSUER_URI must be set, e.g. https://auth.example.com/realms/shopfast}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/coupon_db
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -376,6 +396,8 @@ services:
       - shopfast-net
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:?KEYCLOAK_ISSUER_URI must be set, e.g. https://auth.example.com/realms/shopfast}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/review_db
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -410,6 +432,8 @@ services:
       - shopfast-net
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:?KEYCLOAK_ISSUER_URI must be set, e.g. https://auth.example.com/realms/shopfast}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/notification_db
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -440,6 +464,8 @@ services:
       - shopfast-net
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:?KEYCLOAK_ISSUER_URI must be set, e.g. https://auth.example.com/realms/shopfast}
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set}
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/admin_db
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -468,6 +494,48 @@ services:
       retries: 3
       start_period: 60s
 
+  # Production Keycloak. Differences from the dev entry are deliberate:
+  #   - `start` (not `start-dev`): HTTP/2, strict hostname handling, no dev shortcuts.
+  #   - No `--import-realm`: in production the realm is imported once, by hand, during
+  #     the cutover. Re-importing on every boot would silently revert any emergency
+  #     change an operator made in the admin console during an incident.
+  #   - KC_HOSTNAME is a real public URL. It ends up in the `iss` claim of every token,
+  #     so it must match what the services validate against or every request 401s.
+  #   - No admin port published. The admin console is reachable only from inside the
+  #     network (or through an authenticated reverse-proxy route).
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: keycloak
+    restart: unless-stopped
+    command: [ "start", "--optimized" ]
+    networks:
+      - shopfast-net
+    environment:
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/keycloak_db
+      - KC_DB_USERNAME=${POSTGRES_USER}
+      - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - KC_HOSTNAME=${KEYCLOAK_PUBLIC_URL:?KEYCLOAK_PUBLIC_URL must be set, e.g. https://auth.example.com}
+      - KC_HOSTNAME_STRICT=true
+      - KC_HTTP_ENABLED=true
+      - KC_PROXY_HEADERS=xforwarded
+      - KC_HEALTH_ENABLED=true
+      - KC_METRICS_ENABLED=true
+      - KC_CACHE=local
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:?KEYCLOAK_ADMIN must be set}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:?KEYCLOAK_ADMIN_PASSWORD must be set}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # The Keycloak image is distroless: no curl, no wget. bash's /dev/tcp is the
+    # only dependency-free way to probe the management port.
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q 'UP'" ]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+
   postgres:
     image: postgres:15
     container_name: postgres
@@ -477,7 +545,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_MULTIPLE_DATABASES: auth_db,user_db,product_db,category_db,inventory_db,order_db,payment_db,cart_db,coupon_db,review_db,notification_db,admin_db
+      POSTGRES_MULTIPLE_DATABASES: auth_db,user_db,product_db,category_db,inventory_db,order_db,payment_db,cart_db,coupon_db,review_db,notification_db,admin_db,keycloak_db
     ports:
       - "5432:5432"
     volumes:

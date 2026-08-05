@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -35,7 +36,8 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
         JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtUtils);
 
         http
@@ -46,9 +48,18 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/user").permitAll()      // registration allowed
                         .requestMatchers("/api/v1/user/**").permitAll()      // registration allowed
                         .requestMatchers("/api/v1/user/internal/email/**").permitAll()      // registration allowed
-                        .requestMatchers("/actuator/**","/v3/api-docs/**","/swagger-ui/**").permitAll()
+                        // Only the safe actuator endpoints; /actuator/** would have
+                        // exposed env and heapdump, i.e. every secret this service holds.
+                        .requestMatchers("/actuator/health/**","/actuator/info","/actuator/prometheus",
+                                "/v3/api-docs/**","/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                // Migration window: the legacy filter below authenticates old HS256
+                // tokens, and anything it leaves unauthenticated falls through to the
+                // Keycloak resource server for RS256 validation. Once all clients are
+                // on Keycloak, delete the filter, JwtUtils and this comment.
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

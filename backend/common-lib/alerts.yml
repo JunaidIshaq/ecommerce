@@ -8,3 +8,61 @@ groups:
           severity: warning
         annotations:
           description: "High error rate detected on Inventory Service"
+
+  # Keycloak is a single point of failure for authentication: if it is down or
+  # slow, every authenticated request across the platform fails. These rules exist
+  # so that shows up as "Keycloak is down" rather than as a confusing wave of 401s
+  # from thirteen unrelated services.
+  - name: keycloak_alerts
+    rules:
+      - alert: KeycloakDown
+        expr: up{job="keycloak"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Keycloak is unreachable"
+          description: >-
+            Prometheus cannot scrape Keycloak. New logins and token refreshes are
+            failing. Already-issued access tokens keep working until they expire
+            (15 minutes), so there is a short grace period before user impact is total.
+
+      - alert: KeycloakLoginFailureSpike
+        expr: rate(keycloak_failed_login_attempts_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Elevated failed login rate in Keycloak"
+          description: >-
+            Sustained failed logins - either a credential-stuffing attempt or a
+            broken client. Check whether the failures concentrate on a few accounts
+            (attack) or are spread across many (client bug).
+
+      - alert: KeycloakSlowTokenEndpoint
+        expr: >-
+          histogram_quantile(0.95,
+            rate(http_server_requests_seconds_bucket{job="keycloak"}[5m])) > 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Keycloak p95 latency above 1s"
+          description: >-
+            Token issuance is slow, which stalls every service-to-service call that
+            needs a client-credentials token. Usually the Keycloak database.
+
+      # The gateway logs a warning for every legacy HS256 token it accepts. This
+      # alert is the inverse of the usual kind: it is meant to be *silent* at the
+      # end of the migration, at which point the legacy path can be deleted.
+      - alert: LegacyTokensStillInUse
+        expr: >-
+          sum(rate(logback_events_total{level="warn", application="api-gateway"}[1h])) > 0
+        for: 1h
+        labels:
+          severity: info
+        annotations:
+          summary: "Legacy HS256 tokens are still being presented to the gateway"
+          description: >-
+            The JWT_SECRET kill switch cannot be removed until this stays at zero
+            for longer than the longest refresh-token lifetime.

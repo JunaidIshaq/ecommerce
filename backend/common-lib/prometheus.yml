@@ -36,3 +36,12 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: [ 'review-service:8091' ]
+
+  # Keycloak is now on the critical path for every authenticated request, so it
+  # needs to be scraped like any other dependency. Metrics are served on the
+  # management port (9000), not the HTTP port, and the path is /metrics rather
+  # than the Spring Boot /actuator/prometheus.
+  - job_name: 'keycloak'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: [ 'keycloak:9000' ]

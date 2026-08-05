@@ -153,3 +153,26 @@ resilience4j:
         baseConfig: default
       inventory-service:
         baseConfig: default
+
+---
+# --- Keycloak resource server ------------------------------------------------
+# Appended as a second YAML document (note the ---) on purpose: the files already
+# have a top-level `spring:` key and a duplicate key in one document makes Spring
+# Boot refuse to start. Separate documents are merged instead.
+# Tokens are verified offline against the realm's public JWKS, fetched from the
+# issuer's discovery document and refreshed automatically on key rotation.
+# Nothing here is a secret: the service only ever needs the PUBLIC key.
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8180/realms/shopfast}
+
+shopfast:
+  security:
+    # Service-to-service credentials. Absent in local runs, in which case the
+    # Feign interceptor simply relays the caller's token instead.
+    service-client:
+      client-id: shopfast-services
+      client-secret: ${SHOPFAST_SERVICES_CLIENT_SECRET:}

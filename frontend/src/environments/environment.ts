@@ -8,5 +8,18 @@ export const environment = {
   cartPort: 8088,
   checkoutPort: 8084,
   baseDomain: null,
-  passwordEncryptionKey: 'MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI='
+
+  // Keycloak. `clientId` is public and carries no secret - a browser app cannot
+  // keep one. PKCE is what replaces the client secret; see keycloak/FRONTEND_MIGRATION.md.
+  keycloak: {
+    authority: 'http://localhost:8180/realms/shopfast',
+    clientId: 'shopfast-web',
+    // Must be listed verbatim in the client's redirectUris, or Keycloak refuses
+    // the authorization request before the user ever sees a login page.
+    redirectUrl: 'http://localhost:4200/callback',
+    postLogoutRedirectUri: 'http://localhost:4200',
+    // openid is mandatory. profile/email populate the ID token claims the header
+    // renders; offline_access is what lets the refresh token drive silent renew.
+    scope: 'openid profile email offline_access',
+  },
 };

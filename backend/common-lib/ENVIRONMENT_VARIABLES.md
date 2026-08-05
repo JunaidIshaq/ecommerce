@@ -23,7 +23,7 @@ that is applied globally.
 | Variable | Consequence if unset |
 |---|---|
 | `DB_PASSWORD` | Datasource authentication fails at startup |
-| `APP_PASSWORD_ENCRYPTION_KEY` (auth-service) | Startup fails — the default was deliberately removed |
+| `APP_PASSWORD_ENCRYPTION_KEY` (auth-service) | Startup fails — the default was deliberately removed. **Obsolete after the Keycloak migration**; see Section 2b |
 
 Everything else has a working default aimed at Docker Compose networking.
 
@@ -34,13 +34,52 @@ Everything else has a working default aimed at Docker Compose networking.
 | Variable | Default | Notes |
 |---|---|---|
 | `DB_PASSWORD` | *(none — required)* | DB username is hard-coded to `postgres` |
-| `JWT_SECRET` | *(none in prod; dev has a placeholder)* | Must be **identical** across all services and the gateway, or tokens issued by auth-service will be rejected everywhere else |
+| `JWT_SECRET` | *(none in prod; dev has a placeholder)* | **Legacy.** Only the gateway still reads it, to accept old HS256 tokens during the migration window. Unsetting it is the kill switch that rejects all legacy tokens |
 | `REDIS_HOST` | `redis` (prod) / `localhost` (dev) | |
 | `REDIS_PORT` | `6379` | |
 | `KAFKA_BOOTSTRAP` | `kafka:9092` | |
 | `ELASTIC_URI` | `http://elasticsearch:9200` | |
 | `EUREKA_URL` | `http://eureka-server:8761/eureka/eureka/` | See [Section 6](#6-issues-found-while-compiling-this-list) |
 | `JPA_DDL_AUTO` | `update` | **Do not set to `validate`** — see [Section 5](#5-jpa_ddl_auto-warning) |
+
+---
+
+## 2b. Keycloak variables
+
+Authentication moved from a shared HS256 secret to Keycloak issuing RS256 tokens.
+The practical difference for configuration: services no longer hold a signing key at
+all. They hold an **issuer URL** and fetch the public key from it. A leaked value
+here lets an attacker verify tokens, not forge them.
+
+| Variable | Read by | Default | Notes |
+|---|---|---|---|
+| `KEYCLOAK_ISSUER_URI` | all 14 services | `http://keycloak:8180/realms/shopfast` | Must **exactly** match the `iss` claim in issued tokens, character for character. A trailing slash mismatch is a total auth outage |
+| `KEYCLOAK_PUBLIC_URL` | keycloak container (prod) | *(none — required in prod)* | Sets `KC_HOSTNAME`. This is what ends up in `iss` |
+| `SHOPFAST_SERVICES_CLIENT_SECRET` | all services + auth-service | *(none)* | Secret for the `shopfast-services` confidential client. Used for service-to-service tokens and Admin REST calls |
+| `SHOPFAST_ADMIN_CLIENT_SECRET` | realm import only | *(none)* | Secret for the `shopfast-admin` console client |
+| `KEYCLOAK_ADMIN` / `KEYCLOAK_ADMIN_PASSWORD` | keycloak container | *(none)* | Bootstrap root admin. Remove both after creating a named admin user |
+
+### The mistake that will cost you an afternoon
+
+`KEYCLOAK_ISSUER_URI` must be identical for the token issuer and every validator.
+In production Keycloak sits behind TLS at `https://auth.example.com`, so tokens
+carry `iss: https://auth.example.com/realms/shopfast`. If a service is configured
+with the internal `http://keycloak:8180/...` instead, it will fetch JWKS
+successfully, verify the signature successfully, and then reject the token on the
+issuer check. The symptom is a blanket 401 with a valid-looking token — always
+compare the `iss` claim against the configured value first.
+
+This means containers must be able to resolve the public hostname internally.
+Either split-horizon DNS or a `extra_hosts` entry pointing at the reverse proxy.
+
+### Variables that are now obsolete
+
+| Variable | Status |
+|---|---|
+| `APP_PASSWORD_ENCRYPTION_KEY` | Dead. Passwords are no longer AES-wrapped by the client; Keycloak receives them over TLS. Safe to delete once no service references `PasswordEncryptionUtil` |
+| `JWT_SECRET` | Legacy-only. Gateway-only, migration window only. Deleting it activates the kill switch |
+
+---
 
 ## 3. Per-service variables
 

@@ -1,5 +1,6 @@
 package com.shopfast.inventoryservice.config;
 
+import org.springframework.security.config.Customizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,6 +31,9 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().permitAll()
                 )
+                // Validate Keycloak RS256 tokens against the realm JWKS so that a
+                // presented identity is trustworthy and usable by method security.
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
 

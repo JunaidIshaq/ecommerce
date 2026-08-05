@@ -10,6 +10,8 @@ import {LoginComponent} from './pages/login/login.component';
 import {SignupComponent} from './pages/signup/signup.component';
 import {CustomerOrderDetailComponent} from './pages/order-detail/order-detail.component';
 import {OrderHistoryComponent} from './pages/order-history/order-history.component';
+import {CallbackComponent} from './pages/callback/callback.component';
+import {SilentRenewComponent} from './pages/silent-renew/silent-renew.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -18,6 +20,8 @@ const routes: Routes = [
   { path: 'cart', component: CartComponent },
   { path: 'checkout', component: CheckoutComponent },
   { path: 'login', component: LoginComponent },
+  { path: 'callback', component: CallbackComponent },
+  { path: 'silent-renew', component: SilentRenewComponent },
   { path: 'signup', component: SignupComponent },
   { path: 'profile', component: ProfileComponent },
   { path: 'orders', component: OrderHistoryComponent },

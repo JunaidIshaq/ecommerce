@@ -9,6 +9,8 @@ import {ProfileComponent} from './pages/profile/profile.component';
 import {ProductDetailComponent} from './pages/product-detail/product-detail.component';
 import {CustomerOrderDetailComponent} from './pages/order-detail/order-detail.component';
 import {OrderHistoryComponent} from './pages/order-history/order-history.component';
+import {CallbackComponent} from './pages/callback/callback.component';
+import {SilentRenewComponent} from './pages/silent-renew/silent-renew.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -20,7 +22,11 @@ export const routes: Routes = [
   },
   { path: 'cart', component: CartComponent },
   { path: 'checkout', component: CheckoutComponent },
-  { path: 'login', component: LoginComponent },
+  { path: 'login', component: LoginComponent, data: { renderMode: 'client' } },
+  // OIDC redirect targets. Both are browser-only: they touch sessionStorage and
+  // the URL fragment, neither of which exists during server rendering.
+  { path: 'callback', component: CallbackComponent, data: { renderMode: 'client' } },
+  { path: 'silent-renew', component: SilentRenewComponent, data: { renderMode: 'client' } },
   { path: 'signup', component: SignupComponent },
   { path: 'profile', component: ProfileComponent },
   { path: 'orders', component: OrderHistoryComponent },

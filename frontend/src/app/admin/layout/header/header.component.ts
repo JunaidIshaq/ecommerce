@@ -34,8 +34,9 @@ export class HeaderComponent {
   }
 
   logout() {
+    // No local navigation: signoutRedirect sends the browser to Keycloak's
+    // end-session endpoint, which returns it to post_logout_redirect_uri.
     this.auth.logout();
-    this.router.navigate(['/login']);
   }
 
   @HostListener('document:click', ['$event.target'])

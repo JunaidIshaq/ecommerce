@@ -1,5 +1,6 @@
 package com.shopfast.notificationservice.config;
 
+import org.springframework.security.config.Customizer;
 import com.shopfast.notificationservice.security.JwtAuthenticationFilter;
 import com.shopfast.notificationservice.security.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -45,11 +46,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                // Validate Keycloak tokens here too. "Trust the gateway" would mean any
+                // workload that can reach this port is implicitly authenticated.
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
-                // If you want to parse JWT here as resource server; otherwise trust gateway:
-                // .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-
         return http.build();
     }
 

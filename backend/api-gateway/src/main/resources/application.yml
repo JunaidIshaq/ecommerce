@@ -44,8 +44,16 @@ server:
 
   forward-headers-strategy: framework
 
+keycloak:
+  # Discovery document root. The gateway fetches the realm's public JWKS from here
+  # and refreshes it automatically when Keycloak rotates signing keys.
+  issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8180/realms/shopfast}
+
 jwt:
-  secret: ${JWT_SECRET}
+  # Legacy HS256 secret, accepted only for the duration of the migration. Clearing
+  # this value (or removing JWT_SECRET from the environment) immediately stops the
+  # gateway accepting old auth-service tokens - that is the kill switch for phase 4.
+  secret: ${JWT_SECRET:}
   access-expiration: 3600          # seconds (1h)
   refresh-expiration: 86400        # seconds (24h)
 

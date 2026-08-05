@@ -62,9 +62,11 @@ ShopFast is built on a **microservices architecture** with the following key cha
 ### Security & Authentication
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| JWT (JJWT) | 0.11.5 | Authentication & Authorization |
-| Spring Security | - | Security Framework |
-| AES-256-GCM | - | Password Encryption |
+end | Keycloak | 26.0 | Identity provider (OIDC) — issues all tokens |
+| Spring Security OAuth2 Resource Server | 6.x | Token validation in every service |
+| RS256 / JWKS | - | Asymmetric token signing; services hold only the public key |
+| PKCE (RFC 7636) | - | Authorization Code protection for browser and mobile clients |
+| BCrypt | - | Password hashing (inside Keycloak) |
 
 ### Resilience & Observability
 | Technology | Version | Purpose |
@@ -124,12 +126,16 @@ ShopFast is built on a **microservices architecture** with the following key cha
 #### 3. Auth Service (`auth-service`)
 - **Port:** 8087
 - **Database:** `auth_db`
-- **Purpose:** User authentication and JWT token management
+- **Purpose:** Thin facade over the Keycloak Admin API. It no longer issues tokens
+  or verifies passwords — Keycloak does both. What remains is the one job Keycloak
+  cannot do alone: creating a ShopFast account, which is a Keycloak identity *and*
+  a profile row in `user_db`, atomically enough that neither is left orphaned.
 - **Key Features:**
-  - Login/Logout with JWT
-  - Password encryption (AES-256-GCM)
-  - Token refresh mechanism
-  - Feign client to user-service for validation
+  - Registration: creates the Keycloak user, then the profile; disables the
+    Keycloak user if the profile write fails
+  - Password reset and global logout, delegated to Keycloak
+  - Enumeration-safe responses (identical whether or not an email exists)
+  - Feign client to user-service for profile creation
   - Kafka integration for auth events
 
 #### 4. User Service (`user-service`)
@@ -675,31 +681,44 @@ sequenceDiagram
 
 ### Authentication Flow
 
+Authentication is OpenID Connect Authorization Code with PKCE. The password is
+entered on Keycloak's own page and never passes through ShopFast code.
+
 ```mermaid
 sequenceDiagram
-    participant C as Client
+    participant C as Client (browser/mobile)
+    participant KC as Keycloak
     participant GW as API Gateway
-    participant AUTH as Auth Service
-    participant USER as User Service
-    participant K as Kafka
+    participant SVC as Domain Service
 
-    C->>GW: POST /auth/login
-    GW->>AUTH: Forward Request
+    Note over C,KC: Login - ShopFast never sees the password
+    C->>KC: Redirect /auth?client_id=shopfast-web&code_challenge=S256(v)
+    KC->>KC: Authenticate user (+ MFA, brute-force checks)
+    KC-->>C: Redirect back with authorization code
+    C->>KC: POST /token (code + code_verifier)
+    KC-->>C: Access token (RS256) + refresh token
 
-    AUTH->>USER: Feign: Validate User
-    USER-->>AUTH: User Details
-
-    AUTH->>AUTH: Verify Password (AES-256-GCM)
-    AUTH->>AUTH: Generate JWT Tokens
-    AUTH->>K: Publish Auth Event
-    AUTH-->>GW: JWT Tokens
-    GW-->>C: Access + Refresh Tokens
-
-    Note over C,GW: Subsequent Requests
-    C->>GW: Request with Bearer Token
-    GW->>GW: Validate JWT
-    GW->>AUTH: Forward Request
+    Note over C,SVC: Authenticated request
+    C->>GW: GET /api/v1/orders, Bearer <access token>
+    GW->>KC: Fetch JWKS (cached, once per key rotation)
+    GW->>GW: Verify RS256 signature, issuer, audience, expiry
+    GW->>SVC: Forward request with the same token
+    SVC->>SVC: Verify independently, map realm roles to ROLE_*
+    SVC-->>C: 200
 ```
+
+Two properties worth calling out:
+
+- **The gateway is not a trust boundary.** Every downstream service re-validates the
+  token itself. A request that reaches a service by any other route — a
+  misconfigured port, a compromised sibling — is still rejected.
+- **No service can mint a token.** They hold Keycloak's public key, not a signing
+  key. This is the concrete gain over the previous shared-HS256-secret design, where
+  compromising any one of thirteen services meant being able to forge an admin token.
+
+During the migration the gateway also accepts old HS256 tokens, routing on the JWT
+`alg` header, so existing sessions survive the cutover. That path is removed once
+legacy tokens have expired.
 
 ### Data Flow Architecture
 
@@ -777,20 +796,37 @@ Each microservice owns its own database, ensuring loose coupling and independent
 
 ### Authentication & Authorization
 
-- **JWT-based authentication** with access and refresh tokens
-- **Password encryption** using AES-256-GCM
-- **Stateless** authentication suitable for microservices
-- **API Gateway** validates JWT before routing requests
+Identity is delegated to **Keycloak**. ShopFast code neither stores passwords nor
+signs tokens.
+
+- **OpenID Connect** Authorization Code + PKCE for browser and mobile clients
+- **RS256 tokens** — services verify with Keycloak's public key, fetched via JWKS
+  and cached; no service holds a signing key
+- **Defence in depth** — the gateway *and* every downstream service validate the
+  token independently, including the `aud` claim
+- **Client credentials** for service-to-service calls, so an internal call carries a
+  service identity rather than impersonating a user
+- **Stateless** at the service layer; session state lives in Keycloak
 
 ### Security Features
 
 | Feature | Implementation |
 |---------|----------------|
-| Authentication | JWT (JJWT 0.11.5) |
-| Password Hashing | AES-256-GCM |
-| Token Expiry | 1 hour (access), 24 hours (refresh) |
+| Authentication | Keycloak 26 (OIDC), Authorization Code + PKCE |
+| Token Signing | RS256, asymmetric, JWKS with automatic key rotation |
+| Password Hashing | BCrypt, inside Keycloak (never leaves it) |
+| Token Expiry | 15 min (access), 30 min idle / 10 h max SSO session |
+| Brute-force Protection | Keycloak lockout after repeated failures |
+| Password Policy | Length, complexity and history enforced by the realm |
+| MFA / Social Login | Available per-realm; no application code required |
+| Audit Trail | Keycloak login and admin event logs |
 | Rate Limiting | Redis-based (10 req/s, burst 20) |
-| Service Communication | Internal network (Docker) |
+| Service Communication | Internal network + client-credentials tokens |
+
+**Migration note.** The gateway temporarily also accepts legacy HS256 tokens so that
+existing sessions survive the cutover. Unsetting `JWT_SECRET` is the kill switch
+that disables this path. See `DEPLOY_RUNBOOK.md` and
+`keycloak/FRONTEND_MIGRATION.md`.
 
 ---
 

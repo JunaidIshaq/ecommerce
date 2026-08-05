@@ -1,5 +1,6 @@
 package com.shopfast.orderservice.config;
 
+import org.springframework.security.config.Customizer;
 import com.shopfast.orderservice.security.JwtAuthenticationFilter;
 import com.shopfast.orderservice.security.JwtUtils;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +42,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/order/checkout/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                // Migration window: the legacy HS256 filter added below authenticates
+                // old tokens; requests it leaves anonymous fall through to here and
+                // are validated as Keycloak RS256 tokens against the realm JWKS.
+                // Once all clients use Keycloak, delete the filter and JwtUtils.
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);

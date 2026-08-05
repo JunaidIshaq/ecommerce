@@ -127,6 +127,154 @@ sudo docker compose up -d
 
 ---
 
+# Keycloak cutover
+
+Do this as a separate deployment from the hardening above. It changes how every
+request in the system is authenticated, so it deserves its own window and its own
+rollback decision.
+
+The design point that makes this survivable: **the gateway accepts both old HS256
+tokens and new Keycloak RS256 tokens simultaneously.** Logged-in users are not
+kicked out at cutover, and the frontend can migrate on its own schedule.
+
+## Before you start
+
+```bash
+# 1. Back up. keycloak_db does not exist yet, but user_db is the source for
+#    migration and you want a restore point if the migration script misbehaves.
+sudo docker compose exec -T postgres pg_dump -U postgres -d user_db -Fc > user_db-pre-keycloak.dump
+
+# 2. Add the new secrets to .env.
+{
+  echo "SHOPFAST_SERVICES_CLIENT_SECRET=$(openssl rand -hex 32)"
+  echo "SHOPFAST_ADMIN_CLIENT_SECRET=$(openssl rand -hex 32)"
+  echo "KEYCLOAK_ADMIN=admin"
+  echo "KEYCLOAK_ADMIN_PASSWORD=$(openssl rand -base64 24)"
+  echo "KEYCLOAK_ISSUER_URI=http://keycloak:8180/realms/shopfast"
+} >> .env
+chmod 600 .env
+
+# 3. Keep JWT_SECRET. Removing it now invalidates every active session.
+grep -q '^JWT_SECRET=' .env || echo "JWT_SECRET is missing - old tokens will be rejected"
+
+sudo docker compose config -q && echo "config OK"
+```
+
+## Start Keycloak
+
+```bash
+sudo docker compose up -d postgres
+sudo docker compose up -d keycloak
+
+# First boot creates the schema and imports the realm. Expect 60-90 seconds.
+sudo docker compose logs -f keycloak | grep -m1 'Running the server'
+```
+
+Confirm the realm imported and is serving keys. If this returns anything other than
+a JSON document with an `issuer` field, stop — every service will fail to start.
+
+```bash
+curl -sf http://localhost:8180/realms/shopfast/.well-known/openid-configuration | head -c 200
+curl -sf http://localhost:8180/realms/shopfast/protocol/openid-connect/certs | head -c 200
+```
+
+## Deploy the services
+
+```bash
+sudo docker compose build
+sudo docker compose up -d
+sudo docker compose ps          # all healthy
+```
+
+A service that cannot reach the issuer URL **fails to start**, rather than starting
+and silently accepting unverified tokens. If something is stuck restarting, check
+its logs for `Unable to resolve the Configuration with the provided Issuer`.
+
+## Verify both token types work
+
+```bash
+source .env
+
+# New path: get a real Keycloak token via the service client.
+TOKEN=$(curl -s -X POST \
+  http://localhost:8180/realms/shopfast/protocol/openid-connect/token \
+  -d grant_type=client_credentials \
+  -d client_id=shopfast-services \
+  -d client_secret="$SHOPFAST_SERVICES_CLIENT_SECRET" | jq -r .access_token)
+
+[ "$TOKEN" != "null" ] && echo "token OK"
+curl -s -o /dev/null -w '%{http_code}\n' \
+  -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/products   # expect 200
+
+# No token must still be rejected.
+curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8080/api/v1/orders  # expect 401
+
+# Old path: an existing frontend session should still work. Test from a browser
+# that was logged in before the deploy - it should not be redirected to login.
+```
+
+## Migrate users
+
+Run against a copy first if you can. BCrypt hashes cannot be imported into
+Keycloak, so migrated users get an `UPDATE_PASSWORD` required action and must set a
+new password at first login. There is no way around this short of a custom SPI.
+
+```bash
+cd keycloak
+
+python3 migrate-users.py --dry-run          # reports counts, writes nothing
+python3 migrate-users.py                    # writes migration-journal-<ts>.json
+```
+
+Keep the journal file. It is the only rollback path:
+
+```bash
+python3 migrate-users.py --rollback migration-journal-<ts>.json
+```
+
+Rollback deletes **only** the users that run created — accounts registered directly
+in Keycloak afterwards are left alone.
+
+## Set up backups before you walk away
+
+`keycloak_db` now holds every credential in the system. Nothing else does.
+
+```bash
+cd backend
+./keycloak/backup-keycloak-db.sh
+(crontab -l 2>/dev/null; echo "17 3 * * * cd $(pwd) && ./keycloak/backup-keycloak-db.sh >> /var/log/keycloak-backup.log 2>&1") | crontab -
+```
+
+## Rolling back the cutover
+
+Within the first hours, before users have reset passwords:
+
+```bash
+git checkout HEAD~1 -- docker-compose.yml
+sudo docker compose up -d --build
+```
+
+Old tokens still validate because `JWT_SECRET` is unchanged, so sessions survive the
+rollback too. Users who already reset their password through Keycloak will not be
+able to log in against the old auth-service — this is why the migration step is the
+point of no return, not the deployment step.
+
+## Retiring the legacy path
+
+Do not do this at cutover. Watch the `LegacyTokensStillInUse` alert; when it has
+been silent for longer than the longest refresh-token lifetime (30 days):
+
+```bash
+sed -i '/^JWT_SECRET=/d' .env
+sudo docker compose up -d api-gateway
+```
+
+The gateway then rejects every HS256 token. Verify a legacy token now returns 401
+before considering it done, then proceed to the code cleanup in
+`common-lib/plans/keycloak-migration-plan.md`.
+
+---
+
 ## Still outstanding after this
 
 Hardening the compose file closes the exposure, but two things remain:

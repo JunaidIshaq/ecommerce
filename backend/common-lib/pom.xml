@@ -20,12 +20,60 @@
     <description>Shared library for all microservices</description>
 
     <properties>
-        <java.version>16</java.version>
+        <!-- 17, not 16: the shared security classes below compile against Spring
+             Security 6 / Spring Boot 3, which require a Java 17 baseline. -->
+        <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
 
     <dependencies>
+
+        <!-- Shared OIDC resource-server support.
+             Marked <optional> so it is NOT transitively forced onto modules that
+             have no HTTP layer (e.g. batch/consumer-only services); modules that
+             want the shared security config declare the starter themselves. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- RestClient, used by ServiceTokenProvider to call the Keycloak token endpoint. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Feign request interceptor for propagating the service token.
+             Optional: only services that actually use Feign pull this in. -->
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <optional>true</optional>
+        </dependency>
 
         <!-- Lombok -->
         <dependency>
@@ -49,6 +97,14 @@
             <version>3.0.2</version>
         </dependency>
 
+        <!-- The security classes above are shared by every service, so a defect here
+             is a defect everywhere. They need real test coverage. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -64,6 +120,7 @@
                     <release>${java.version}</release>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 

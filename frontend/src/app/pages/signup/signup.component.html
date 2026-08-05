@@ -9,15 +9,26 @@
       </div>
 
       <!-- SIGNUP FORM -->
-      <form (ngSubmit)="signOut()" #signupForm="ngForm" class="form">
+      <form (ngSubmit)="signUp()" #signupForm="ngForm" class="form">
         <div class="form-group">
-          <label>Full Name</label>
+          <label>First Name</label>
           <input
             type="text"
-            name="name"
-            ngModel
+            name="firstName"
+            [(ngModel)]="credentials.firstName"
             required
-            placeholder="Enter your full name"
+            placeholder="Enter your first name"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Last Name</label>
+          <input
+            type="text"
+            name="lastName"
+            [(ngModel)]="credentials.lastName"
+            required
+            placeholder="Enter your last name"
           />
         </div>
 
@@ -26,7 +37,7 @@
           <input
             type="email"
             name="email"
-            ngModel
+            [(ngModel)]="credentials.email"
             required
             placeholder="Enter your email"
           />
@@ -37,7 +48,7 @@
           <input
             type="password"
             name="password"
-            ngModel
+            [(ngModel)]="credentials.password"
             required
             placeholder="Create a password"
           />
@@ -48,18 +59,20 @@
           <input
             type="password"
             name="confirmPassword"
-            ngModel
+            [(ngModel)]="confirmPassword"
             required
             placeholder="Re-enter your password"
           />
         </div>
 
+        <p class="error" *ngIf="error">{{ error }}</p>
+
         <button
           type="submit"
           class="btn primary"
-          [disabled]="!signupForm.valid"
+          [disabled]="!signupForm.valid || loading"
         >
-          Create Account
+          {{ loading ? 'Creating account…' : 'Create Account' }}
         </button>
 
         <div class="divider">

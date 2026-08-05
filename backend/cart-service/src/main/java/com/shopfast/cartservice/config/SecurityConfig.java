@@ -45,11 +45,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                // Validate Keycloak tokens here too. "Trust the gateway" would mean any
+                // workload that can reach this port is implicitly authenticated.
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
-                // If you want to parse JWT here as resource server; otherwise trust gateway:
-                // .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-
         return http.build();
     }
 

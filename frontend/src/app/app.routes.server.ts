@@ -20,6 +20,20 @@ export const serverRoutes: ServerRoute[] = [
     path: 'admin/**',
     renderMode: RenderMode.Client
   },
+  // OIDC endpoints must never be server-rendered: the code exchange reads the
+  // query string and sessionStorage, and silent renew runs inside an iframe.
+  {
+    path: 'login',
+    renderMode: RenderMode.Client
+  },
+  {
+    path: 'callback',
+    renderMode: RenderMode.Client
+  },
+  {
+    path: 'silent-renew',
+    renderMode: RenderMode.Client
+  },
   {
     path: '**',
     renderMode: RenderMode.Server

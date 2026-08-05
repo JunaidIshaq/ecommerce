@@ -49,6 +49,46 @@ services:
     networks:
       - product-net
 
+  # Keycloak: the OIDC identity provider. Dev mode here (plain HTTP) because it only
+  # ever talks over the internal product-net; docker-compose.prod.yml runs `start`
+  # with a real hostname behind TLS. The realm is imported from a version-controlled
+  # JSON on every boot so realm config is never "clicked into" the admin console.
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: keycloak
+    command: [ "start-dev", "--import-realm", "--http-port=8180" ]
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN:?KEYCLOAK_ADMIN must be set in .env}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:?KEYCLOAK_ADMIN_PASSWORD must be set in .env}
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/keycloak_db
+      - KC_DB_USERNAME=postgres
+      - KC_DB_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+      - KC_HEALTH_ENABLED=true
+      - KC_METRICS_ENABLED=true
+      - KC_HOSTNAME_STRICT=false
+      # Client secrets are substituted into realm-export.json at import time so no
+      # secret is ever committed to the repo.
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
+      - SHOPFAST_ADMIN_CLIENT_SECRET=${SHOPFAST_ADMIN_CLIENT_SECRET:?SHOPFAST_ADMIN_CLIENT_SECRET must be set in .env}
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    ports:
+      - "127.0.0.1:8180:8180"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # The Keycloak image is distroless - no curl, no wget. Bash's /dev/tcp is the
+      # only HTTP client available, hitting the management port health endpoint.
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000; echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep -q 'UP' <&3" ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 90s
+    networks:
+      - product-net
+
   api-gateway:
     build:
       context: .
@@ -56,12 +96,16 @@ services:
     container_name: api-gateway
     environment:
       - SPRING_REDIS_HOST=redis
+      # Legacy HS256 secret. Still needed during the dual-token migration window so
+      # tokens minted by the old auth-service keep validating. Remove after phase 4.
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/eureka/
     ports:
       - "8080:8080"
     depends_on:
       - eureka-server
+      - keycloak
       - auth-service
       - user-service
       - product-service

@@ -1,0 +1,2 @@
+com.shopfast.common.security.ResourceServerAutoConfiguration
+com.shopfast.common.security.ServiceTokenAutoConfiguration

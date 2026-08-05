@@ -1,42 +1,31 @@
-import {Component} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {Router, RouterLink} from '@angular/router';
-import {CommonModule} from '@angular/common';
-import {AuthService} from '../../services/auth.service';
-import {ToastService} from '../../services/toast.service';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { OidcService } from '../../services/oidc.service';
 
+/**
+ * /login no longer collects credentials. The password is typed into a page
+ * served by Keycloak on a different origin, so this application's JavaScript can
+ * never see it. This route exists only to kick off the redirect for links that
+ * still point at it.
+ */
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.css',
-  standalone: true, // 👈 this line is critical
-  imports: [CommonModule, FormsModule,  RouterLink],
+  standalone: true,
+  imports: [CommonModule],
+  template: `<p style="padding:2rem;text-align:center">Redirecting to sign in…</p>`
 })
-export class LoginComponent {
-  credentials = { email: '', password: '' };
+export class LoginComponent implements OnInit {
+  constructor(
+    private auth: AuthService,
+    private oidc: OidcService,
+    private route: ActivatedRoute
+  ) {}
 
-  error = '';
-  loading = false;
-
-  constructor(private authService: AuthService, private router: Router, private toast: ToastService) {}
-
-  login() {
-    if (!this.credentials.email || !this.credentials.password) return;
-
-    this.loading = true;
-    this.error = '';
-
-
-    this.authService.login(this.credentials).subscribe({
-      next: res => {
-        this.router.navigate(['/']);
-        this.toast.success('Login successful');
-      },
-      error: (err) => {
-        this.error = err?.error?.message || 'Invalid email or password';
-        this.loading = false;
-      }
-    });
+  ngOnInit(): void {
+    if (!this.oidc.isBrowser()) return;
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/';
+    this.auth.login(returnUrl);
   }
-
 }
