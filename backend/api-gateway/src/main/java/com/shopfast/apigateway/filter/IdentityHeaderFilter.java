@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,9 +16,12 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 /**
@@ -57,13 +61,17 @@ public class IdentityHeaderFilter implements GlobalFilter, Ordered {
      * list is deliberately generous: anything a downstream service might trust
      * must be scrubbed here, or scrubbing the rest achieves nothing.
      */
-    private static final List<String> IDENTITY_HEADERS = List.of(
-            "userId",
-            "user_id",
-            "X-User-Id",
-            "X-User-Email",
-            "X-User-Roles",
-            "X-User-Name");
+    private static final Set<String> IDENTITY_HEADERS = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+
+    static {
+        IDENTITY_HEADERS.addAll(List.of(
+                "userId",
+                "user_id",
+                "X-User-Id",
+                "X-User-Email",
+                "X-User-Roles",
+                "X-User-Name"));
+    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -74,8 +82,9 @@ public class IdentityHeaderFilter implements GlobalFilter, Ordered {
                 .cast(JwtAuthenticationToken.class)
                 .map(token -> withIdentity(exchange, token))
                 // No token: strip only. An anonymous request must not be able to
-                // smuggle identity headers past the gateway either.
-                .defaultIfEmpty(withoutIdentity(exchange))
+                // smuggle identity headers past the gateway either. Deferred so the
+                // anonymous branch is not also built for authenticated requests.
+                .switchIfEmpty(Mono.fromSupplier(() -> withoutIdentity(exchange)))
                 .flatMap(chain::filter);
     }
 
@@ -91,41 +100,65 @@ public class IdentityHeaderFilter implements GlobalFilter, Ordered {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
-        ServerHttpRequest request = exchange.getRequest().mutate()
-                .headers(headers -> {
-                    IDENTITY_HEADERS.forEach(headers::remove);
+        HttpHeaders headers = copyWithoutIdentityHeaders(exchange.getRequest().getHeaders());
 
-                    if (StringUtils.hasText(userId)) {
-                        // Both spellings are populated because both are in use
-                        // downstream; see IDENTITY_HEADERS.
-                        headers.add("userId", userId);
-                        headers.add("user_id", userId);
-                        headers.add("X-User-Id", userId);
-                    }
-                    if (StringUtils.hasText(email)) {
-                        headers.add("X-User-Email", email);
-                    }
-                    if (StringUtils.hasText(username)) {
-                        headers.add("X-User-Name", username);
-                    }
-                    if (StringUtils.hasText(roles)) {
-                        headers.add("X-User-Roles", roles);
-                    }
-                })
-                .build();
+        if (StringUtils.hasText(userId)) {
+            // Both spellings are populated because both are in use downstream;
+            // see IDENTITY_HEADERS.
+            headers.add("userId", userId);
+            headers.add("user_id", userId);
+            headers.add("X-User-Id", userId);
+        }
+        if (StringUtils.hasText(email)) {
+            headers.add("X-User-Email", email);
+        }
+        if (StringUtils.hasText(username)) {
+            headers.add("X-User-Name", username);
+        }
+        if (StringUtils.hasText(roles)) {
+            headers.add("X-User-Roles", roles);
+        }
 
         if (log.isDebugEnabled()) {
             log.debug("Injected identity headers for subject {} on {} {}",
                     userId, exchange.getRequest().getMethod(), exchange.getRequest().getPath());
         }
 
-        return exchange.mutate().request(request).build();
+        return withHeaders(exchange, headers);
     }
 
     private ServerWebExchange withoutIdentity(ServerWebExchange exchange) {
-        ServerHttpRequest request = exchange.getRequest().mutate()
-                .headers(headers -> IDENTITY_HEADERS.forEach(headers::remove))
-                .build();
+        return withHeaders(exchange, copyWithoutIdentityHeaders(exchange.getRequest().getHeaders()));
+    }
+
+    /**
+     * Copies the inbound headers, dropping every identity header.
+     *
+     * <p>A copy rather than an in-place edit because the headers exposed by the
+     * request builder are read-only - calling {@code remove} on them throws
+     * {@link UnsupportedOperationException} at runtime.
+     */
+    private HttpHeaders copyWithoutIdentityHeaders(HttpHeaders source) {
+        HttpHeaders copy = new HttpHeaders();
+        source.forEach((name, values) -> {
+            if (!IDENTITY_HEADERS.contains(name)) {
+                copy.addAll(name, values);
+            }
+        });
+        return copy;
+    }
+
+    /**
+     * Decorating the request is the reliable way to replace the header set;
+     * {@code mutate().headers(...)} hands back a read-only collection.
+     */
+    private ServerWebExchange withHeaders(ServerWebExchange exchange, HttpHeaders headers) {
+        ServerHttpRequest request = new ServerHttpRequestDecorator(exchange.getRequest()) {
+            @Override
+            public HttpHeaders getHeaders() {
+                return headers;
+            }
+        };
         return exchange.mutate().request(request).build();
     }
 
