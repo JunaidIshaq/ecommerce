@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -85,13 +86,40 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Order ids are UUIDs, but "hard to guess" is not an access control. This
+     * previously accepted {@code userId} and never compared it to the order's
+     * owner, so any authenticated shopper who had an id - from a shared link, a
+     * log, a browser history - could read someone else's order, including its
+     * addresses and totals.
+     *
+     * <p>A mismatch returns "not found" rather than "forbidden" on purpose:
+     * "forbidden" would confirm the id belongs to a real order and let an
+     * attacker enumerate valid ids.
+     */
     @Operation(summary = "Get order by id")
     @GetMapping("/{id}")
     public ResponseEntity<GenericApiResponseDto<OrderResponseDto>> getOrder(@RequestHeader("userId") String userId, @PathVariable("id") UUID id) {
         return orderService.getOrderById(id)
+                .filter(order -> canRead(order, userId))
                 .map(order -> enrichOrderResponse(OrderResponseDto.from(order), order))
                 .map(orderResponse -> ResponseEntity.ok(GenericApiResponseDto.success(orderResponse, "Order fetched successfully")))
                 .orElse(ResponseEntity.ok(GenericApiResponseDto.error("Order not found", 404)));
+    }
+
+    /** Owner, or staff acting through the admin console. */
+    private boolean canRead(Order order, String userId) {
+        return (userId != null && userId.equals(order.getUserId())) || isAdmin();
+    }
+
+    private boolean isAdmin() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_ADMIN") || role.equals("ROLE_SUPPORT"));
     }
 
     private OrderResponseDto enrichOrderResponse(OrderResponseDto response, Order order) {
