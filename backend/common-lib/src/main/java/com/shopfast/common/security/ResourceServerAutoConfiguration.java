@@ -4,6 +4,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -32,8 +33,13 @@ import java.util.List;
  * <p>Activated by setting {@code spring.security.oauth2.resourceserver.jwt.issuer-uri}.
  * A service can opt out with {@code shopfast.security.enabled=false}, and can always
  * define its own {@link SecurityFilterChain} bean to override this one entirely.
+ *
+ * <p>Restricted to servlet applications: {@link HttpSecurity} is the servlet-stack
+ * builder and does not exist in a reactive context, so applying this to the WebFlux
+ * api-gateway would fail its startup. The gateway configures its own reactive chain.
  */
 @AutoConfiguration
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass({ SecurityFilterChain.class, JwtAuthenticationConverter.class })
 @ConditionalOnProperty(prefix = "shopfast.security", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties(ShopfastSecurityProperties.class)
