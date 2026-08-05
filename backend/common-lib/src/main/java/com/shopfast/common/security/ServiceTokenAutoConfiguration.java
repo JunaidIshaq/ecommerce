@@ -1,12 +1,12 @@
 package com.shopfast.common.security;
 
-import feign.RequestInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Wires service-to-service authentication when the credentials are configured.
@@ -28,10 +28,21 @@ public class ServiceTokenAutoConfiguration {
         return new ServiceTokenProvider(issuerUri, clientId, clientSecret);
     }
 
-    @Bean
-    @ConditionalOnClass(RequestInterceptor.class)
-    @ConditionalOnMissingBean(ServiceTokenRelayInterceptor.class)
-    public ServiceTokenRelayInterceptor serviceTokenRelayInterceptor(ServiceTokenProvider provider) {
-        return new ServiceTokenRelayInterceptor(provider);
+    /**
+     * Feign support lives in a nested configuration guarded by a string-based
+     * {@link ConditionalOnClass}. Declaring the interceptor bean on the outer class
+     * would force Spring to load {@code ServiceTokenRelayInterceptor} - and therefore
+     * {@code feign.RequestInterceptor} - while introspecting the outer class, which
+     * throws {@code NoClassDefFoundError} in services that do not use OpenFeign.
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(name = "feign.RequestInterceptor")
+    static class FeignRelayConfiguration {
+
+        @Bean
+        @ConditionalOnMissingBean(ServiceTokenRelayInterceptor.class)
+        public ServiceTokenRelayInterceptor serviceTokenRelayInterceptor(ServiceTokenProvider provider) {
+            return new ServiceTokenRelayInterceptor(provider);
+        }
     }
 }
