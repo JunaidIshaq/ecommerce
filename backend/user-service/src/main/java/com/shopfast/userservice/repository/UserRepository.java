@@ -14,4 +14,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByEmailIgnoreCase(String email);
 
+    /** Primary lookup for a signed-in user: the Keycloak {@code sub} claim. */
+    Optional<User> findByKeycloakId(String keycloakId);
+
 }

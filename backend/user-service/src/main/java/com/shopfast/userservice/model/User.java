@@ -37,7 +37,8 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "users", indexes = {
-        @Index(name = "idx_user_email", columnList = "email", unique = true)
+        @Index(name = "idx_user_email", columnList = "email", unique = true),
+        @Index(name = "idx_user_keycloak_id", columnList = "keycloakId", unique = true)
 })
 @JsonIgnoreProperties(ignoreUnknown = true)  // Prevent unknown fields from breaking serialization
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -50,7 +51,23 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    /**
+     * The Keycloak {@code sub} claim - the identity this profile belongs to.
+     *
+     * <p>Email is not usable as the link: a user can change it in Keycloak, and the
+     * profile would then silently detach from its account. {@code sub} never changes.
+     *
+     * <p>Nullable because rows created before the Keycloak migration have no
+     * counterpart yet; they are adopted on first sign-in by matching on email.
+     */
+    @Column(unique = true)
+    private String keycloakId;
+
+    /**
+     * Only set for accounts that predate Keycloak. Keycloak owns credentials now, so
+     * new rows leave this null - hence the column can no longer be NOT NULL.
+     */
+    @Column
     private String password;
 
     @Column(nullable = false)
@@ -58,6 +75,13 @@ public class User {
 
     @Column(nullable = false)
     private String lastName;
+
+    /** Profile details Keycloak does not hold; the shop owns these. */
+    @Column
+    private String phone;
+
+    @Column
+    private String country;
 
     @Enumerated(EnumType.STRING)
     private Role role;

@@ -1,80 +1,58 @@
 package com.shopfast.userservice.config;
 
-import com.shopfast.userservice.security.JwtAuthenticationFilter;
-import com.shopfast.userservice.security.JwtUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * User-service contributes CORS and a password encoder; authentication is the shared
+ * {@code ResourceServerAutoConfiguration} chain in common-lib.
+ *
+ * <p>This class previously declared its own {@code SecurityFilterChain}, which
+ * overrode the shared one (it is {@code @ConditionalOnMissingBean}) and brought two
+ * problems with it:
+ *
+ * <ul>
+ *   <li>It installed the pre-Keycloak HS256 {@code JwtAuthenticationFilter}, which
+ *       cannot verify an RS256 Keycloak token - the same defect that made the cart
+ *       return 401 INVALID_TOKEN for every signed-in user.</li>
+ *   <li>It permitted {@code /api/v1/user/**} to everyone. That is the whole service:
+ *       the user listing, lookup by id, and status changes were all reachable without
+ *       a token by anything that could address the container - so the only thing
+ *       standing between the internet and a dump of every account was the gateway
+ *       remembering to require auth on that prefix.</li>
+ * </ul>
+ *
+ * <p>Now nothing is public by default. Service-to-service callers (auth-service's
+ * Feign client for {@code /internal/email}) already send a client-credentials token
+ * via the shared relay interceptor, so they authenticate like any other caller.
+ *
+ * <p>The password encoder stays: rows migrated from before Keycloak still carry a
+ * BCrypt hash, even though Keycloak owns credentials for new accounts.
+ */
 @Configuration
 public class SecurityConfig {
-
-    private final JwtUtils jwtUtils;
-
-    public SecurityConfig(JwtUtils jwtUtils) {
-        this.jwtUtils = jwtUtils;
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http,
-                                           JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
-        JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtUtils);
-
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/user").permitAll()      // registration allowed
-                        .requestMatchers("/api/v1/user/**").permitAll()      // registration allowed
-                        .requestMatchers("/api/v1/user/internal/email/**").permitAll()      // registration allowed
-                        // Only the safe actuator endpoints; /actuator/** would have
-                        // exposed env and heapdump, i.e. every secret this service holds.
-                        .requestMatchers("/actuator/health/**","/actuator/info","/actuator/prometheus",
-                                "/v3/api-docs/**","/swagger-ui/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                // Migration window: the legacy filter below authenticates old HS256
-                // tokens, and anything it leaves unauthenticated falls through to the
-                // Keycloak resource server for RS256 validation. Once all clients are
-                // on Keycloak, delete the filter, JwtUtils and this comment.
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
-                "http://localhost:4200",          // ✅ Local Angular
-                "https://shopfast.live",          // ✅ Production domain
-                "https://www.shopfast.live"       // ✅ WWW version
+                "http://localhost:4200",
+                "https://shopfast.live",
+                "https://www.shopfast.live"
         ));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
@@ -82,10 +60,5 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
     }
 }

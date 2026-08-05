@@ -1,46 +1,105 @@
 <!-- PROFILE CONTENT -->
 <section class="profile-container">
   <div class="profile-card">
-    <!-- Profile Picture Section -->
-    <div class="profile-image">
-      <img src="/assets/images/profile/junaid.png" alt="Profile Photo" />
-      <button class="edit-btn"><i class="fas fa-camera"></i></button>
+
+    <!-- Loading -->
+    <div class="profile-state" *ngIf="loading">
+      <p>Loading your profile…</p>
     </div>
 
-    <!-- User Info -->
-    <div class="user-info">
-      <h2>{{ user?.name || 'John Doe' }}</h2>
-      <p class="email">{{ user?.email || 'junaidnumlcs@gmail.com' }}</p>
-      <p class="joined">Member since: {{ user?.joinedDate || 'March 2023' }}</p>
+    <!-- Load failure: say what happened and offer a way forward, rather than
+         rendering an empty card that looks like an account with no data. -->
+    <div class="profile-state" *ngIf="!loading && loadError">
+      <p class="error">{{ loadError }}</p>
+      <button class="btn primary" (click)="load()">Try again</button>
     </div>
 
-    <!-- Divider -->
-    <hr class="divider" />
+    <ng-container *ngIf="!loading && !loadError && profile">
 
-    <!-- Account Details -->
-    <div class="details-grid">
-      <div class="detail">
-        <h4>Full Name</h4>
-        <p>{{ user?.name || 'John Doe' }}</p>
+      <!-- Profile Picture Section -->
+      <div class="profile-image">
+        <div class="avatar-initials">{{ initials }}</div>
       </div>
-      <div class="detail">
-        <h4>Email Address</h4>
-        <p>{{ user?.email || 'junaidnumlcs@gmail.com' }}</p>
-      </div>
-      <div class="detail">
-        <h4>Phone Number</h4>
-        <p>{{ user?.phone || '+1 234 567 890' }}</p>
-      </div>
-      <div class="detail">
-        <h4>Country</h4>
-        <p>{{ user?.country || 'Pakistan' }}</p>
-      </div>
-    </div>
 
-    <!-- Edit Button -->
-    <div class="action-buttons">
-      <a routerLink="/orders" class="btn primary">My Orders</a>
-      <button class="btn secondary">Change Password</button>
-    </div>
+      <!-- User Info -->
+      <div class="user-info">
+        <h2>{{ profile.fullName || profile.email }}</h2>
+        <p class="email">{{ profile.email }}</p>
+        <p class="joined" *ngIf="profile.memberSince">
+          Member since: {{ profile.memberSince | date: 'MMMM y' }}
+        </p>
+      </div>
+
+      <hr class="divider" />
+
+      <p class="save-success" *ngIf="saved && !editing">Profile updated.</p>
+
+      <!-- Read-only view -->
+      <div class="details-grid" *ngIf="!editing">
+        <div class="detail">
+          <h4>Full Name</h4>
+          <p>{{ profile.fullName || 'Not provided' }}</p>
+        </div>
+        <div class="detail">
+          <h4>Email Address</h4>
+          <p>{{ profile.email }}</p>
+        </div>
+        <div class="detail">
+          <h4>Phone Number</h4>
+          <p>{{ profile.phone || 'Not provided' }}</p>
+        </div>
+        <div class="detail">
+          <h4>Country</h4>
+          <p>{{ profile.country || 'Not provided' }}</p>
+        </div>
+      </div>
+
+      <!-- Edit form. Email is displayed but not editable: Keycloak is the source
+           of truth for it, and the API ignores it if sent. -->
+      <form class="details-grid" *ngIf="editing" (ngSubmit)="save()">
+        <div class="detail">
+          <label for="firstName">First Name</label>
+          <input id="firstName" name="firstName" type="text" maxlength="100"
+                 [(ngModel)]="form.firstName" />
+        </div>
+        <div class="detail">
+          <label for="lastName">Last Name</label>
+          <input id="lastName" name="lastName" type="text" maxlength="100"
+                 [(ngModel)]="form.lastName" />
+        </div>
+        <div class="detail">
+          <label for="phone">Phone Number</label>
+          <input id="phone" name="phone" type="tel" maxlength="30"
+                 [(ngModel)]="form.phone" />
+        </div>
+        <div class="detail">
+          <label for="country">Country</label>
+          <input id="country" name="country" type="text" maxlength="100"
+                 [(ngModel)]="form.country" />
+        </div>
+
+        <p class="error" *ngIf="saveError">{{ saveError }}</p>
+
+        <div class="action-buttons">
+          <button type="submit" class="btn primary" [disabled]="saving">
+            {{ saving ? 'Saving…' : 'Save Changes' }}
+          </button>
+          <button type="button" class="btn secondary" (click)="cancelEdit()" [disabled]="saving">
+            Cancel
+          </button>
+        </div>
+      </form>
+
+      <!-- Actions -->
+      <div class="action-buttons" *ngIf="!editing">
+        <button class="btn primary" (click)="startEdit()">Edit Profile</button>
+        <a routerLink="/orders" class="btn secondary">My Orders</a>
+        <!-- Passwords live in Keycloak, so this leaves the app entirely. -->
+        <a [href]="accountConsoleUrl" target="_blank" rel="noopener" class="btn secondary">
+          Change Password
+        </a>
+      </div>
+
+    </ng-container>
   </div>
 </section>
