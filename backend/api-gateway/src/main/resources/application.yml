@@ -11,6 +11,47 @@ spring:
       # proxy straight to each service - taking gateway authentication out of the
       # request path entirely.
       routes:
+        # ---------------------------------------------------------------
+        # Public alias routes.
+        #
+        # Anything under /api/v1/public/<service>/** is reachable without a
+        # token. The /public segment is stripped here and the request is
+        # forwarded to the service's normal path, so the service itself never
+        # sees "/public" and its own security rules still apply to the real
+        # path. That matters: it means this alias cannot be used to reach an
+        # endpoint that the service would otherwise protect. Asking for
+        # /api/v1/public/order/123 rewrites to /api/v1/order/123, which
+        # order-service still answers with 401.
+        #
+        # These must be declared before the non-public routes: Spring Cloud
+        # Gateway evaluates routes in order and /api/v1/public/product/** would
+        # otherwise never be reached.
+        # ---------------------------------------------------------------
+        - id: product-service-public
+          uri: lb://product-service
+          predicates:
+            - Path=/api/v1/public/product/**
+          filters:
+            - RewritePath=/api/v1/public/product(?<segment>/?.*), /api/v1/product$\{segment}
+        - id: category-service-public
+          uri: lb://category-service
+          predicates:
+            - Path=/api/v1/public/category/**
+          filters:
+            - RewritePath=/api/v1/public/category(?<segment>/?.*), /api/v1/category$\{segment}
+        - id: elastic-service-public
+          uri: lb://elastic-service
+          predicates:
+            - Path=/api/v1/public/search/**
+          filters:
+            - RewritePath=/api/v1/public/search(?<segment>/?.*), /api/v1/search$\{segment}
+        - id: review-service-public
+          uri: lb://review-service
+          predicates:
+            - Path=/api/v1/public/review/**
+          filters:
+            - RewritePath=/api/v1/public/review(?<segment>/?.*), /api/v1/review$\{segment}
+
         - id: product-service
           uri: lb://product-service
           predicates:

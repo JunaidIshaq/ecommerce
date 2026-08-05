@@ -42,8 +42,6 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info",
                                 "/actuator/prometheus", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         // Project-wide convention: a /public segment marks an endpoint as
-                        // deliberately anonymous, for any method.
-                        .requestMatchers("/api/v1/public/**", "/api/v1/*/public/**").permitAll()
                         .requestMatchers("/api/v1/category/admin", "/api/v1/category/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/category/**").permitAll()
                         .anyRequest().authenticated()
