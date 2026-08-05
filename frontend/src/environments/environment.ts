@@ -18,8 +18,10 @@ export const environment = {
     // the authorization request before the user ever sees a login page.
     redirectUrl: 'http://localhost:4200/callback',
     postLogoutRedirectUri: 'http://localhost:4200',
-    // openid is mandatory. profile/email populate the ID token claims the header
-    // renders; offline_access is what lets the refresh token drive silent renew.
-    scope: 'openid profile email offline_access',
+    // openid is mandatory; profile/email populate the ID token claims the header
+    // renders. offline_access is deliberately absent: it is not assigned to the
+    // shopfast-web client (Keycloak rejects the whole request with invalid_scope),
+    // and a browser client should not hold an offline refresh token anyway.
+    scope: 'openid profile email',
   },
 };

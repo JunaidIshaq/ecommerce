@@ -30,7 +30,7 @@ export const appConfig: ApplicationConfig = {
         responseType: 'code',
 
         // openid is required; profile/email populate the claims the header displays.
-        scope: 'openid profile email offline_access',
+        scope: 'openid profile email',
 
         // Refresh silently in the background rather than bouncing a user mid-checkout
         // to the login page when the 15-minute access token expires.

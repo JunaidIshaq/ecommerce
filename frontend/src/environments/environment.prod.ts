@@ -18,8 +18,11 @@ export const environment = {
     // Must match the client's redirectUris in the realm exactly, including scheme.
     redirectUrl: 'https://shopfast.live/callback',
     postLogoutRedirectUri: 'https://shopfast.live',
-    // openid is mandatory. profile/email populate the ID token claims the header
-    // renders; offline_access is what lets the refresh token drive silent renew.
-    scope: 'openid profile email offline_access',
+    // openid is mandatory; profile/email populate the ID token claims the header
+    // renders. offline_access is deliberately absent: it is not assigned to the
+    // shopfast-web client (Keycloak rejects the whole request with invalid_scope),
+    // and a browser client should not hold an offline refresh token anyway. Session
+    // continuation is handled by silent renew against the Keycloak SSO session.
+    scope: 'openid profile email',
   }
 };
