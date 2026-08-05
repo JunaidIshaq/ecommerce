@@ -203,9 +203,16 @@ def main():
 
         # shopfast-profile maps a `userId` attribute into the token; services
         # migrated from the old auth-service key their rows on it.
-        kc.put("/users/%s" % user["id"], {
-            "attributes": {"userId": [user["id"]]},
-        })
+        #
+        # This has to be a *merge* into the representation we just read back.
+        # Keycloak's user update replaces the whole representation, so putting
+        # a body of just {"attributes": ...} silently blanks email, firstName
+        # and lastName on the account we have only just created.
+        updated = dict(user)
+        attributes = dict(updated.get("attributes") or {})
+        attributes["userId"] = [user["id"]]
+        updated["attributes"] = attributes
+        kc.put("/users/%s" % user["id"], updated)
 
         if role:
             kc.post("/users/%s/role-mappings/realm" % user["id"], [{
