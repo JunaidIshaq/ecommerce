@@ -67,6 +67,17 @@ services:
       - KC_HEALTH_ENABLED=true
       - KC_METRICS_ENABLED=true
       - KC_HOSTNAME_STRICT=false
+      # Keycloak is served at https://shopfast.live/auth/ by the host's nginx rather
+      # than on its own subdomain, so it must know two things it cannot infer:
+      #   - the path it is mounted under, or every URL it generates (redirects, the
+      #     JWKS location in its discovery document) would omit /auth and 404;
+      #   - the public origin, because the `iss` claim it stamps into every token
+      #     must match what resource servers expect, and it only sees nginx.
+      - KC_HTTP_RELATIVE_PATH=${KEYCLOAK_RELATIVE_PATH:-/}
+      - KC_HOSTNAME=${KEYCLOAK_PUBLIC_URL:-}
+      # Trust X-Forwarded-* from nginx. Without this Keycloak sees the proxy's
+      # http://127.0.0.1 and builds redirect URLs the browser cannot follow.
+      - KC_PROXY_HEADERS=xforwarded
       # Client secrets are substituted into realm-export.json at import time so no
       # secret is ever committed to the repo.
       - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
@@ -95,6 +106,7 @@ services:
       dockerfile: api-gateway/Dockerfile
     container_name: api-gateway
     environment:
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - SPRING_REDIS_HOST=redis
       # Legacy HS256 secret. Still needed during the dual-token migration window so
       # tokens minted by the old auth-service keep validating. Remove after phase 4.
@@ -186,6 +198,8 @@ services:
          condition: service_healthy
 
     environment:
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/product_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -223,6 +237,8 @@ services:
       eureka-server:
         condition: service_healthy
     environment:
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/category_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -254,6 +270,8 @@ services:
       dockerfile: inventory-service/Dockerfile
     container_name: inventory-service
     environment:
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/inventory_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -291,6 +309,8 @@ services:
       dockerfile: order-service/Dockerfile
     container_name: order-service
     environment:
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/order_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -329,6 +349,8 @@ services:
       dockerfile: payment-service/Dockerfile
     container_name: payment-service
     environment:
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/payment_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -366,6 +388,8 @@ services:
       dockerfile: user-service/Dockerfile
     container_name: user-service
     environment:
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/user_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -399,6 +423,8 @@ services:
       dockerfile: auth-service/Dockerfile
     container_name: auth-service
     environment:
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auth_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -439,6 +465,8 @@ services:
       dockerfile: cart-service/Dockerfile
     container_name: cart-service
     environment:
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/cart_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -475,6 +503,8 @@ services:
       dockerfile: coupon-service/Dockerfile
     container_name: coupon-service
     environment:
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/coupon_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -511,6 +541,8 @@ services:
       dockerfile: review-service/Dockerfile
     container_name: review-service
     environment:
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/review_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -545,6 +577,8 @@ services:
       dockerfile: notification-service/Dockerfile
     container_name: notification-service
     environment:
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/notification_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -576,6 +610,8 @@ services:
       dockerfile: elastic-service/Dockerfile
     container_name: elastic-service
     environment:
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - ELASTIC_URI=http://elasticsearch:9200
       - KAFKA_BOOTSTRAP=kafka:9092
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
@@ -609,6 +645,8 @@ services:
       dockerfile: admin-service/Dockerfile
     container_name: admin-service
     environment:
+      - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
+      - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/admin_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}

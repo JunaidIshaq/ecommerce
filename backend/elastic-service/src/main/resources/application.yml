@@ -75,6 +75,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8180/realms/shopfast}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:}
 
 shopfast:
   security:

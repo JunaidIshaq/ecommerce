@@ -57,8 +57,27 @@ public class ResourceServerAutoConfiguration {
     }
 
     /**
-     * Decoder built from the issuer's discovery document, so key rotation is picked
-     * up automatically from JWKS instead of requiring a redeploy.
+     * Decoder that verifies tokens against the realm's public JWKS, so key rotation
+     * is picked up automatically instead of requiring a redeploy.
+     *
+     * <p>Two ways to find those keys:
+     *
+     * <ul>
+     *   <li>{@code issuer-uri} alone - the keys are discovered from the issuer's
+     *       well-known document. Simplest, and correct when the issuer URL is
+     *       reachable from inside the network.</li>
+     *   <li>{@code issuer-uri} plus {@code jwk-set-uri} - keys are fetched from the
+     *       explicit URL while the {@code iss} claim is still validated against the
+     *       issuer.</li>
+     * </ul>
+     *
+     * <p>The second form exists because the issuer must be the URL the *browser*
+     * uses (it is baked into every token Keycloak mints, and a mismatch fails
+     * validation), but that public URL is often not usable from inside the container
+     * network - it would mean hairpinning out to the public IP and back through the
+     * TLS terminator just to read a public key, making startup depend on the reverse
+     * proxy. Pointing jwk-set-uri at the internal address avoids that without
+     * weakening anything: the issuer is still checked, and JWKS is public data.
      */
     @Bean
     @ConditionalOnMissingBean
@@ -66,9 +85,15 @@ public class ResourceServerAutoConfiguration {
     public NimbusJwtDecoder jwtDecoder(ShopfastSecurityProperties properties,
                                        org.springframework.core.env.Environment environment) {
         String issuerUri = environment.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri");
-        NimbusJwtDecoder decoder = (NimbusJwtDecoder) JwtDecoders.fromIssuerLocation(issuerUri);
+        String jwkSetUri = environment.getProperty("spring.security.oauth2.resourceserver.jwt.jwk-set-uri");
+
+        NimbusJwtDecoder decoder = (jwkSetUri != null && !jwkSetUri.isBlank())
+                ? NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build()
+                : (NimbusJwtDecoder) JwtDecoders.fromIssuerLocation(issuerUri);
 
         List<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>();
+        // Note this is applied in both branches: skipping the issuer check when
+        // jwk-set-uri is set would accept a token minted by any realm on that server.
         validators.add(JwtValidators.createDefaultWithIssuer(issuerUri));
         if (properties.getExpectedAudience() != null && !properties.getExpectedAudience().isBlank()) {
             validators.add(new AudienceValidator(properties.getExpectedAudience()));

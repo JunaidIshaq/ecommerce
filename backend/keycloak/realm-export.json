@@ -86,11 +86,11 @@
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
-      "redirectUris": [ "http://localhost:3000/*", "https://shopfast.example.com/*" ],
-      "webOrigins": [ "http://localhost:3000", "https://shopfast.example.com" ],
+      "redirectUris": [ "http://localhost:4200/*", "https://shopfast.live/*" ],
+      "webOrigins": [ "http://localhost:4200", "https://shopfast.live" ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "http://localhost:3000/*##https://shopfast.example.com/*"
+        "post.logout.redirect.uris": "http://localhost:4200/*##https://shopfast.live/*"
       },
       "defaultClientScopes": [ "profile", "email", "roles", "web-origins", "shopfast-profile" ]
     },
