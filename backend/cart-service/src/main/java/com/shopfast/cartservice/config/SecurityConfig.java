@@ -1,66 +1,37 @@
 package com.shopfast.cartservice.config;
 
-import com.shopfast.cartservice.security.JwtAuthenticationFilter;
-import com.shopfast.cartservice.security.JwtUtils;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-@Slf4j
+/**
+ * Cart-service only contributes CORS; authentication is the shared
+ * {@code ResourceServerAutoConfiguration} chain in common-lib.
+ *
+ * <p>This class used to declare its own {@link org.springframework.security.web.SecurityFilterChain},
+ * which overrode the shared one (it is {@code @ConditionalOnMissingBean}) and installed a
+ * hand-rolled HS256 filter from the pre-Keycloak design. That filter rejected every
+ * RS256 Keycloak token with 401 INVALID_TOKEN, so no logged-in user could use the cart.
+ * The same chain also had {@code /api/v1/cart/**} as blanket permitAll, which would have
+ * left the authenticated and internal cart endpoints open once the filter was removed.
+ *
+ * <p>Anonymous guest-cart paths are declared as {@code shopfast.security.public-paths}
+ * in application.yml, so they stay open without opening the whole service.
+ */
 @Configuration
 public class SecurityConfig {
 
-    private final JwtUtils jwtUtils;
-
-    public SecurityConfig(JwtUtils jwtUtils) {
-        this.jwtUtils = jwtUtils;
-    }
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtUtils);
-
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/v1/cart").permitAll()
-                        .requestMatchers("/api/v1/cart/**").permitAll()
-                        .requestMatchers("/api/v1/cart/guest/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                // Validate Keycloak tokens here too. "Trust the gateway" would mean any
-                // workload that can reach this port is implicitly authenticated.
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable);
-        return http.build();
-    }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
-                "http://localhost:4200",          // ✅ Local Angular
-                "https://shopfast.live",          // ✅ Production domain
-                "https://www.shopfast.live"       // ✅ WWW version
+                "http://localhost:4200",
+                "https://shopfast.live",
+                "https://www.shopfast.live"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
@@ -70,10 +41,5 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
     }
 }
