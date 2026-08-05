@@ -59,6 +59,21 @@ public class GatewaySecurityConfig {
     };
 
     /**
+     * Project-wide convention: a {@code /public} path segment marks an endpoint as
+     * deliberately anonymous, so opening one is a visible decision in the URL rather
+     * than a hidden entry in a config file.
+     *
+     * <p>Enumerated rather than written as {@code /**}{@code /public/**} because
+     * WebFlux matches with {@link org.springframework.web.util.pattern.PathPattern},
+     * which only permits {@code **} as the final segment.
+     */
+    private static final String[] PUBLIC_CONVENTION_PATHS = {
+            "/api/v1/public/**",
+            "/api/v1/*/public/**",
+            "/api/public/**",
+    };
+
+    /**
      * Anonymous storefront traffic. A shopper browses the catalogue and fills a
      * guest basket before authenticating, so these must pass the gateway without
      * a token - otherwise routing public traffic through the gateway would turn
@@ -92,6 +107,7 @@ public class GatewaySecurityConfig {
                         // CORS preflight carries no credentials by design.
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers(PUBLIC_PATHS).permitAll()
+                        .pathMatchers(PUBLIC_CONVENTION_PATHS).permitAll()
                         // Declared before the catch-all: the admin listing lives under
                         // the same /api/v1/product prefix as the public catalogue, so
                         // it has to be claimed first or the GET rule would open it.

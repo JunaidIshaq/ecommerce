@@ -45,6 +45,20 @@ import java.util.List;
 @EnableConfigurationProperties(ShopfastSecurityProperties.class)
 @EnableMethodSecurity
 public class ResourceServerAutoConfiguration {
+    /**
+     * Project-wide convention: a {@code /public} path segment marks an endpoint as
+     * deliberately anonymous. Applying it here as well as at the gateway keeps the
+     * rule true even when a request reaches a service directly, and means opening an
+     * endpoint is a visible decision in its URL rather than a config-file entry.
+     *
+     * <p>Enumerated rather than written with a mid-path wildcard so the patterns
+     * behave identically under both the servlet and the gateway matchers.
+     */
+    private static final String[] PUBLIC_CONVENTION_PATHS = {
+            "/api/v1/public/**",
+            "/api/v1/*/public/**",
+            "/api/public/**",
+    };
 
     /**
      * Maps Keycloak realm/client roles onto Spring authorities. Without it every
@@ -129,6 +143,7 @@ public class ResourceServerAutoConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         // Browsers send an unauthenticated preflight; blocking it breaks CORS.
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(PUBLIC_CONVENTION_PATHS).permitAll()
                         .requestMatchers(publicPaths).permitAll()
                         // Default deny: a newly added endpoint is protected until someone
                         // deliberately opens it.

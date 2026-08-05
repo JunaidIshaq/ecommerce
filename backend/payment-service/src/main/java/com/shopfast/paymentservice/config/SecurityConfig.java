@@ -42,6 +42,9 @@ public class SecurityConfig {
                         // /actuator/env, which prints the datasource and client secrets.
                         .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info",
                                 "/actuator/prometheus", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        // Project-wide convention: a /public segment marks an endpoint as
+                        // deliberately anonymous, for any method.
+                        .requestMatchers("/api/v1/public/**", "/api/v1/*/public/**").permitAll()
                         // The controller is mapped at /api/v1/payment, not /api/payment,
                         // so the old rules here never matched a single request and every
                         // payment call fell through to the permitAll catch-all below.

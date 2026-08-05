@@ -38,6 +38,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info",
                                 "/actuator/prometheus", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        // Project-wide convention: a /public segment marks an endpoint as
+                        // deliberately anonymous, for any method.
+                        .requestMatchers("/api/v1/public/**", "/api/v1/*/public/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
