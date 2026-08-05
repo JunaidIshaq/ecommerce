@@ -172,6 +172,19 @@ spring:
 
 shopfast:
   security:
+    # The guest basket is anonymous by design: a shopper fills a cart before ever
+    # creating an account, and the cart is keyed by the anonId the browser
+    # generates. These must stay open or "add to cart" fails for logged-out
+    # visitors, which is most first-time traffic.
+    public-paths:
+      - /actuator/health
+      - /actuator/health/**
+      - /actuator/info
+      - /actuator/prometheus
+      - /v3/api-docs/**
+      - /swagger-ui/**
+      - /api/v1/cart/guest
+      - /api/v1/cart/guest/**
     # Service-to-service credentials. Absent in local runs, in which case the
     # Feign interceptor simply relays the caller's token instead.
     service-client:

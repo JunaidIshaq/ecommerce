@@ -191,6 +191,22 @@ spring:
 
 shopfast:
   security:
+    # These are the endpoints a caller reaches *before* they hold a token, so they
+    # cannot require one. Everything else on this service (logout-all, validate)
+    # acts on an existing session and stays authenticated.
+    public-paths:
+      - /actuator/health
+      - /actuator/health/**
+      - /actuator/info
+      - /actuator/prometheus
+      - /v3/api-docs/**
+      - /swagger-ui/**
+      - /api/v1/auth/register
+      - /api/v1/auth/password-reset
+      # Legacy endpoints kept alive for the migration window only. They are the
+      # reason JWT_SECRET still exists; both go when the HS256 path is removed.
+      - /api/v1/auth/login
+      - /api/v1/auth/refresh
     # Service-to-service credentials. Absent in local runs, in which case the
     # Feign interceptor simply relays the caller's token instead.
     service-client:

@@ -116,7 +116,11 @@ services:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/eureka/
     ports:
-      - "8080:8080"
+      # Bound to loopback deliberately. Docker publishes ports by writing its own
+      # iptables rules, which are evaluated before ufw's - so "8080:8080" would put
+      # the gateway on the public internet regardless of the firewall policy.
+      # nginx reaches it over 127.0.0.1, which is the only caller that should.
+      - "127.0.0.1:8080:8080"
     depends_on:
       - eureka-server
       - keycloak

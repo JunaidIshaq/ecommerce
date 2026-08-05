@@ -117,6 +117,11 @@ public class ResourceServerAutoConfiguration {
         String[] publicPaths = properties.getPublicPaths().toArray(String[]::new);
 
         http
+                // Picks up a CorsConfigurationSource bean if the service defines one,
+                // and is otherwise a no-op. Services that are called cross-origin (the
+                // Angular dev server on :4200) rely on this; without it, removing a
+                // service's own filter chain would silently drop its CORS handling.
+                .cors(Customizer.withDefaults())
                 // No cookies, no sessions - CSRF protection guards cookie-based auth and
                 // would only break these stateless bearer-token APIs.
                 .csrf(csrf -> csrf.disable())

@@ -1,7 +1,8 @@
 package com.shopfast.categoryservice.config;
 
-import org.springframework.security.config.Customizer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -20,23 +21,34 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
+    /**
+     * The storefront needs to render the category tree before anyone logs in, so
+     * reads stay anonymous. Everything that changes a category requires a token.
+     *
+     * <p>Previously this ended in {@code anyRequest().permitAll()}, which left
+     * category creation and deletion open to the internet. Note also that
+     * {@code /actuator/**} was public here - that exposes {@code /actuator/env}
+     * and would leak configuration, so only the safe endpoints are listed now.
+     */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(
-                                "/api/v1/category/**",
-                                "/api/v1/category/search"
-                        ).permitAll()
-                        .anyRequest().permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info",
+                                "/actuator/prometheus", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/api/v1/category/admin", "/api/v1/category/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/category/**").permitAll()
+                        .anyRequest().authenticated()
                 )
-                // Validate Keycloak RS256 tokens against the realm JWKS so that a
-                // presented identity is trustworthy and usable by method security.
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                // The shared converter is what turns Keycloak realm roles into
+                // authorities; without it hasRole(...) can never match.
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
 

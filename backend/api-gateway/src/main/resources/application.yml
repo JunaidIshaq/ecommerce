@@ -4,6 +4,65 @@ spring:
 
   cloud:
     gateway:
+      # Explicit routes keyed on the public URL prefix. These exist so nginx can
+      # forward /api/** to the gateway unchanged: the discovery locator below only
+      # answers on /<service-id>/**, which is not the URL the browser calls, and
+      # relying on it alone is what made it tempting to bypass the gateway and
+      # proxy straight to each service - taking gateway authentication out of the
+      # request path entirely.
+      routes:
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/api/v1/product/**
+        - id: category-service
+          uri: lb://category-service
+          predicates:
+            - Path=/api/v1/category/**
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/v1/inventory/**
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/v1/order/**
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/user/**
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/v1/auth/**
+        - id: cart-service
+          uri: lb://cart-service
+          predicates:
+            - Path=/api/v1/cart/**
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/notification/**
+        - id: admin-service
+          uri: lb://admin-service
+          predicates:
+            - Path=/api/v1/admin/**
+        - id: review-service
+          uri: lb://review-service
+          predicates:
+            - Path=/api/v1/review/**
+        - id: coupon-service
+          uri: lb://coupon-service
+          predicates:
+            - Path=/api/v1/coupon/**
+        - id: elastic-service
+          uri: lb://elastic-service
+          predicates:
+            - Path=/api/v1/search/**
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/v1/payment/**
       discovery:
         locator:
           enabled: true  # Enable dynamic routing via Eureka

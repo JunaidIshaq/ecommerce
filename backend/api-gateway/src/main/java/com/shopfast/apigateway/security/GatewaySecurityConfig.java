@@ -42,14 +42,38 @@ import java.util.List;
 @EnableWebFluxSecurity
 public class GatewaySecurityConfig {
 
-    /** Everything a caller must reach *before* they hold a token. */
+    /** Infrastructure endpoints and the pre-token auth calls. */
     private static final String[] PUBLIC_PATHS = {
-            "/api/v1/auth/**",
             "/actuator/health/**",
             "/actuator/info",
             "/actuator/prometheus",
             "/v3/api-docs/**",
             "/swagger-ui/**",
+            // Reachable before a token exists. Listed individually rather than as
+            // /api/v1/auth/** so that logout-all and validate - which act on an
+            // existing session - are not accidentally opened too.
+            "/api/v1/auth/register",
+            "/api/v1/auth/password-reset",
+            "/api/v1/auth/login",
+            "/api/v1/auth/refresh",
+    };
+
+    /**
+     * Anonymous storefront traffic. A shopper browses the catalogue and fills a
+     * guest basket before authenticating, so these must pass the gateway without
+     * a token - otherwise routing public traffic through the gateway would turn
+     * the whole shop into a login wall.
+     *
+     * <p>Reads only: the matching write endpoints stay authenticated.
+     */
+    private static final String[] PUBLIC_GET_PATHS = {
+            "/api/v1/product/**",
+            "/api/v1/category/**",
+    };
+
+    private static final String[] PUBLIC_CART_PATHS = {
+            "/api/v1/cart/guest",
+            "/api/v1/cart/guest/**",
     };
 
     @Bean
@@ -68,6 +92,12 @@ public class GatewaySecurityConfig {
                         // CORS preflight carries no credentials by design.
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers(PUBLIC_PATHS).permitAll()
+                        // Declared before the catch-all: the admin listing lives under
+                        // the same /api/v1/product prefix as the public catalogue, so
+                        // it has to be claimed first or the GET rule would open it.
+                        .pathMatchers("/api/v1/product/admin/**", "/api/v1/category/admin/**").authenticated()
+                        .pathMatchers(HttpMethod.GET, PUBLIC_GET_PATHS).permitAll()
+                        .pathMatchers(PUBLIC_CART_PATHS).permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt

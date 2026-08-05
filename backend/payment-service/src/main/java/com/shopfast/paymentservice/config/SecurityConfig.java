@@ -4,6 +4,7 @@ import org.springframework.security.config.Customizer;
 import com.shopfast.paymentservice.security.JwtAuthenticationFilter;
 import com.shopfast.paymentservice.security.JwtUtils;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -36,10 +37,16 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/payment").authenticated()
-                        .requestMatchers("/api/payment/**").authenticated()
-                        .anyRequest().permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Only the safe actuator endpoints. "/actuator/**" also exposed
+                        // /actuator/env, which prints the datasource and client secrets.
+                        .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info",
+                                "/actuator/prometheus", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        // The controller is mapped at /api/v1/payment, not /api/payment,
+                        // so the old rules here never matched a single request and every
+                        // payment call fell through to the permitAll catch-all below.
+                        .requestMatchers("/api/v1/payment", "/api/v1/payment/**").authenticated()
+                        .anyRequest().authenticated()
                 )
                 // Migration window: the legacy HS256 filter added below authenticates
                 // old tokens; requests it leaves anonymous fall through to here and
