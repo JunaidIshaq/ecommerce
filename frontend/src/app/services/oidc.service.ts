@@ -19,9 +19,13 @@ export class OidcService {
       this.manager = new UserManager({
         authority: environment.keycloak.authority,
         client_id: environment.keycloak.clientId,
-        redirect_uri: `${window.location.origin}/callback`,
-        post_logout_redirect_uri: window.location.origin,
-        silent_redirect_uri: `${window.location.origin}/silent-renew`,
+        // Taken from config rather than derived from window.location.origin:
+        // Keycloak matches redirect_uri against the client's registered list
+        // verbatim, so it must be the value someone deliberately registered, not
+        // whatever origin the page happens to be served from.
+        redirect_uri: environment.keycloak.redirectUrl,
+        post_logout_redirect_uri: environment.keycloak.postLogoutRedirectUri,
+        silent_redirect_uri: environment.keycloak.redirectUrl.replace(/\/callback$/, '/silent-renew'),
         response_type: 'code',
 
         // openid is mandatory; profile/email populate the ID token claims the UI shows.
