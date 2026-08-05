@@ -9,6 +9,7 @@ import {RouterLink} from '@angular/router';
 import {Notification, NotificationService} from '../../services/notification.service';
 import {SearchService} from '../../services/search.service';
 import {AuthService} from '../../services/auth.service';
+import {ProfileService} from '../../services/profile.service';
 
 @Component({
   selector: 'app-header',
@@ -41,6 +42,7 @@ export class HeaderComponent implements OnInit {
     private auth: AuthService,
     private notificationService: NotificationService,
     private searchService: SearchService,
+    private profileService: ProfileService,
     private cd: ChangeDetectorRef,
     private zone: NgZone,
     private eRef: ElementRef
@@ -128,6 +130,7 @@ export class HeaderComponent implements OnInit {
   }
 
   logout() {
+    this.profileService.clear();
     this.auth.logout();
   }
 
