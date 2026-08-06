@@ -108,10 +108,20 @@ public class GatewaySecurityConfig {
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers(PUBLIC_PATHS).permitAll()
                         .pathMatchers(PUBLIC_CONVENTION_PATHS).permitAll()
+                        // Every administrative surface, gated on the role rather than
+                        // merely on being logged in. `authenticated()` here would let any
+                        // customer with a valid token list all users and edit stock, since
+                        // a token proves who you are, not what you may do.
+                        //
+                        // admin-service enforces the same rule itself; this is the outer
+                        // of two checks, so a request that bypasses the gateway and hits
+                        // the pod directly is still rejected.
+                        .pathMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                         // Declared before the catch-all: the admin listing lives under
                         // the same /api/v1/product prefix as the public catalogue, so
                         // it has to be claimed first or the GET rule would open it.
-                        .pathMatchers("/api/v1/product/admin/**", "/api/v1/category/admin/**").authenticated()
+                        .pathMatchers("/api/v1/product/admin/**", "/api/v1/category/admin/**")
+                            .hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .pathMatchers(HttpMethod.GET, PUBLIC_GET_PATHS).permitAll()
                         .pathMatchers(PUBLIC_CART_PATHS).permitAll()
                         .anyExchange().authenticated())

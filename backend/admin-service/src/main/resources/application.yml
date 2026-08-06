@@ -67,8 +67,9 @@ server:
 
   forward-headers-strategy: framework
 
-jwt:
-  secret: ${JWT_SECRET}
+# The legacy `jwt.secret` was removed along with the HS256 filter it fed. It was
+# the shared symmetric key: any holder could mint admin tokens, not just verify
+# them. Tokens are now RS256 only, validated against the realm JWKS below.
 
 elastic:
   host:

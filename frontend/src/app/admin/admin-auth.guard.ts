@@ -10,9 +10,15 @@ import { OidcSecurityService } from 'angular-auth-oidc-client';
  * ['SUPER_ADMIN'] - so it granted access to everyone, including anonymous visitors.
  * Roles now come from the ID token Keycloak signed.
  *
- * This still only controls what the UI renders. The admin APIs enforce ROLE_ADMIN
- * server-side with @PreAuthorize; anyone can bypass this guard by calling the API
- * directly, and that is fine, because the API is where the real check lives.
+ * This still only controls what the UI renders - a guard is a rendering decision,
+ * not an access control, and anyone can bypass it with curl. It is safe to rely on
+ * only because the same role is enforced twice server-side: at the gateway on
+ * /api/v1/admin/**, and again inside admin-service's own filter chain.
+ *
+ * That server-side half was missing until recently: the rule in admin-service sat
+ * commented out above a permitAll(), so this guard was briefly the only thing
+ * standing in front of the admin API. Do not weaken it on the assumption that the
+ * backend is covered - check that it still is.
  */
 export const AdminAuthGuard: CanActivateFn = () => {
   const oidc = inject(OidcSecurityService);

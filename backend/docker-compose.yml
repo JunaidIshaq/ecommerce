@@ -665,7 +665,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
       - KAFKA_BOOTSTRAP=kafka:9092
-      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
+      # No JWT_SECRET: admin-service no longer accepts legacy HS256 tokens. It
+      # validates Keycloak RS256 only, which needs the public JWKS above and no secret.
       - SERVER_PORT=8093
       - LOGSTASH_HOST=logstash
       - LOGSTASH_PORT=5000
