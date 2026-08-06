@@ -132,6 +132,16 @@
   color: #2563eb;
 }
 
+/* Admin shortcut - tinted so it reads as a privileged action, not another
+   storefront icon. Only rendered for ROLE_ADMIN / ROLE_SUPER_ADMIN. */
+.admin-link {
+  color: #b45309;
+}
+
+.admin-link:hover {
+  color: #92400e;
+}
+
 .cart-count {
   position: absolute;
   top: -6px;

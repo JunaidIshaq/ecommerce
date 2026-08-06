@@ -38,6 +38,15 @@
       <a routerLink="/product" class="nav-link">Products</a>
       <a routerLink="/profile" class="nav-link" *ngIf="(user$ | async)">Profile</a>
 
+      <!-- 🛡 Admin shortcut - only rendered for ROLE_ADMIN / ROLE_SUPER_ADMIN -->
+      <a routerLink="/admin"
+         class="icon-btn admin-link"
+         title="Admin Dashboard"
+         aria-label="Admin Dashboard"
+         *ngIf="isAdmin$ | async">
+        <i class="fa fa-user-shield"></i>
+      </a>
+
       <!-- 🌟 Notification Bell -->
       <div class="notif-wrapper" *ngIf="(user$ | async)">
         <i class="fa fa-bell notif-icon" (click)="toggleDropdown()"></i>
@@ -116,6 +125,9 @@
   <div class="mobile-menu" [class.open]="menuOpen">
     <a routerLink="/product" (click)="closeMenu()">Products</a>
     <a routerLink="/profile" (click)="closeMenu()" *ngIf="(user$ | async)">Profile</a>
+    <a routerLink="/admin" (click)="closeMenu()" *ngIf="isAdmin$ | async">
+      <i class="fa fa-user-shield"></i> Admin Dashboard
+    </a>
     <a routerLink="/orders" (click)="closeMenu()" *ngIf="(user$ | async)">My Orders</a>
     <a routerLink="/cart" (click)="closeMenu()">Cart ({{ (cartCount$ | async) || 0 }})</a>
     <a routerLink="/login" (click)="closeMenu()" *ngIf="!(user$ | async)">Login</a>

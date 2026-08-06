@@ -22,6 +22,14 @@ export class HeaderComponent implements OnInit {
 
   cartCount$: Observable<number>;
   user$: Observable<User | null>;
+
+  /**
+   * Drives the admin shortcut in the navbar. Roles come from the ID token Keycloak
+   * signed - the same source AdminAuthGuard reads - so the icon cannot appear for
+   * someone the guard would turn away. Hiding it is a cosmetic decision only; the
+   * role is enforced at the gateway and again inside admin-service.
+   */
+  isAdmin$: Observable<boolean>;
   query = '';
   menuOpen = false;
 
@@ -49,6 +57,9 @@ export class HeaderComponent implements OnInit {
   ) {
     this.cartCount$ = this.cart.getCart().pipe(map(() => this.cart.count()));
     this.user$ = this.auth.currentUser();
+    this.isAdmin$ = this.auth.getUserRoles().pipe(
+      map(roles => roles.includes('ROLE_ADMIN') || roles.includes('ROLE_SUPER_ADMIN'))
+    );
     this.user$.pipe(take(1)).subscribe(u => this.userId = u?.id!);
 
   }
