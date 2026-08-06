@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, ElementRef, HostListener, NgZone, OnInit} from '@angular/core';
 import {CartService} from '../../services/cart.service';
-import {map, take} from 'rxjs/operators';
-import {Observable} from 'rxjs';
+import {map, switchMap, take} from 'rxjs/operators';
+import {Observable, of} from 'rxjs';
 import {User} from '../../models/user.model';
 import {FormsModule} from '@angular/forms';
 import {AsyncPipe, CommonModule, DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
@@ -28,6 +28,13 @@ export class HeaderComponent implements OnInit {
    * signed - the same source AdminAuthGuard reads - so the icon cannot appear for
    * someone the guard would turn away. Hiding it is a cosmetic decision only; the
    * role is enforced at the gateway and again inside admin-service.
+   *
+   * This is chained off user$ rather than reading the token directly. The header is
+   * constructed once, at app start, before the OIDC callback has resolved -
+   * getPayloadFromIdToken() emits a single value and completes, so reading it in the
+   * constructor captured "no token yet" and never re-evaluated. The icon then stayed
+   * hidden for the whole session, including for real admins. user$ re-emits on login,
+   * silent renew and logout, so the token is re-read each time it can have changed.
    */
   isAdmin$: Observable<boolean>;
   query = '';
@@ -57,7 +64,8 @@ export class HeaderComponent implements OnInit {
   ) {
     this.cartCount$ = this.cart.getCart().pipe(map(() => this.cart.count()));
     this.user$ = this.auth.currentUser();
-    this.isAdmin$ = this.auth.getUserRoles().pipe(
+    this.isAdmin$ = this.user$.pipe(
+      switchMap(u => (u ? this.auth.getUserRoles() : of<string[]>([]))),
       map(roles => roles.includes('ROLE_ADMIN') || roles.includes('ROLE_SUPER_ADMIN'))
     );
     this.user$.pipe(take(1)).subscribe(u => this.userId = u?.id!);

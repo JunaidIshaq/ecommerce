@@ -44,9 +44,15 @@
   align-items: center;
   gap: 24px;
   padding: 14px 30px;
-  max-width: 1280px;
-  margin: 0 auto;
+  width: 100%;
 }
+
+/* Deliberately not capped at a max-width. The bar was previously limited to
+   1280px and centred, so on any display wider than that the logo floated in
+   from the left edge and the action group stopped well short of the right
+   edge - flex alignment could not fix that, because the flex container itself
+   ended there. The bar now spans the viewport and the 30px padding sets the
+   inset. */
 
 /* The logo keeps its natural width; the search bar absorbs the slack so the
    action group is pushed hard against the right edge and stays there. With
