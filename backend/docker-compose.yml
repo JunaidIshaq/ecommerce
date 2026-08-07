@@ -109,6 +109,11 @@ services:
     container_name: api-gateway
     environment:
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - SPRING_REDIS_HOST=redis
       # Legacy HS256 secret. Still needed during the dual-token migration window so
       # tokens minted by the old auth-service keep validating. Remove after phase 4.
@@ -206,6 +211,11 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/product_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -245,6 +255,11 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/category_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -278,6 +293,11 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/inventory_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -317,6 +337,11 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/order_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -357,6 +382,11 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/payment_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -396,6 +426,11 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/user_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -431,6 +466,11 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       # Admin REST API access: auth-service creates/updates users in Keycloak.
       # Without these, /api/v1/auth/register fails at runtime with a 500.
       # Must include KEYCLOAK_RELATIVE_PATH (prod serves Keycloak under /auth),
@@ -438,7 +478,6 @@ services:
       - KEYCLOAK_BASE_URL=${KEYCLOAK_BASE_URL:-http://keycloak:8180}
       - KEYCLOAK_REALM=${KEYCLOAK_REALM:-shopfast}
       - KEYCLOAK_ADMIN_CLIENT_ID=${KEYCLOAK_ADMIN_CLIENT_ID:-shopfast-services}
-      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auth_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -481,6 +520,11 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/cart_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -519,6 +563,11 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/coupon_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -557,6 +606,11 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/review_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -593,6 +647,11 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/notification_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
@@ -626,6 +685,11 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - ELASTIC_URI=http://elasticsearch:9200
       - KAFKA_BOOTSTRAP=kafka:9092
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
@@ -661,6 +725,11 @@ services:
     environment:
       - KEYCLOAK_ISSUER_URI=${KEYCLOAK_ISSUER_URI:-http://keycloak:8180/realms/shopfast}
       - KEYCLOAK_JWK_SET_URI=${KEYCLOAK_JWK_SET_URI:-}
+      # Client-credentials identity for service-to-service calls. Without it the
+      # ServiceTokenProvider auto-config stays off and every internal hop goes out
+      # unauthenticated - which is why guest add-to-cart got a 401 from
+      # product-service /internal and surfaced as "Product not available".
+      - SHOPFAST_SERVICES_CLIENT_SECRET=${SHOPFAST_SERVICES_CLIENT_SECRET:?SHOPFAST_SERVICES_CLIENT_SECRET must be set in .env}
       - POSTGRES_URI=jdbc:postgresql://postgres:5432/admin_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}

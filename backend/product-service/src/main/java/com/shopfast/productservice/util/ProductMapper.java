@@ -4,11 +4,7 @@ import com.shopfast.productservice.dto.ProductDto;
 import com.shopfast.productservice.dto.ProductInternalResponseDto;
 import com.shopfast.productservice.model.Product;
 
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 
 public class ProductMapper {
 
