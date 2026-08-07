@@ -86,9 +86,56 @@ public class GatewaySecurityConfig {
             "/api/v1/category/**",
     };
 
+    /**
+     * The cart is one set of URLs for guests and signed-in shoppers alike.
+     * cart-service decides which basket a request addresses from the token when
+     * there is one and the {@code X-Anon-Id} header otherwise, so the gateway
+     * cannot usefully require a token here: doing so is what made anonymous
+     * add-to-cart return 401.
+     *
+     * <p>Permitting the path does not make it unauthenticated. A request carrying
+     * a bearer token is still verified, and cart-service refuses any request that
+     * identifies no cart at all.
+     */
     private static final String[] PUBLIC_CART_PATHS = {
+            "/api/v1/cart",
+            "/api/v1/cart/items",
+            "/api/v1/cart/items/**",
+            // Retained while clients still hold the old guest URLs.
             "/api/v1/cart/guest",
             "/api/v1/cart/guest/**",
+    };
+
+    /**
+     * Cart endpoints that must keep a token. Enumerated separately, and matched
+     * first, because {@code /merge} folds a guest basket into a named user's
+     * account and {@code /internal} is service-to-service - opening either as
+     * part of the cart prefix would let anyone write into another user's cart.
+     */
+    private static final String[] AUTHENTICATED_CART_PATHS = {
+            "/api/v1/cart/merge",
+            "/api/v1/cart/internal",
+            "/api/v1/cart/internal/**",
+    };
+
+    /**
+     * Guest checkout. A shopper who filled an anonymous basket has to be able to
+     * pay without first creating an account, so the checkout POST cannot demand a
+     * token - order-service derives the buyer from the token when one is present
+     * and from {@code X-Anon-Id} otherwise.
+     */
+    private static final String[] PUBLIC_ORDER_POST_PATHS = {
+            "/api/v1/order/checkout",
+    };
+
+    /**
+     * The confirmation page a guest lands on after paying. Only the single-order
+     * read is opened - never {@code GET /api/v1/order}, which lists a shopper's
+     * whole history. order-service still requires the capability token issued at
+     * checkout, so an opened path is not an open order.
+     */
+    private static final String[] PUBLIC_ORDER_GET_PATHS = {
+            "/api/v1/order/*",
     };
 
     @Bean
@@ -123,7 +170,10 @@ public class GatewaySecurityConfig {
                         .pathMatchers("/api/v1/product/admin/**", "/api/v1/category/admin/**")
                             .hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .pathMatchers(HttpMethod.GET, PUBLIC_GET_PATHS).permitAll()
+                        .pathMatchers(AUTHENTICATED_CART_PATHS).authenticated()
                         .pathMatchers(PUBLIC_CART_PATHS).permitAll()
+                        .pathMatchers(HttpMethod.POST, PUBLIC_ORDER_POST_PATHS).permitAll()
+                        .pathMatchers(HttpMethod.GET, PUBLIC_ORDER_GET_PATHS).permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt

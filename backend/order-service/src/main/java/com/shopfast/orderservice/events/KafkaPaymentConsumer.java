@@ -135,7 +135,7 @@ public class KafkaPaymentConsumer {
         // The gateway already degrades quietly here; this guard only stops an
         // unexpected error from rolling back an otherwise-confirmed order.
         try {
-            remoteGateway.clearCart(order.getUserId());
+            remoteGateway.clearCart(order.getUserId(), order.isGuest());
             log.info("Cart cleared for user {}", order.getUserId());
         } catch (Exception ex) {
             log.error("Failed to clear cart for user {}: {}", order.getUserId(), ex.getMessage());

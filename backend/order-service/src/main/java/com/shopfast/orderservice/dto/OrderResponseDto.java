@@ -56,6 +56,15 @@ public class OrderResponseDto implements Serializable {
     @JsonProperty("updated_at")
     private String updatedAt;
 
+    /**
+     * Returned once, at guest checkout, and never by {@link #from(Order)} - a token
+     * echoed back on every read would leak from any endpoint that renders an order.
+     * Omitted from the payload when null.
+     */
+    @JsonProperty("access_token")
+    @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+    private String accessToken;
+
     public static OrderResponseDto from(Order order) {
         return OrderResponseDto.builder()
                 .id(order.getId() != null ? order.getId().toString() : null)

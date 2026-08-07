@@ -53,8 +53,32 @@ public class Order {
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
+    /**
+     * The Keycloak subject for a signed-in shopper, or the anonymous browser id
+     * for a guest. {@link #guest} says which, so a guest id can never be mistaken
+     * for a real account.
+     */
     @Column(nullable = false)
     private String userId;
+
+    /**
+     * True when {@link #userId} is an anonymous browser id rather than an account.
+     *
+     * <p>The DDL carries a default so adding this column to a table that already
+     * has rows succeeds - a bare NOT NULL would fail the migration outright, and
+     * every pre-existing order was placed by a signed-in shopper.
+     */
+    @Column(nullable = false, columnDefinition = "boolean not null default false")
+    private boolean guest;
+
+    /**
+     * Capability token handed back once at checkout so a guest - who has no JWT -
+     * can open their own order later. Random 256 bits: the order id alone is not an
+     * access control, and guests have no other credential to prove ownership with.
+     * Never returned when listing orders.
+     */
+    @Column(length = 64)
+    private String accessToken;
 
     @Column(nullable = false, unique = true)
     private String orderNumber;
