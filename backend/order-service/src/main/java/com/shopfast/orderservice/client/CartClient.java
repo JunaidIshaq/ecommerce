@@ -8,13 +8,27 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.util.List;
 
+/**
+ * A basket belongs either to a signed-in shopper ({@code X-User-Id}) or to a
+ * guest ({@code X-Anon-Id}); both headers are optional here so the caller can
+ * pick the right one at runtime. Feign omits a header whose value is null.
+ */
 @FeignClient(name="cart-service", url = "${cart.service.url}")
 public interface CartClient {
 
     @GetMapping("/api/v1/cart/internal")
-    public List<CartItemDto> getCartInternal(@RequestHeader("X-User-Id") String userId);
+    List<CartItemDto> getCartInternal(@RequestHeader(value = "X-User-Id", required = false) String userId,
+                                      @RequestHeader(value = "X-Anon-Id", required = false) String anonId);
 
     @DeleteMapping("/api/v1/cart/internal")
-    public List<CartItemDto> clearCartInternal(@RequestHeader("X-User-Id") String userId);
+    List<CartItemDto> clearCartInternal(@RequestHeader(value = "X-User-Id", required = false) String userId,
+                                        @RequestHeader(value = "X-Anon-Id", required = false) String anonId);
 
+    default List<CartItemDto> getCartInternal(String userId) {
+        return getCartInternal(userId, null);
+    }
+
+    default List<CartItemDto> clearCartInternal(String userId) {
+        return clearCartInternal(userId, null);
+    }
 }

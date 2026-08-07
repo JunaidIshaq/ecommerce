@@ -34,7 +34,10 @@ public class SecurityConfig {
                 "https://www.shopfast.live"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
+        // X-Anon-Id identifies a guest basket. It is a custom header, so the browser
+        // will not send it unless the preflight response names it here - omitting it
+        // fails anonymous cart calls in the browser while curl still works.
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control", "X-Anon-Id"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 

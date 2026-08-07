@@ -146,6 +146,16 @@
             <artifactId>common-lib</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!--
+          The module had no test dependency at all, so src/test could not compile
+          and any test added here would have been silently impossible to run.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -39,14 +39,27 @@ public class RemoteGateway {
 
     // ------------------------------------------------------------------ cart
 
+    /**
+     * @param buyerId the Keycloak subject for a signed-in shopper, or the anonymous
+     *                browser id for a guest
+     * @param guest   selects which header identifies the basket; a guest basket is
+     *                stored under a different Redis key, so getting this wrong reads
+     *                an empty cart and fails checkout with "Cart is empty"
+     */
     @CircuitBreaker(name = "cart-service", fallbackMethod = "getCartFallback")
     @Retry(name = "cart-service")
+    public List<CartItemDto> getCart(String buyerId, boolean guest) {
+        return guest
+                ? cartClient.getCartInternal(null, buyerId)
+                : cartClient.getCartInternal(buyerId, null);
+    }
+
     public List<CartItemDto> getCart(String userId) {
-        return cartClient.getCartInternal(userId);
+        return getCart(userId, false);
     }
 
     @SuppressWarnings("unused") // referenced by name from @CircuitBreaker
-    private List<CartItemDto> getCartFallback(String userId, Throwable t) {
+    private List<CartItemDto> getCartFallback(String buyerId, boolean guest, Throwable t) {
         // Reading the cart gates the whole checkout; guessing "empty" here would
         // silently discard the customer's basket, so surface the outage instead.
         throw new RemoteServiceUnavailableException("cart-service", t);
@@ -56,14 +69,22 @@ public class RemoteGateway {
      * Best effort: called only after payment has already settled.
      */
     @CircuitBreaker(name = "cart-service", fallbackMethod = "clearCartFallback")
+    public void clearCart(String buyerId, boolean guest) {
+        if (guest) {
+            cartClient.clearCartInternal(null, buyerId);
+        } else {
+            cartClient.clearCartInternal(buyerId, null);
+        }
+    }
+
     public void clearCart(String userId) {
-        cartClient.clearCartInternal(userId);
+        clearCart(userId, false);
     }
 
     @SuppressWarnings("unused")
-    private void clearCartFallback(String userId, Throwable t) {
-        log.warn("Could not clear cart for user {} after checkout: {}. "
-                + "Order is unaffected; cart will be reconciled on next write.", userId, t.toString());
+    private void clearCartFallback(String buyerId, boolean guest, Throwable t) {
+        log.warn("Could not clear cart for buyer {} after checkout: {}. "
+                + "Order is unaffected; cart will be reconciled on next write.", buyerId, t.toString());
     }
 
     // ---------------------------------------------------------------- coupon

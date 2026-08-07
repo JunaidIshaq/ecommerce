@@ -99,17 +99,53 @@ public class OrderController {
      */
     @Operation(summary = "Get order by id")
     @GetMapping("/{id}")
-    public ResponseEntity<GenericApiResponseDto<OrderResponseDto>> getOrder(@RequestHeader("userId") String userId, @PathVariable("id") UUID id) {
+    public ResponseEntity<GenericApiResponseDto<OrderResponseDto>> getOrder(
+            @RequestHeader(value = "X-Order-Token", required = false) String orderToken,
+            @PathVariable("id") UUID id) {
+        String userId = currentUserId();
         return orderService.getOrderById(id)
-                .filter(order -> canRead(order, userId))
+                .filter(order -> canRead(order, userId, orderToken))
                 .map(order -> enrichOrderResponse(OrderResponseDto.from(order), order))
                 .map(orderResponse -> ResponseEntity.ok(GenericApiResponseDto.success(orderResponse, "Order fetched successfully")))
                 .orElse(ResponseEntity.ok(GenericApiResponseDto.error("Order not found", 404)));
     }
 
-    /** Owner, or staff acting through the admin console. */
-    private boolean canRead(Order order, String userId) {
-        return (userId != null && userId.equals(order.getUserId())) || isAdmin();
+    /**
+     * Owner, staff, or a guest presenting the capability token they were handed at
+     * checkout. The guest branch is what makes an order visible to someone who has
+     * no account: the order id alone stays insufficient.
+     */
+    private boolean canRead(Order order, String userId, String orderToken) {
+        if (userId != null && userId.equals(order.getUserId())) {
+            return true;
+        }
+        if (order.isGuest() && matchesAccessToken(order, orderToken)) {
+            return true;
+        }
+        return isAdmin();
+    }
+
+    /**
+     * Constant-time so the comparison cannot be timed character by character to
+     * recover a valid token.
+     */
+    private boolean matchesAccessToken(Order order, String orderToken) {
+        if (order.getAccessToken() == null || orderToken == null || orderToken.isBlank()) {
+            return false;
+        }
+        return java.security.MessageDigest.isEqual(
+                order.getAccessToken().getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                orderToken.trim().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+
+    /** The subject from the token, or null for an anonymous request. */
+    private String currentUserId() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken) {
+            return null;
+        }
+        return authentication.getName();
     }
 
     private boolean isAdmin() {

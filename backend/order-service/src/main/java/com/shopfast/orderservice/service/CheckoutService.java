@@ -1,4 +1,4 @@
-package com.shopfast.orderservice.service;
+ package com.shopfast.orderservice.service;
 
 import com.shopfast.common.enums.NotificationChannel;
 import com.shopfast.common.enums.NotificationType;
@@ -28,9 +28,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.shopfast.orderservice.web.OrderIdentity;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +58,8 @@ public class CheckoutService {
     private static final int MONEY_SCALE = 2;
     private static final RoundingMode MONEY_ROUNDING = RoundingMode.HALF_UP;
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     private final OrderRepository orderRepository;
     private final KafkaOrderProducer kafkaOrderProducer;
     private final ProcessedCommandRepository processedCommandRepository;
@@ -62,14 +68,19 @@ public class CheckoutService {
     private final OrderNumberGenerator orderNumberGenerator;
 
     @Transactional
-    public Order checkout(String userId, CheckoutRequestDto request) {
-        List<CartItemDto> cartItems = loadCart(userId);
+    public Order checkout(OrderIdentity buyer, CheckoutRequestDto request) {
+        String buyerId = buyer.id();
+        List<CartItemDto> cartItems = loadCart(buyer);
 
         BigDecimal subTotal = calculateSubTotal(cartItems);
-        BigDecimal discount = resolveDiscount(userId, request, cartItems, subTotal);
+        // Coupons are validated per account (usage limits, eligibility), so a guest
+        // gets no discount rather than an unlimited one shared across browsers.
+        BigDecimal discount = buyer.isAuthenticated()
+                ? resolveDiscount(buyerId, request, cartItems, subTotal)
+                : BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING);
         BigDecimal total = subTotal.subtract(discount).max(BigDecimal.ZERO).setScale(MONEY_SCALE, MONEY_ROUNDING);
 
-        Order order = buildOrder(userId, request, cartItems, subTotal, discount, total);
+        Order order = buildOrder(buyer, request, cartItems, subTotal, discount, total);
         order = orderRepository.save(order); // items cascade from Order
 
         processPayment(order, request, total);
@@ -78,10 +89,15 @@ public class CheckoutService {
         return order;
     }
 
+    @Transactional
+    public Order checkout(String userId, CheckoutRequestDto request) {
+        return checkout(OrderIdentity.ofUser(userId), request);
+    }
+
     // ------------------------------------------------------------------ cart
 
-    private List<CartItemDto> loadCart(String userId) {
-        List<CartItemDto> cartItems = remoteGateway.getCart(userId);
+    private List<CartItemDto> loadCart(OrderIdentity buyer) {
+        List<CartItemDto> cartItems = remoteGateway.getCart(buyer.id(), buyer.guest());
         if (cartItems == null || cartItems.isEmpty()) {
             throw new IllegalArgumentException("Cart is empty");
         }
@@ -139,14 +155,20 @@ public class CheckoutService {
 
     // ---------------------------------------------------------------- order
 
-    private Order buildOrder(String userId,
+    private Order buildOrder(OrderIdentity buyer,
                              CheckoutRequestDto request,
                              List<CartItemDto> cartItems,
                              BigDecimal subTotal,
                              BigDecimal discount,
                              BigDecimal total) {
         Order order = new Order();
-        order.setUserId(userId);
+        order.setUserId(buyer.id());
+        order.setGuest(buyer.guest());
+        if (buyer.guest()) {
+            // A guest has no JWT to prove ownership with later, so hand them a
+            // capability token instead of relying on the order id being obscure.
+            order.setAccessToken(newAccessToken());
+        }
         order.setOrderNumber(orderNumberGenerator.next());
         order.setStatus(OrderStatus.CREATED);
         order.setSubTotal(subTotal);
@@ -182,6 +204,13 @@ public class CheckoutService {
         }
         order.setItems(items);
         return order;
+    }
+
+    /** 256 bits from a CSPRNG, URL-safe so it can travel in a link or a header. */
+    private String newAccessToken() {
+        byte[] bytes = new byte[32];
+        SECURE_RANDOM.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
     private PaymentMethod resolvePaymentMethod(CheckoutRequestDto request) {

@@ -90,12 +90,9 @@ export class CheckoutComponent {
 
     this.user$.pipe(take(1)).subscribe({
       next: (user) => {
-        if (!user || !user.id) {
-          this.toast.error('User not logged in !');
-          this.placing = false;
-          return;
-        }
-
+        // No sign-in gate: a guest who filled an anonymous basket can pay. The
+        // buyer is derived server-side from the token or the anonymous id, so
+        // there is nothing here for the client to assert.
         const body: any = {
           paymentMethod: this.paymentMethod,
           fullName: this.address.fullName,
@@ -118,7 +115,7 @@ export class CheckoutComponent {
           body.cvv = this.cvv;
         }
 
-        this.cart.checkoutWithPayment(user.id, body).subscribe({
+        this.cart.checkoutWithPayment(user?.id ?? '', body).subscribe({
           next: (res: any) => {
             this.cart.clear().subscribe();
             // Backend may wrap order in { data: {...} } or return it directly

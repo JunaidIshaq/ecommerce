@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
 import { isPlatformBrowser } from '@angular/common';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { PaginatedOrdersResponse } from '../models/paginated-orders.model';
+import { getGuestOrderToken } from '../utils/guest-order-tokens';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -32,9 +33,19 @@ export class OrderService {
     }
   }
 
+  /**
+   * The owner is taken from the bearer token server-side; the `userId` header it
+   * used to send proved nothing and let any caller read any order by id.
+   *
+   * A guest has no token, so the capability token issued at their checkout is
+   * presented instead - it is what makes the confirmation page work without an
+   * account, while keeping the order closed to anyone who merely knows the id.
+   */
   getOrderById(id: string | number): Observable<Order> {
-    const userId = this.getUserId();
-    const headers = userId ? new HttpHeaders().set('userId', userId) : new HttpHeaders();
+    const orderToken = getGuestOrderToken(String(id));
+    const headers = orderToken
+      ? new HttpHeaders().set('X-Order-Token', orderToken)
+      : new HttpHeaders();
     return this.http.get<any>(`${this.baseUrl}/api/v1/order/${id}`, { headers }).pipe(
       map((res: any) => res?.data as Order)
     );

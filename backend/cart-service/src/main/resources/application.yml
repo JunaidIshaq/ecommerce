@@ -173,6 +173,12 @@ shopfast:
     # creating an account, and the cart is keyed by the anonId the browser
     # generates. These must stay open or "add to cart" fails for logged-out
     # visitors, which is most first-time traffic.
+    #
+    # The cart endpoints are one set of URLs for both kinds of shopper -
+    # CartIdentityResolver picks the basket from the token if there is one and the
+    # X-Anon-Id header otherwise - so they are listed here rather than requiring a
+    # token. /merge and /internal are deliberately absent: they are not listed, so
+    # the default deny still applies to them.
     public-paths:
       - /actuator/health
       - /actuator/health/**
@@ -180,6 +186,10 @@ shopfast:
       - /actuator/prometheus
       - /v3/api-docs/**
       - /swagger-ui/**
+      - /api/v1/cart
+      - /api/v1/cart/items
+      - /api/v1/cart/items/**
+      # Retained while clients still hold the old guest URLs.
       - /api/v1/cart/guest
       - /api/v1/cart/guest/**
     # Service-to-service credentials. Absent in local runs, in which case the
