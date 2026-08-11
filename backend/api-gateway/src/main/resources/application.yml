@@ -52,6 +52,18 @@ spring:
           filters:
             - RewritePath=/api/v1/public/review(?<segment>/?.*), /api/v1/review$\{segment}
 
+        - id: identity-service-public
+          uri: lb://identity-service
+          predicates:
+            - Path=/identity/api/v1/public/**
+          filters:
+            - RewritePath=/identity/api/v1/public/(?<segment>/?.*), /api/v1/$\{segment}
+
+        - id: keycloak
+          uri: http://keycloak:8180
+          predicates:
+            - Path=/realms/**
+
         - id: product-service
           uri: lb://product-service
           predicates:
@@ -72,10 +84,25 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/v1/user/**
+
+        - id: user-service-prefix
+          uri: lb://user-service
+          predicates:
+            - Path=/users/api/v1/user/**
+          filters:
+            - RewritePath=/users/api/v1/user(?<segment>/?.*), /api/v1/user$\{segment}
         - id: auth-service
           uri: lb://auth-service
           predicates:
             - Path=/api/v1/auth/**
+
+        - id: identity-service
+          uri: lb://identity-service
+          predicates:
+            - Path=/identity/api/v1/**
+          filters:
+            - RewritePath=/identity/api/v1/(?<segment>/?.*), /api/v1/$\{segment}
+
         - id: cart-service
           uri: lb://cart-service
           predicates:

@@ -49,9 +49,7 @@ public class GatewaySecurityConfig {
             "/actuator/prometheus",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            // Reachable before a token exists. Listed individually rather than as
-            // /api/v1/auth/** so that logout-all and validate - which act on an
-            // existing session - are not accidentally opened too.
+            "/realms/*/protocol/openid-connect/token",
             "/api/v1/auth/register",
             "/api/v1/auth/password-reset",
             "/api/v1/auth/login",
@@ -71,6 +69,7 @@ public class GatewaySecurityConfig {
             "/api/v1/public/**",
             "/api/v1/*/public/**",
             "/api/public/**",
+            "/*/api/v1/public/**",
     };
 
     /**

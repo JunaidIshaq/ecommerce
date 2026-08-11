@@ -56,7 +56,7 @@ public class CouponService {
     public CouponValidateResponseDto validate(CouponValidateRequestDto requestDto) {
         Optional<Coupon> optionalCoupon = couponRepository.findByCode(requestDto.getCode().trim().toUpperCase());
         if (optionalCoupon.isEmpty()) {
-            buildInvalid(requestDto.getCode(), "Coupon code not found !");
+            return buildInvalid(requestDto.getCode(), "Coupon code not found !");
         }
 
         Coupon coupon = optionalCoupon.get();

@@ -137,6 +137,7 @@ resilience4j:
           - java.io.IOException
           - java.util.concurrent.TimeoutException
           - feign.RetryableException
+
     instances:
       cart-service:
         baseConfig: default
