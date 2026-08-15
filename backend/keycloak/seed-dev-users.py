@@ -42,7 +42,7 @@ EMAIL_TEMPLATE = "alice{n}@yopmail.com"
 #   specialChars(1) and notUsername and passwordHistory(3)
 # Keycloak rejects the user creation outright if it does not, so keep these in
 # step if the policy is ever tightened.
-PASSWORD = os.environ.get("SEED_USER_PASSWORD", "Secret123!xyz")
+PASSWORD = os.environ.get("SEED_USER_PASSWORD", "Alice@12345")
 
 # Realm roles in this project carry the ROLE_ prefix in Keycloak itself
 # (KeycloakRealmRoleConverter deliberately does not add a second one).

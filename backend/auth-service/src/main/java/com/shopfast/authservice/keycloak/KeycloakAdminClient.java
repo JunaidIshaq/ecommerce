@@ -68,13 +68,18 @@ public class KeycloakAdminClient {
      */
     public String createUser(String username, String email, String firstName, String lastName,
                              String password, List<String> requiredActions) {
+        return createUser(username, email, firstName, lastName, password, requiredActions, false);
+    }
+
+    public String createUser(String username, String email, String firstName, String lastName,
+                             String password, List<String> requiredActions, boolean emailVerified) {
         Map<String, Object> body = Map.of(
                 "username", username,
                 "email", email,
                 "firstName", firstName == null ? "" : firstName,
                 "lastName", lastName == null ? "" : lastName,
                 "enabled", true,
-                "emailVerified", false,
+                "emailVerified", emailVerified,
                 "requiredActions", requiredActions == null ? List.of("VERIFY_EMAIL") : requiredActions,
                 "credentials", password == null ? List.of() : List.of(Map.of(
                         "type", "password",

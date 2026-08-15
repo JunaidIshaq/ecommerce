@@ -90,6 +90,7 @@ management:
 
 app:
   seed-auth: true
+  seed-users: true
   password:
     encryption:
       # AES-256-GCM encryption key for login password (Base64-encoded 32 bytes)
