@@ -38,3 +38,8 @@ data:
   SERVICE_LIMITS_MEM: "1Gi"
   IMAGE_REGISTRY: "ghcr.io/shopfast"
   IMAGE_TAG: "latest"
+  # Force the JVM to bind sockets on IPv4 (0.0.0.0) instead of IPv6 (::).
+  # On Java 21 the stack defaults to IPv6, which makes ClusterIP (IPv4)
+  # services unable to reach the pods, breaking service-to-service calls
+  # and wait-for-deps init containers.
+  JAVA_TOOL_OPTIONS: "-Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false"
