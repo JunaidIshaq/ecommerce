@@ -33,8 +33,8 @@ spec:
     - shopfast-test.live
     - www.shopfast-test.live
   issuerRef:
-    name: shopfast-selfsigned
-    kind: Issuer
+    name: letsencrypt-prod
+    kind: ClusterIssuer
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
