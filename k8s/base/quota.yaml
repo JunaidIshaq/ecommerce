@@ -1,0 +1,38 @@
+# Namespace resource quota — prevents noisy-neighbor / runaway scaling.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: shopfast-quota
+  namespace: shopfast
+spec:
+  hard:
+    pods: "120"
+    requests.cpu: "24"
+    requests.memory: 24Gi
+    limits.cpu: "48"
+    limits.memory: 48Gi
+    configmaps: "50"
+    secrets: "50"
+    services: "80"
+---
+# Default resource limits applied to every pod that does not set its own.
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: shopfast-limits
+  namespace: shopfast
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 768Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 256Mi
+      max:
+        cpu: "2"
+        memory: 2Gi
+      min:
+        cpu: 50m
+        memory: 128Mi

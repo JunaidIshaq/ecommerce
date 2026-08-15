@@ -1,0 +1,92 @@
+# Development overlay — one-command bring-up for a local cluster.
+#
+#   kubectl apply -k k8s/overlays/dev
+#
+# Images are retagged to the local insecure registry (localhost:5000) so
+# no external registry push is required. In CI/prod use git-SHA tags.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: shopfast
+
+resources:
+  # 1. namespace, config, secrets, quota, network policies
+  - ../../base
+  - ../../base/secrets
+
+  # 2. stateful backing services
+  - ../../infra
+
+  # 3. discovery + gateway + business services + frontend
+  - ../../services
+
+  # 4. ingress + TLS
+  - ../../ingress
+
+# Retag ghcr.io/shopfast/* -> localhost:5000/shopfast/*:dev (local registry).
+images:
+  - name: ghcr.io/shopfast/eureka-server
+    newName: localhost:5000/shopfast/eureka-server
+    newTag: dev
+  - name: ghcr.io/shopfast/api-gateway
+    newName: localhost:5000/shopfast/api-gateway
+    newTag: dev
+  - name: ghcr.io/shopfast/product-service
+    newName: localhost:5000/shopfast/product-service
+    newTag: dev
+  - name: ghcr.io/shopfast/category-service
+    newName: localhost:5000/shopfast/category-service
+    newTag: dev
+  - name: ghcr.io/shopfast/user-service
+    newName: localhost:5000/shopfast/user-service
+    newTag: dev
+  - name: ghcr.io/shopfast/auth-service
+    newName: localhost:5000/shopfast/auth-service
+    newTag: dev
+  - name: ghcr.io/shopfast/inventory-service
+    newName: localhost:5000/shopfast/inventory-service
+    newTag: dev
+  - name: ghcr.io/shopfast/order-service
+    newName: localhost:5000/shopfast/order-service
+    newTag: dev
+  - name: ghcr.io/shopfast/payment-service
+    newName: localhost:5000/shopfast/payment-service
+    newTag: dev
+  - name: ghcr.io/shopfast/cart-service
+    newName: localhost:5000/shopfast/cart-service
+    newTag: dev
+  - name: ghcr.io/shopfast/coupon-service
+    newName: localhost:5000/shopfast/coupon-service
+    newTag: dev
+  - name: ghcr.io/shopfast/review-service
+    newName: localhost:5000/shopfast/review-service
+    newTag: dev
+  - name: ghcr.io/shopfast/notification-service
+    newName: localhost:5000/shopfast/notification-service
+    newTag: dev
+  - name: ghcr.io/shopfast/elastic-service
+    newName: localhost:5000/shopfast/elastic-service
+    newTag: dev
+  - name: ghcr.io/shopfast/admin-service
+    newName: localhost:5000/shopfast/admin-service
+    newTag: dev
+  - name: ghcr.io/shopfast/frontend
+    newName: localhost:5000/shopfast/frontend
+    newTag: dev
+
+# Single-node dev cluster: scale everything to 1 replica and trim CPU requests
+# so the 4-CPU node can schedule all 23 deployments + infra. Remove this block
+# for a multi-node / production cluster.
+patches:
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 100m

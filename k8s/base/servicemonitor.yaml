@@ -1,0 +1,26 @@
+# ---------------------------------------------------------------------------
+# Observability — Prometheus scrape config for Spring Actuator (plan section 8).
+#
+# Applies with the kube-prometheus-stack / Prometheus Operator. Each service
+# already exposes /actuator/prometheus; this ServiceMonitor selects all
+# shopfast app pods and scrapes them.
+# ---------------------------------------------------------------------------
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: shopfast-services
+  namespace: shopfast
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchExpressions:
+      - key: app
+        operator: Exists
+  namespaceSelector:
+    matchNames:
+      - shopfast
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: 30s

@@ -1,0 +1,139 @@
+{
+  "realm": "shopfast",
+  "enabled": true,
+  "displayName": "ShopFast",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "verifyEmail": true,
+  "editUsernameAllowed": false,
+  "accessTokenLifespan": 900,
+  "accessTokenLifespanForImplicitFlow": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 86400,
+  "offlineSessionIdleTimeout": 2592000,
+  "refreshTokenMaxReuse": 0,
+  "revokeRefreshToken": true,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "minimumQuickLoginWaitSeconds": 60,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 5,
+  "passwordPolicy": "length(12) and upperCase(1) and lowerCase(1) and digits(1) and specialChars(1) and notUsername and passwordHistory(3)",
+  "eventsEnabled": true,
+  "eventsExpiration": 2592000,
+  "adminEventsEnabled": true,
+  "adminEventsDetailsEnabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "ROLE_USER",
+        "description": "Standard customer"
+      },
+      {
+        "name": "ROLE_ADMIN",
+        "description": "Platform administrator"
+      },
+      {
+        "name": "ROLE_SELLER",
+        "description": "Marketplace seller"
+      },
+      {
+        "name": "ROLE_SUPPORT",
+        "description": "Customer support agent"
+      }
+    ]
+  },
+  "defaultRoles": [
+    "ROLE_USER",
+    "offline_access",
+    "uma_authorization"
+  ],
+  "clients": [
+    {
+      "clientId": "shopfast-web",
+      "name": "ShopFast Web Storefront",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:4200/*",
+        "https://shopfast.live/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200",
+        "https://shopfast.live"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:4200/*##https://shopfast.live/*"
+      }
+    },
+    {
+      "clientId": "shopfast-mobile",
+      "name": "ShopFast Mobile App",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "shopfast://callback"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+    {
+      "clientId": "shopfast-admin",
+      "name": "ShopFast Admin Console",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "${SHOPFAST_ADMIN_CLIENT_SECRET}",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:3001/*",
+        "https://admin.shopfast.example.com/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3001",
+        "https://admin.shopfast.example.com"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+    {
+      "clientId": "shopfast-services",
+      "name": "Service-to-service client credentials",
+      "description": "Used by Feign clients so internal calls carry a real token instead of trusting the network",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "${SHOPFAST_SERVICES_CLIENT_SECRET}",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "protocolMappers": [
+        {
+          "name": "service-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "shopfast-services",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ]
+}

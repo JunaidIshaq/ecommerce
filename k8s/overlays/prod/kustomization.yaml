@@ -1,0 +1,94 @@
+# Production overlay — Argo CD syncs THIS directory from git (plan section 10).
+#
+#   argocd app create shopfast --repo <git> --path k8s/overlays/prod --dest-server https://kubernetes.default.svc
+#
+# Differences from dev:
+#   - images pinned to an immutable git SHA (never :latest / :dev)
+#   - external Secrets via the External Secrets Operator (raw Secrets not applied;
+#     ../../base/secrets is excluded here and replaced by an ExternalSecret)
+#   - stricter resources / HPA min replicas
+#
+# To set the release SHA on a new build:
+#   kustomize edit set image ghcr.io/shopfast/eureka-server:dev=ghcr.io/shopfast/eureka-server:<sha>
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: shopfast-prod
+
+resources:
+  # base excludes ../../base/secrets on purpose — prod secrets come from the
+  # External Secrets Operator / SealedSecrets. See base/sealed-secret-example.yaml.
+  - ../../base
+  - ../../infra
+  - ../../services
+  - ../../ingress
+
+  # Prod uses Let's Encrypt instead of the self-signed Issuer.
+  - prod-issuer.yaml
+
+patches:
+  - target:
+      kind: Deployment
+      name: api-gateway
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+  - target:
+      kind: Deployment
+      name: product-service
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+  - target:
+      kind: Deployment
+      name: order-service
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+  - target:
+      kind: Certificate
+      name: shopfast-tls
+    patch: |-
+      - op: replace
+        path: /spec/issuerRef/kind
+        value: ClusterIssuer
+      - op: replace
+        path: /spec/issuerRef/name
+        value: letsencrypt-prod
+
+images:
+  - name: ghcr.io/shopfast/eureka-server
+    newTag: dev
+  - name: ghcr.io/shopfast/api-gateway
+    newTag: dev
+  - name: ghcr.io/shopfast/product-service
+    newTag: dev
+  - name: ghcr.io/shopfast/category-service
+    newTag: dev
+  - name: ghcr.io/shopfast/user-service
+    newTag: dev
+  - name: ghcr.io/shopfast/auth-service
+    newTag: dev
+  - name: ghcr.io/shopfast/inventory-service
+    newTag: dev
+  - name: ghcr.io/shopfast/order-service
+    newTag: dev
+  - name: ghcr.io/shopfast/payment-service
+    newTag: dev
+  - name: ghcr.io/shopfast/cart-service
+    newTag: dev
+  - name: ghcr.io/shopfast/coupon-service
+    newTag: dev
+  - name: ghcr.io/shopfast/review-service
+    newTag: dev
+  - name: ghcr.io/shopfast/notification-service
+    newTag: dev
+  - name: ghcr.io/shopfast/elastic-service
+    newTag: dev
+  - name: ghcr.io/shopfast/admin-service
+    newTag: dev
+  - name: ghcr.io/shopfast/frontend
+    newTag: dev

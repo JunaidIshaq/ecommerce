@@ -1,0 +1,145 @@
+# ---------------------------------------------------------------------------
+# Keycloak 26 — OIDC identity provider (RS256 tokens).
+#
+# Mirrors the docker-compose setup: dev mode (start-dev, plain HTTP) behind the
+# cluster-internal service. The realm is imported on every boot from a
+# version-controlled JSON (realm-export.json), so realm config is never
+# "clicked into" the admin console. For production run `start` with TLS and a
+# real hostname (plan section 5 / KEYCLOAK_IMPLEMENTATION_REPORT.md).
+# ---------------------------------------------------------------------------
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: keycloak-data
+  namespace: shopfast
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: shopfast
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.0
+          ports:
+            - containerPort: 8180
+            - containerPort: 9000
+          args: ["start-dev", "--import-realm", "--http-port=8180"]
+          env:
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: shopfast-secrets
+                  key: KEYCLOAK_ADMIN
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: shopfast-secrets
+                  key: KEYCLOAK_ADMIN_PASSWORD
+            - name: KC_DB
+              value: "postgres"
+            - name: KC_DB_URL
+              value: "jdbc:postgresql://postgres:5432/keycloak_db"
+            - name: KC_DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: shopfast-config
+                  key: POSTGRES_USER
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: shopfast-secrets
+                  key: DB_PASSWORD
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            - name: KC_METRICS_ENABLED
+              value: "true"
+            - name: KC_HOSTNAME_STRICT
+              value: "false"
+            - name: KC_PROXY_HEADERS
+              value: "xforwarded"
+            - name: KC_HTTP_RELATIVE_PATH
+              value: "/"
+            - name: SHOPFAST_SERVICES_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: shopfast-secrets
+                  key: SHOPFAST_SERVICES_CLIENT_SECRET
+            - name: SHOPFAST_ADMIN_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: shopfast-secrets
+                  key: SHOPFAST_ADMIN_CLIENT_SECRET
+          volumeMounts:
+            - name: realm
+              mountPath: /opt/keycloak/data/import/realm-export.json
+              subPath: realm-export.json
+            - name: data
+              mountPath: /opt/keycloak/data
+          readinessProbe:
+            # Keycloak image is distroless — no curl/wget. Use /dev/tcp on the
+            # management port (9000) /health/ready endpoint.
+            exec:
+              command:
+                - sh
+                - -c
+                - "exec 3<>/dev/tcp/localhost/9000; printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep -q UP <&3"
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 10
+          resources:
+            requests:
+              cpu: 500m
+              memory: 768Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+      volumes:
+        - name: realm
+          configMap:
+            name: keycloak-realm
+            items:
+              - key: realm-export.json
+                path: realm-export.json
+        - name: data
+          persistentVolumeClaim:
+            claimName: keycloak-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: shopfast
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - name: http
+      port: 8180
+      targetPort: 8180
+    - name: management
+      port: 9000
+      targetPort: 9000

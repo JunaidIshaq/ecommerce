@@ -1,0 +1,36 @@
+# ShopFast on Kubernetes
+#
+# Directory layout (see Kubernetes_Migration_Plan.md section 12):
+#
+#   k8s/
+#     base/            <- shared Namespace, ConfigMaps, Secrets, RBAC, quotas
+#     services/        <- reusable service template + per-service Deployments/Services
+#     infra/           <- stateful backing services (PG, Redis, Kafka, ES, Keycloak)
+#     ingress/         <- Ingress + cert-manager TLS
+#     overlays/
+#       dev/           <- development overlay (kubectl apply -k k8s/overlays/dev)
+#       prod/          <- production overlay (Argo CD syncs this)
+#
+# Build order (plan section 13):
+#   1. base            (namespace, config, secrets)
+#   2. infra           (postgres, redis, kafka, es, keycloak)
+#   3. eureka + gateway
+#   4. leaf services   (product, category, user, auth)
+#   5. order/cart/payment/notification flow
+#   6. frontend + ingress
+#   7. observability + HPA + NetworkPolicies
+#   8. CI/CD + overlays
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: shopfast
+  labels:
+    app.kubernetes.io/part-of: shopfast
+    # DEV ONLY: the backing infra images (Elasticsearch vm.max_map_count init
+    # container, Kafka/Zookeeper, Postgres) need capabilities/privilege that the
+    # "restricted" profile forbids. For prod, tighten to "baseline"/"restricted"
+    # and grant only the specific privileges each workload needs.
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

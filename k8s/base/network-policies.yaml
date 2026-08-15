@@ -1,0 +1,103 @@
+# ---------------------------------------------------------------------------
+# NetworkPolicies — deny-by-default (plan section 9).
+#
+# 1. Default deny all ingress to the shopfast namespace.
+# 2. Allow ingress-nginx to reach the api-gateway (and the frontend, eureka,
+#    kafka-ui which the Ingress exposes).
+# 3. Allow intra-namespace traffic (services call each other via Eureka/Feign
+#    and Kafka) so the platform actually works.
+# 4. Allow DNS egress + egress to the cluster-external Keycloak/SMTP if needed.
+# ---------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: shopfast
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+# Allow the ingress controller to reach the publicly-exposed services.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-edge
+  namespace: shopfast
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values: ["api-gateway", "frontend", "eureka-server", "kafka-ui"]
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 8761
+        - protocol: TCP
+          port: 8080
+---
+# Allow all pods in the namespace to talk to each other (service mesh / Eureka).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-intra-namespace
+  namespace: shopfast
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+---
+# Allow DNS and general egress (Keycloak JWKS, SMTP, external APIs).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress
+  namespace: shopfast
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 6379
+        - protocol: TCP
+          port: 2181
+        - protocol: TCP
+          port: 9092
+        - protocol: TCP
+          port: 9200
+        - protocol: TCP
+          port: 8180
+        - protocol: TCP
+          port: 9000
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80

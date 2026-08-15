@@ -1,0 +1,128 @@
+# ---------------------------------------------------------------------------
+# Ingress + TLS for shopfast.live and shopfast_test.live.
+#
+# Requires the ingress-nginx controller AND cert-manager installed in the
+# cluster. Self-signed Issuer is used for dev; for production swap the
+# ClusterIssuer for Let's Encrypt (plan section 7).
+#
+#   helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+#   helm install ingress-nginx ingress-nginx/ingress-nginx -n ingress-nginx
+#   helm repo add jetstack https://charts.jetstack.io
+#   helm install cert-manager jetstack/cert-manager -n cert-manager
+# ---------------------------------------------------------------------------
+
+# Self-signed Issuer for local/dev TLS.
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: shopfast-selfsigned
+  namespace: shopfast
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: shopfast-tls
+  namespace: shopfast
+spec:
+  secretName: shopfast-tls
+  dnsNames:
+    - shopfast.live
+    - www.shopfast.live
+    - shopfast-test.live
+    - www.shopfast-test.live
+  issuerRef:
+    name: shopfast-selfsigned
+    kind: Issuer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shopfast-ingress
+  namespace: shopfast
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    # Map the legacy /api/v1/<svc> path rules from Nginx/shopfast.live to the
+    # gateway, which fans out internally via Eureka.
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - shopfast.live
+        - www.shopfast.live
+        - shopfast-test.live
+        - www.shopfast-test.live
+      secretName: shopfast-tls
+  rules:
+    - host: shopfast.live
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
+          - path: /eureka
+            pathType: Prefix
+            backend:
+              service:
+                name: eureka-server
+                port:
+                  number: 8761
+          - path: /kafka
+            pathType: Prefix
+            backend:
+              service:
+                name: kafka-ui
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+    - host: www.shopfast.live
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+    - host: shopfast-test.live
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+    - host: www.shopfast-test.live
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80

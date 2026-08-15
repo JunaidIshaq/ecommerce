@@ -171,7 +171,7 @@ class CartServiceTest {
         cartService.mergeGuestIntoUser(anonId, userId);
 
         verify(hashOperations).put(eq("cart:" + userId), eq(productId), contains("\"quantity\":5"));
-        verify(hashOperations).delete("cart:guest:" + anonId);
+        verify(redisTemplate).delete("cart:guest:" + anonId);
     }
 
     @Test
