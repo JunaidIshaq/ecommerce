@@ -18,3 +18,4 @@ resources:
   - admin-service.yaml
   - hpa.yaml
   - frontend.yaml
+  - frontend-nginx-config.yaml
