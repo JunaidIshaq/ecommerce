@@ -20,7 +20,7 @@ data:
   SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
   EUREKA_URL: "http://eureka-server:8761/eureka/eureka/"
   EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka-server:8761/eureka/eureka/"
-  KEYCLOAK_ISSUER_URI: "http://keycloak:8180/realms/shopfast"
+  KEYCLOAK_ISSUER_URI: "https://shopfast.live/realms/shopfast"
   KEYCLOAK_BASE_URL: "http://keycloak:8180"
   KEYCLOAK_JWK_SET_URI: "http://keycloak:8180/realms/shopfast/protocol/openid-connect/certs"
   POSTGRES_HOST: "postgres"

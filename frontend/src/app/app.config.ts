@@ -14,6 +14,7 @@ import {
 } from 'angular-auth-oidc-client';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
+import { tokenInterceptor } from './interceptors/token.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -61,7 +62,7 @@ export const appConfig: ApplicationConfig = {
     // localStorage and, on a 401, tried to refresh it against auth-service. Both
     // halves of that are now the library's job, and it does the refresh correctly
     // under concurrent requests instead of firing one refresh per in-flight call.
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor()])),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor(), tokenInterceptor])),
 
     provideRouter(routes, withViewTransitions()),
     provideClientHydration(withEventReplay()),
