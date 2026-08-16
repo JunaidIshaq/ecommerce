@@ -45,7 +45,7 @@ public class SecurityConfig {
                                          "/api/v1/auth/password-reset",
                                          "/api/v1/auth/logout",
                                          "/api/v1/auth/validate").permitAll()
-                        .requestMatchers("/actuator/health","/actuator/info","/actuator/prometheus").permitAll()
+                        .requestMatchers("/actuator/health/**","/actuator/info","/actuator/prometheus").permitAll()
                         .requestMatchers("/v3/api-docs/**","/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )

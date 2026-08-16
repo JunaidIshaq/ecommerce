@@ -3,6 +3,7 @@ WORKDIR /app
 
 # Copy shared common-lib (because it's inside the context ".")
 COPY pom.xml .
+COPY toolchains.xml /root/.m2/toolchains.xml
 RUN mvn install -N -DskipTests
 COPY common-lib ./common-lib
 RUN mvn -f common-lib/pom.xml install -DskipTests
