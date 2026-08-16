@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: shopfast-infra
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/JunaidIshaq/ecommerce.git
+    targetRevision: HEAD
+    path: k8s/infra
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: shopfast
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

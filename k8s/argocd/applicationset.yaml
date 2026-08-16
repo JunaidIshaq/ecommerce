@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: shopfast-services
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/shopfast/shopfast.git
+        revision: HEAD
+        directories:
+          - path: k8s/services/*
+  template:
+    metadata:
+      name: "{{ .path.basename }}"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/shopfast/shopfast.git
+        targetRevision: HEAD
+        path: "{{ .path }}"
+        kustomize:
+          namePrefix: shopfast-
+          images:
+            - ghcr.io/shopfast/{{ .path.basename }}:latest
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: shopfast
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - Kustomize=true
