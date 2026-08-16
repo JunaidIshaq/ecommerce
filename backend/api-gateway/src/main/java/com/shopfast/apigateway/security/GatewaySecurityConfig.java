@@ -49,6 +49,7 @@ public class GatewaySecurityConfig {
             "/actuator/prometheus",
             "/v3/api-docs/**",
             "/swagger-ui/**",
+            "/realms/**",
             "/realms/*/protocol/openid-connect/token",
             "/api/v1/auth/register",
             "/api/v1/auth/password-reset",

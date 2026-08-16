@@ -78,6 +78,13 @@ spec:
                 name: kafka-ui
                 port:
                   number: 8080
+          - path: /realms
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
           - path: /
             pathType: Prefix
             backend:
@@ -99,6 +106,13 @@ spec:
       http:
         paths:
           - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
+          - path: /realms
             pathType: Prefix
             backend:
               service:

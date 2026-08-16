@@ -51,6 +51,8 @@ spring:
       write-dates-as-timestamps: false
 
 eureka:
+  instance:
+    prefer-ip-address: true
   client:
     service-url:
       defaultZone: ${EUREKA_URL:http://eureka-server:8761/eureka/eureka/}

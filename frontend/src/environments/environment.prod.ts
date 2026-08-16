@@ -11,9 +11,7 @@ export const environment = {
 
   // Keycloak / OIDC — public client, PKCE. No client secret here, ever.
   keycloak: {
-    // Keycloak is mounted at /auth on the main domain rather than its own
-    // subdomain, which avoids a second DNS record and a second certificate.
-    authority: 'https://shopfast.live/auth/realms/shopfast',
+    authority: 'https://shopfast.live/realms/shopfast',
     clientId: 'shopfast-web',
     // Must match the client's redirectUris in the realm exactly, including scheme.
     redirectUrl: 'https://shopfast.live/callback',
