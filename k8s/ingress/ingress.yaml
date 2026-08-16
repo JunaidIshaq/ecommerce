@@ -30,8 +30,6 @@ spec:
   dnsNames:
     - shopfast.live
     - www.shopfast.live
-    - shopfast-test.live
-    - www.shopfast-test.live
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
@@ -54,8 +52,6 @@ spec:
     - hosts:
         - shopfast.live
         - www.shopfast.live
-        - shopfast-test.live
-        - www.shopfast-test.live
       secretName: shopfast-tls
   rules:
     - host: shopfast.live
