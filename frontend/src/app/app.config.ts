@@ -41,8 +41,12 @@ export const appConfig: ApplicationConfig = {
         // Only send the access token to our own API. Without this the library would
         // attach it to every outgoing request, including third-party ones - which is
         // how bearer tokens end up in someone else's logs.
+        //
+        // Must not match Keycloak OIDC endpoints (/realms/**, /callback, etc.),
+        // otherwise the interceptor attaches a token to the discovery document
+        // request and Spring Security rejects it with 401.
         secureRoutes: [
-          environment.baseDomain ?? 'http://localhost:',
+          `${environment.baseDomain}/api/`,
         ],
 
         logLevel: isDevMode() ? LogLevel.Warn : LogLevel.Error,
