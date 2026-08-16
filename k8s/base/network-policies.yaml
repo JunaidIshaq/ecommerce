@@ -94,9 +94,41 @@ spec:
         - protocol: TCP
           port: 9200
         - protocol: TCP
+          port: 9300
+        - protocol: TCP
           port: 8180
         - protocol: TCP
           port: 9000
+        - protocol: TCP
+          port: 8761
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8081
+        - protocol: TCP
+          port: 8082
+        - protocol: TCP
+          port: 8083
+        - protocol: TCP
+          port: 8084
+        - protocol: TCP
+          port: 8085
+        - protocol: TCP
+          port: 8086
+        - protocol: TCP
+          port: 8087
+        - protocol: TCP
+          port: 8088
+        - protocol: TCP
+          port: 8089
+        - protocol: TCP
+          port: 8090
+        - protocol: TCP
+          port: 8091
+        - protocol: TCP
+          port: 8092
+        - protocol: TCP
+          port: 8093
         - protocol: TCP
           port: 443
         - protocol: TCP
