@@ -47,8 +47,12 @@ spec:
                 secretKeyRef:
                   name: shopfast-secrets
                   key: JWT_SECRET
+            # Must equal the issuer (iss) Keycloak puts in tokens, which is derived
+            # from KC_HOSTNAME (https://shopfast.live). The gateway validates every
+            # JWT's iss against this value, so it has to be the public URL, not the
+            # internal service URL.
             - name: KEYCLOAK_ISSUER_URI
-              value: "http://keycloak:8180/realms/shopfast"
+              value: "https://shopfast.live/realms/shopfast"
             - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
               value: "http://eureka-server:8761/eureka/eureka/"
           volumeMounts:

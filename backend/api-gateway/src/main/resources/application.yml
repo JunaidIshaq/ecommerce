@@ -172,9 +172,11 @@ server:
   forward-headers-strategy: framework
 
 keycloak:
-  # Discovery document root. The gateway fetches the realm's public JWKS from here
-  # and refreshes it automatically when Keycloak rotates signing keys.
-  issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8180/realms/shopfast}
+  # Discovery document root. Must match the issuer (iss) Keycloak puts in tokens,
+  # which is derived from KC_HOSTNAME (https://shopfast.live). The gateway validates
+  # every JWT's iss against this value, so it has to be the public URL, not the
+  # internal service URL.
+  issuer-uri: ${KEYCLOAK_ISSUER_URI:https://shopfast.live/realms/shopfast}
   # Optional internal JWKS URL, so the gateway fetches signing keys over the docker
   # network instead of hairpinning back out through the public HTTPS endpoint.
   jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:}
