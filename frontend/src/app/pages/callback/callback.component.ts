@@ -52,26 +52,17 @@ export class CallbackComponent implements OnInit {
     this.oidc.checkAuth().subscribe({
       next: ({ isAuthenticated }) => {
         if (isAuthenticated) {
-          // Return the user to whatever they were trying to reach before the
-          // redirect. Consume the key so a later, unrelated login does not
-          // teleport them to a stale page.
           const returnUrl = sessionStorage.getItem(AuthService.RETURN_URL_KEY) || '/';
           sessionStorage.removeItem(AuthService.RETURN_URL_KEY);
-
-          // replaceUrl so the code-bearing URL does not stay in history. Codes are
-          // single-use, so a back-navigation to it would fail confusingly.
           this.router.navigateByUrl(returnUrl, { replaceUrl: true });
         } else {
           this.error = 'Sign-in did not complete. Redirecting…';
-          this.oidc.authorize();
+          this.router.navigateByUrl('/', { replaceUrl: true });
         }
       },
-      // A failure here is usually a replayed/expired code or clock skew between the
-      // browser and Keycloak. Restarting the flow is the only safe recovery; showing
-      // an error page would strand the user with no way forward.
       error: () => {
-        this.error = 'Sign-in failed. Restarting…';
-        this.oidc.authorize();
+        this.error = 'Sign-in failed. Redirecting…';
+        this.router.navigateByUrl('/', { replaceUrl: true });
       }
     });
   }
