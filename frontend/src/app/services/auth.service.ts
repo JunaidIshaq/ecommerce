@@ -52,8 +52,25 @@ export class AuthService {
     // Single source of truth. The library re-emits on login, silent renew and
     // logout, so we never have to reconcile a cached copy by hand - which is what
     // the old localStorage 'user' key was, and it drifted.
-    this.oidc.userData$.subscribe(({ userData }) => {
-      this.userSubject.next(userData ? this.toUser(userData) : null);
+    //
+    // userData$ calls the Keycloak userinfo endpoint. If the access token is
+    // expired or the refresh flow fails, that HTTP call can 401 and put the
+    // internal BehaviorSubject into an error state, which breaks every
+    // component that depends on user$. Catch that here and fall back to the
+    // ID token claims, which are already decoded and in memory.
+    this.oidc.userData$.subscribe({
+      next: ({ userData }) => {
+        this.userSubject.next(userData ? this.toUser(userData) : null);
+      },
+      error: (err) => {
+        console.error('[AuthService] userData$ error; falling back to ID token claims', err);
+        this.oidc.getPayloadFromIdToken().pipe(
+          map((claims: any) => claims ? this.toUser(claims) : null)
+        ).subscribe({
+          next: (user) => this.userSubject.next(user),
+          error: () => this.userSubject.next(null)
+        });
+      }
     });
   }
 
