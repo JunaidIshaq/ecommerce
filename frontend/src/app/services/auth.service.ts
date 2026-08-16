@@ -142,12 +142,23 @@ export class AuthService {
    * Prefer the HTTP interceptor over calling this. It exists for the few places that
    * build a request by hand.
    *
-   * Returns the token synchronously from the library's in-memory store; it is null
-   * on the server and before the callback completes.
+   * Returns the token synchronously from the library's sessionStorage store; it is
+   * null on the server and before the callback completes.
+   *
+   * Note: OidcSecurityService.getAccessToken() returns Observable<string> in v19,
+   * so we read the underlying sessionStorage entry directly to stay synchronous.
    */
   getAccessToken(): string | null {
     if (!this.isBrowser()) return null;
-    return this.oidc.getAccessToken() as unknown as string | null;
+    try {
+      const configId = `0-${environment.keycloak.clientId}`;
+      const raw = sessionStorage.getItem(configId);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      return data?.authzData ?? null;
+    } catch {
+      return null;
+    }
   }
 
   getUserRoles(): Observable<string[]> {
