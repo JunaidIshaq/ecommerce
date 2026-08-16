@@ -29,7 +29,7 @@ spec:
     matchExpressions:
       - key: app
         operator: In
-        values: ["api-gateway", "frontend", "eureka-server", "kafka-ui"]
+        values: ["api-gateway", "frontend", "eureka-server", "kafka-ui", "pgadmin"]
   policyTypes:
     - Ingress
   ingress:
