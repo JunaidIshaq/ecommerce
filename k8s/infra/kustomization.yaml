@@ -7,3 +7,4 @@ resources:
   - elasticsearch.yaml
   - keycloak.yaml
   - keycloak-realm-configmap.yaml
+  - pgadmin.yaml
