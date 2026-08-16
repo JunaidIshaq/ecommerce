@@ -30,7 +30,7 @@ images:
     newTag: dev
   - name: ghcr.io/shopfast/api-gateway
     newName: localhost:5000/shopfast/api-gateway
-    newTag: dev
+    newTag: 2d9e2e2
   - name: ghcr.io/shopfast/product-service
     newName: localhost:5000/shopfast/product-service
     newTag: dev
