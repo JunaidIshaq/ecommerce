@@ -90,6 +90,13 @@ spec:
                 name: keycloak
                 port:
                   number: 8180
+          - path: /admin
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
           - path: /pgadmin
             pathType: Prefix
             backend:
@@ -115,6 +122,13 @@ spec:
                 port:
                   number: 8180
           - path: /resources
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
+          - path: /admin
             pathType: Prefix
             backend:
               service:
@@ -152,6 +166,13 @@ spec:
                 name: keycloak
                 port:
                   number: 8180
+          - path: /admin
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
           - path: /
             pathType: Prefix
             backend:
@@ -170,6 +191,13 @@ spec:
                 port:
                   number: 8180
           - path: /resources
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
+          - path: /admin
             pathType: Prefix
             backend:
               service:
