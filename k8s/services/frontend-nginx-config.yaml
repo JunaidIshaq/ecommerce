@@ -5,14 +5,25 @@ metadata:
   namespace: shopfast
 data:
   default.conf: |
-    server {
-        listen 80;
-        server_name _;
+server {
+    listen 80;
+    server_name _;
 
-        root /usr/share/nginx/html;
-        index index.html;
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
 
-        location ^~ /api/ {
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Serve static assets with the correct Content-Type so ES modules (.js)
+    # and other files are not rejected by the browser's strict MIME checks.
+    location ~* \.(js|mjs|css|html|json|wasm|map|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$ {
+        try_files $uri =404;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location ^~ /api/ {
             proxy_pass http://admin-service:8093;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
