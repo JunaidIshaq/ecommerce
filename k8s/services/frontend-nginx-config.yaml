@@ -106,11 +106,19 @@ data:
         }
 
         location = /keycloak {
-            return 302 /keycloak.html;
+            return 302 /admin/;
         }
 
         location = /keycloak/ {
-            return 302 /keycloak.html;
+            return 302 /admin/;
+        }
+
+        location = /realms/shopfast/ {
+            return 302 /admin/;
+        }
+
+        location = /realms/master/ {
+            return 302 /admin/;
         }
 
         location / {
