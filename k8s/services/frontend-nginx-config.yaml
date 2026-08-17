@@ -5,32 +5,27 @@ metadata:
   namespace: shopfast
 data:
   default.conf: |
-server {
-    listen 80;
-    server_name _;
+    server {
+        listen 80;
+        server_name _;
 
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
 
-    root /usr/share/nginx/html;
-    index index.html;
+        root /usr/share/nginx/html;
+        index index.html;
 
-    # Serve static assets with the correct Content-Type so ES modules (.js)
-    # and other files are not rejected by the browser's strict MIME checks.
-    location ~* \.(js|mjs|css|wasm|map|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$ {
-        try_files $uri =404;
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
+        location ~* \.(js|mjs|css|wasm|map|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$ {
+            try_files $uri =404;
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
 
-    # index.html must never be cached with "immutable": Angular hashes the
-    # chunk filenames on every build, so a stale index.html would pin the user
-    # to old JS bundles that may have been removed from the image.
-    location = /index.html {
-        add_header Cache-Control "no-cache";
-    }
+        location = /index.html {
+            add_header Cache-Control "no-cache";
+        }
 
-    location ^~ /api/ {
+        location ^~ /api/ {
             proxy_pass http://admin-service:8093;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
@@ -110,16 +105,15 @@ server {
             proxy_set_header X-Forwarded-Proto $scheme;
         }
 
-    # Frontend SPA fallback
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
+        location = /keycloak {
+            return 302 /realms/shopfast/protocol/openid-connect/auth?client_id=shopfast-web&redirect_uri=https://$host/;
+        }
 
-    # Shortcut for admins: /keycloak redirects straight to the Keycloak
-    # realm login page. The normal user OAuth2 flow goes through the
-    # frontend app (/callback); this is a separate flow for direct
-    # Keycloak access.
-    location = /keycloak {
-        return 302 /realms/shopfast/protocol/openid-connect/auth?client_id=shopfast-web&redirect_uri=https://$host/;
+        location = /keycloak/ {
+            return 302 /realms/shopfast/protocol/openid-connect/auth?client_id=shopfast-web&redirect_uri=https://$host/;
+        }
+
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
     }
-}
