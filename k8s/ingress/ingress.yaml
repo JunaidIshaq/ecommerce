@@ -82,9 +82,16 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: api-gateway
+                name: keycloak
                 port:
-                  number: 8080
+                  number: 8180
+          - path: /resources
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
           - path: /pgadmin
             pathType: Prefix
             backend:
@@ -102,6 +109,20 @@ spec:
     - host: www.shopfast.live
       http:
         paths:
+          - path: /realms
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
+          - path: /resources
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
           - path: /
             pathType: Prefix
             backend:
@@ -123,9 +144,16 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: api-gateway
+                name: keycloak
                 port:
-                  number: 8080
+                  number: 8180
+          - path: /resources
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
           - path: /
             pathType: Prefix
             backend:
@@ -136,6 +164,20 @@ spec:
     - host: www.shopfast-test.live
       http:
         paths:
+          - path: /realms
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
+          - path: /resources
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
           - path: /
             pathType: Prefix
             backend:
