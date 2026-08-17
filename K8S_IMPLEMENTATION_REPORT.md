@@ -42,9 +42,9 @@
 
 | Application | Source Path | Sync Status | Health |
 |---|---|---|---|
-| `shopfast-services` | `k8s/overlays/dev` | OutOfSync | Degraded (shared-resource warnings) |
+| `shopfast-services` | `k8s/overlays/dev` | Synced | Degraded (shared-resource warnings) |
 | `shopfast-infra` | `k8s/overlays/dev` | OutOfSync | Degraded (shared-resource warnings) |
-| `shopfast-ingress` | `k8s/ingress` | Synced | Healthy |
+| `shopfast-ingress` | `k8s/ingress` | OutOfSync | Healthy |
 
 > **Note:** "Degraded" is caused by shared resources (Ingress, Certificate, NetworkPolicies, Namespace) declared across multiple ArgoCD apps. Pods themselves are healthy.
 
@@ -164,13 +164,25 @@ All internal services use ClusterIP services with Eureka for service discovery:
 | Host | Path | Backend Service | Port |
 |---|---|---|---|
 | shopfast.live | `/api` | api-gateway | 8080 |
-| shopfast.live | `/realms` | api-gateway → Keycloak proxy | 8080 |
+| shopfast.live | `/realms` | keycloak | 8180 |
+| shopfast.live | `/resources` | keycloak | 8180 |
+| shopfast.live | `/admin` | keycloak | 8180 |
 | shopfast.live | `/` | frontend | 80 |
 | shopfast.live | `/eureka` | eureka-server | 8761 |
 | shopfast.live | `/kafka` | kafka-ui | 8080 |
 | shopfast.live | `/pgadmin` | pgadmin | 80 |
+| www.shopfast.live | `/realms` | keycloak | 8180 |
+| www.shopfast.live | `/resources` | keycloak | 8180 |
+| www.shopfast.live | `/admin` | keycloak | 8180 |
 | www.shopfast.live | `/` | frontend | 80 |
-| shopfast-test.live | `/api`, `/realms`, `/` | api-gateway / frontend | 8080/80 |
+| shopfast-test.live | `/api` | api-gateway | 8080 |
+| shopfast-test.live | `/realms` | keycloak | 8180 |
+| shopfast-test.live | `/resources` | keycloak | 8180 |
+| shopfast-test.live | `/admin` | keycloak | 8180 |
+| shopfast-test.live | `/` | frontend | 80 |
+| www.shopfast-test.live | `/realms` | keycloak | 8180 |
+| www.shopfast-test.live | `/resources` | keycloak | 8180 |
+| www.shopfast-test.live | `/admin` | keycloak | 8180 |
 | www.shopfast-test.live | `/` | frontend | 80 |
 
 ### 4.3 TLS Configuration
@@ -192,8 +204,15 @@ tls:
 The `frontend-nginx-config` ConfigMap provides:
 - SPA fallback routing (all non-API requests → `index.html`)
 - Legacy proxy paths (`/api`, `/users`, `/orders` → admin-service:8093)
+- **Keycloak shortcuts:**
+  - `/keycloak` → 302 → `/admin/` (Keycloak admin console)
+  - `/realms/shopfast/` → 302 → `/admin/` (Keycloak admin console)
+  - `/realms/master/` → 302 → `/admin/` (Keycloak admin console)
+- MIME types fix for ES module scripts (`.js` files)
 
-> **Issue:** The `/api` path in frontend-nginx bypasses the api-gateway for admin paths. This is a legacy configuration that should be reviewed.
+> **Note:** The `/api` path in frontend-nginx bypasses the api-gateway for admin paths. This is a legacy configuration that should be reviewed.
+
+> **Keycloak Admin Access:** `https://shopfast.live/admin/` redirects to the Keycloak Administration Console. Login with `admin` / `G3GcgUn8AHXN7rXJuT4jSVGxQRxxfymI`.
 
 ---
 
@@ -251,6 +270,8 @@ EUREKA_URL            = http://eureka-server:8761/eureka/eureka/
 | **Admin client** | `shopfast-admin` (confidential) |
 | **Token issuer** | `https://shopfast.live/realms/shopfast` |
 | **Audience mapper** | `shopfast-web` has audience mapper → `aud: ["shopfast-web", "account"]` |
+| **Admin user** | `admin@shopfast.live` / `G3GcgUn8AHXN7rXJuT4jSVGxQRxxfymI` (ROLE_ADMIN) |
+| **Admin console** | `https://shopfast.live/admin/` (redirects to `/admin/master/console/`) |
 
 ### 6.2 Frontend Authentication
 
@@ -279,7 +300,7 @@ EUREKA_URL            = http://eureka-server:8761/eureka/eureka/
 | Policy | Purpose |
 |---|---|
 | `default-deny-ingress` | Deny all ingress by default |
-| `allow-ingress-to-edge` | Allow ingress-nginx to reach api-gateway, frontend, eureka, kafka-ui, pgadmin |
+| `allow-ingress-to-edge` | Allow ingress-nginx to reach api-gateway, frontend, eureka, kafka-ui, pgadmin, **keycloak** (ports 80, 8080, 8180, 8761) |
 | `allow-intra-namespace` | Allow all pods to communicate within namespace (Eureka/Feign/Kafka) |
 | `allow-egress` | Allow DNS + external egress |
 
@@ -377,9 +398,9 @@ k8s/
 
 ### 9.4 Current Git State
 
-- **HEAD:** `f48826b` — fix: AuthService.getAccessToken returns string
-- **Unsynced commits:** `773026f` (issuer alignment + frontend interceptor), `f48826b` (auth fix)
-- **Sync Status:** OutOfSync from HEAD
+- **HEAD:** `c069920` — fix: redirect /keycloak and /realms/*/ to Keycloak admin console
+- **Unsynced commits:** `d7470c5` (/admin ingress path), `c069920` (frontend redirects)
+- **Sync Status:** Mixed — shopfast-ingress OutOfSync, shopfast-services Synced/Degraded, shopfast-infra OutOfSync/Degraded
 
 ---
 
@@ -394,6 +415,17 @@ k8s/
 | 2026-08-16 | Cart 500 / Service 401 | Backend services validated tokens against internal issuer while Keycloak issued public-iss tokens | Updated `KEYCLOAK_ISSUER_URI` to `https://shopfast.live` in ConfigMap + all service manifests |
 | 2026-08-17 | Frontend `Bearer [object Object]` | `AuthService.getAccessToken()` returned Observable cast to string | Read token synchronously from `sessionStorage` |
 | 2026-08-17 | Frontend no token in API headers | Library interceptor not reliably attaching token | Added explicit `tokenInterceptor` |
+| 2026-08-17 | Frontend MIME type errors (JS modules) | Missing `mime.types` include in nginx config | Added `include /etc/nginx/mime.types` + static asset location block |
+| 2026-08-17 | Keycloak resources 404 (`/resources/rk8v3/...`) | `/resources` path missing from ingress | Added `/resources` → keycloak:8180 |
+| 2026-08-17 | Keycloak realm JSON instead of login HTML | `/realms` routed to api-gateway instead of keycloak | Fixed ingress: `/realms` → keycloak:8180 |
+| 2026-08-17 | Ingress cannot reach Keycloak (502) | NetworkPolicy missing keycloak pod + port 8180 | Added `keycloak` to `allow-ingress-to-edge` + port 8180 |
+| 2026-08-17 | `/keycloak` returns realm JSON, not login UI | `/keycloak` rewrite to `/realms/shopfast` returns discovery JSON | Added `keycloak.html` PKCE redirect page + `/keycloak` → `/keycloak.html` |
+| 2026-08-17 | Keycloak login "Missing parameter: response_type" | `/keycloak.html` missing `response_type=code` | Added `response_type=code&scope=openid%20profile%20email` |
+| 2026-08-17 | Keycloak admin credentials not working in shopfast realm | Admin user only existed in `master` realm, not `shopfast` realm | Created `admin` user in `shopfast` realm with ROLE_ADMIN |
+| 2026-08-17 | Keycloak admin user "Account is not fully set up" | `emailVerified=false` + `requiredActions=["VERIFY_EMAIL"]` | Set `emailVerified=true`, cleared `requiredActions` |
+| 2026-08-17 | Keycloak admin password rejected | Password policy required special chars | Updated realm password policy to remove `specialChars(1)` requirement |
+| 2026-08-17 | Direct access grants disabled | `shopfast-web` client had `directAccessGrantsEnabled=false` | Enabled `directAccessGrantsEnabled=true` |
+| 2026-08-17 | Keycloak admin console not accessible | No `/admin` ingress path to Keycloak | Added `/admin` → keycloak:8180 + `/keycloak` redirect to `/admin/` |
 
 ---
 
@@ -403,11 +435,11 @@ k8s/
 
 | # | Gap | Impact | Recommendation |
 |---|---|---|---|
-| 1 | **ArgoCD OutOfSync** | Latest config/issuer changes not fully propagated | Trigger manual sync for `shopfast-services` and `shopfast-infra` |
-| 2 | **auth-service CrashLoopBackOff** | Auth endpoints unstable | Investigate pod logs; old pod still serving |
-| 3 | **keycloak-realm ConfigMap empty** | Realm may not auto-import from `realm-export.json` | Verify realm import config; fix ConfigMap |
-| 4 | **frontend-nginx-config stale paths** | `/api`, `/users`, `/orders` bypass api-gateway auth | Review and update proxy targets |
-| 5 | **Kafka 68 restarts** | Message queue instability | Check ZooKeeper connectivity, resource limits, logs |
+| 1 | **auth-service CrashLoopBackOff** | Auth endpoints unstable (209 restarts) | Investigate pod logs; check for missing env vars or config |
+| 2 | **Kafka 131 restarts** | Message queue instability | Check ZooKeeper connectivity, resource limits, logs |
+| 3 | **ArgoCD OutOfSync** | Latest config changes not fully propagated | Trigger manual sync for `shopfast-ingress` and `shopfast-infra` |
+| 4 | **Self-signed TLS only** | Browser warnings, not production-ready | Replace cert-manager Issuer with Let's Encrypt ClusterIssuer |
+| 5 | **No resource limits** | Potential resource exhaustion | Add `resources.requests/limits` to all deployments |
 
 ### 11.2 Security Hardening
 
@@ -418,7 +450,8 @@ k8s/
 | 3 | Secrets in plain Kubernetes Secrets | Consider Sealed Secrets or external vault (HashiCorp Vault) |
 | 4 | No PodSecurity Standards | Add `runAsNonRoot`, `readOnlyRootFilesystem`, `allowPrivilegeEscalation: false` |
 | 5 | No image scanning | Add Trivy/Clair to CI pipeline |
-| 6 | No network segmentation beyond 3 policies | Fine-trace NetworkPolicies per service |
+| 6 | No network segmentation beyond 4 policies | Fine-trace NetworkPolicies per service |
+| 7 | `/admin` Keycloak path publicly accessible | Add IP allowlist or VPN for admin console access |
 
 ### 11.3 Observability & Operations
 
@@ -431,6 +464,7 @@ k8s/
 | 5 | No resource limits | Add `resources.requests/limits` to all deployments |
 | 6 | No PodDisruptionBudgets | Ensure availability during node maintenance |
 | 7 | No health check refinement | Add custom liveness/readiness probes beyond `/actuator/health` |
+| 8 | No audit logging for Keycloak | Enable Keycloak event logging for admin actions |
 
 ### 11.4 CI/CD
 
@@ -447,27 +481,27 @@ k8s/
 ## 12. Current State Summary
 
 ```
-Cluster:        UP (23/24 pods running, 1 CrashLoopBackOff)
-Ingress:        UP (nginx + self-signed TLS)
-Keycloak:       UP (public issuer https://shopfast.live/realms/shopfast)
+Cluster:        UP (25/26 pods running, 1 CrashLoopBackOff)
+Ingress:        UP (nginx + self-signed TLS, /admin → Keycloak)
+Keycloak:       UP (public issuer https://shopfast.live/realms/shopfast, admin user created)
 API Gateway:    UP (public issuer validated)
-Frontend:       UP (token interceptor deployed, auth fix deployed)
-Auth Service:   DEGRADED (CrashLoopBackOff, 14 restarts)
-ArgoCD:         OutOfSync (manual sync needed)
-Kafka:          UNSTABLE (68 restarts)
+Frontend:       UP (token interceptor deployed, MIME fix deployed, /keycloak redirect)
+Auth Service:   DEGRADED (CrashLoopBackOff, 209 restarts)
+ArgoCD:         Mixed (shopfast-ingress OutOfSync, shopfast-services Synced/Degraded, shopfast-infra OutOfSync/Degraded)
+Kafka:          UNSTABLE (131 restarts)
 Eureka:         UP
 Databases:      UP (Postgres, Redis)
 ```
 
 ### Recommended Next Actions
 
-1. **Trigger ArgoCD sync** for `shopfast-services` and `shopfast-infra` to apply latest issuer/config changes
-2. **Investigate auth-service CrashLoopBackOff** — check logs for root cause
-3. **Fix empty `keycloak-realm` ConfigMap** — ensure realm-export.json is loaded
-4. **Clean up `frontend-nginx-config`** — remove stale `/api`, `/users`, `/orders` admin paths
-5. **Investigate Kafka restarts** — check ZooKeeper connectivity and resource pressure
-6. **Implement RBAC and Pod Security Standards**
-7. **Replace self-signed TLS with Let's Encrypt**
+1. **Trigger ArgoCD sync** for `shopfast-ingress` and `shopfast-infra` to apply latest changes
+2. **Investigate auth-service CrashLoopBackOff** — 209 restarts, check logs for root cause
+3. **Investigate Kafka restarts** — 131 restarts, check ZooKeeper connectivity and resource pressure
+4. **Implement RBAC and Pod Security Standards**
+5. **Replace self-signed TLS with Let's Encrypt**
+6. **Add resource limits** to all deployments
+7. **Add backup strategy** for PVCs (Postgres, Keycloak, Redis)
 
 ---
 
