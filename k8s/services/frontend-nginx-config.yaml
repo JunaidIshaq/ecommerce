@@ -106,11 +106,11 @@ data:
         }
 
         location = /keycloak {
-            return 302 /realms/shopfast/protocol/openid-connect/auth?client_id=shopfast-web&response_type=code&scope=openid%20profile%20email&redirect_uri=https://$host/;
+            return 302 /keycloak.html;
         }
 
         location = /keycloak/ {
-            return 302 /realms/shopfast/protocol/openid-connect/auth?client_id=shopfast-web&response_type=code&scope=openid%20profile%20email&redirect_uri=https://$host/;
+            return 302 /keycloak.html;
         }
 
         location / {
