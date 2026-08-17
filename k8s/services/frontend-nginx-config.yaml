@@ -110,8 +110,16 @@ server {
             proxy_set_header X-Forwarded-Proto $scheme;
         }
 
-        # Frontend SPA fallback
-        location / {
-            try_files $uri $uri/ /index.html;
-        }
+    # Frontend SPA fallback
+    location / {
+        try_files $uri $uri/ /index.html;
     }
+
+    # Shortcut for admins: /keycloak redirects straight to the Keycloak
+    # realm login page. The normal user OAuth2 flow goes through the
+    # frontend app (/callback); this is a separate flow for direct
+    # Keycloak access.
+    location = /keycloak {
+        return 302 /realms/shopfast/protocol/openid-connect/auth?client_id=shopfast-web&redirect_uri=https://$host/;
+    }
+}
