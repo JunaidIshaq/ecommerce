@@ -46,6 +46,8 @@ metadata:
     # Map the legacy /api/v1/<svc> path rules from Nginx/shopfast.live to the
     # gateway, which fans out internally via Eureka.
     nginx.ingress.kubernetes.io/use-regex: "true"
+    # /keycloak -> /realms/shopfast  (short alias for the Keycloak realm UI)
+    nginx.ingress.kubernetes.io/rewrite-target: /realms/shopfast/$2
 spec:
   ingressClassName: nginx
   tls:
@@ -92,6 +94,13 @@ spec:
                 name: keycloak
                 port:
                   number: 8180
+          - path: /keycloak(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
           - path: /pgadmin
             pathType: Prefix
             backend:
@@ -118,6 +127,13 @@ spec:
                   number: 8180
           - path: /resources
             pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
+          - path: /keycloak(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: keycloak
@@ -154,6 +170,13 @@ spec:
                 name: keycloak
                 port:
                   number: 8180
+          - path: /keycloak(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
           - path: /
             pathType: Prefix
             backend:
@@ -173,6 +196,13 @@ spec:
                   number: 8180
           - path: /resources
             pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8180
+          - path: /keycloak(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: keycloak
