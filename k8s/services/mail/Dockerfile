@@ -1,7 +1,7 @@
 # RainLoop webmail UI, served under the /mail subpath.
 #
-#   docker build -t localhost:5000/shopfast/mail:v7 k8s/services/mail
-#   docker push localhost:5000/shopfast/mail:v7
+#   docker build -t localhost:5000/shopfast/mail:v8 k8s/services/mail
+#   docker push localhost:5000/shopfast/mail:v8
 #
 # The container listens on :80 with nginx + php-fpm (supervisord). RainLoop is
 # installed at /var/www/rainloop and its basePath is set to /mail/ so it emits
