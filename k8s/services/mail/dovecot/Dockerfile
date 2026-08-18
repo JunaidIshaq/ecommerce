@@ -1,2 +1,6 @@
-FROM dovecot/dovecot:2.3-alpine
-RUN apk add --no-cache shadow && usermod -aG shadow dovecot
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y dovecot-core dovecot-imapd && \
+    usermod -aG shadow dovecot && \
+    rm -rf /var/lib/apt/lists/*
+EXPOSE 143 2525
+CMD ["dovecot", "-F"]
