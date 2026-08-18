@@ -135,12 +135,11 @@ spec:
           port: 443
         - protocol: TCP
           port: 80
-    # Allow the mail pod (RainLoop) to reach the VPS-hosted dovecot/postfix.
-    - to:
-        - ipBlock:
-            cidr: 72.62.250.5/32
-      ports:
+        - protocol: TCP
+          port: 25
         - protocol: TCP
           port: 143
+        - protocol: TCP
+          port: 465
         - protocol: TCP
           port: 587
