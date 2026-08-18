@@ -30,7 +30,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: mail
-          image: localhost:5000/shopfast/mail:v6
+          image: localhost:5000/shopfast/mail:v7
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
