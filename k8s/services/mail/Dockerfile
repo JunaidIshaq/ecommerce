@@ -1,6 +1,7 @@
 # RainLoop webmail UI, served under the /mail subpath.
 #
-#   docker build -t ghcr.io/shopfast/mail:latest k8s/services/mail
+#   docker build -t localhost:5000/shopfast/mail:v2 k8s/services/mail
+#   docker push localhost:5000/shopfast/mail:v2
 #
 # The container listens on :80 with nginx + php-fpm (supervisord). RainLoop is
 # installed at /var/www/rainloop and its basePath is set to /mail/ so it emits
@@ -18,7 +19,8 @@ RUN apk add --no-cache \
 
 # RainLoop app code.
 ENV RAINLOOP_VERSION=1.17.0
-RUN curl -fsSL "https://github.com/RainLoop/rainloop-webmail/releases/download/v${RAINLOOP_VERSION}/rainloop-legacy-${RAINLOOP_VERSION}.zip" -o /tmp/rainloop.zip \
+RUN mkdir -p /var/www/rainloop \
+    && curl -fsSL "https://github.com/RainLoop/rainloop-webmail/releases/download/v${RAINLOOP_VERSION}/rainloop-legacy-${RAINLOOP_VERSION}.zip" -o /tmp/rainloop.zip \
     && unzip -q /tmp/rainloop.zip -d /var/www/rainloop \
     && rm -f /tmp/rainloop.zip \
     && chown -R nginx:nginx /var/www/rainloop \
@@ -28,8 +30,10 @@ RUN curl -fsSL "https://github.com/RainLoop/rainloop-webmail/releases/download/v
 COPY rainloop-config/ /var/www/rainloop/data/_data_/_default_/configs/
 RUN chown -R nginx:nginx /var/www/rainloop/data
 
-# php-fpm listens on a unix socket; nginx proxies to it.
+# php-fpm over TCP (127.0.0.1:9000) to avoid socket chown issues under
+# dropped capabilities; drop the default pool so only ours runs.
 COPY php-fpm.conf /etc/php83/php-fpm.d/zz-rainloop.conf
+RUN rm -f /etc/php83/php-fpm.d/www.conf
 COPY nginx.conf   /etc/nginx/http.d/default.conf
 COPY supervisord.conf /etc/supervisord.conf
 
