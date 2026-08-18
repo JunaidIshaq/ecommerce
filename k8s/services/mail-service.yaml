@@ -23,14 +23,14 @@ spec:
         app: mail
     spec:
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 101   # nginx user in the alpine image
+        runAsNonRoot: false
+        runAsUser: 0
         fsGroup: 101
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: mail
-          image: ghcr.io/shopfast/mail:latest
+          image: localhost:5000/shopfast/mail:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
