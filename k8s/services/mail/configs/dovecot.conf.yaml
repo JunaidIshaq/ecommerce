@@ -15,7 +15,7 @@ data:
     userdb {
       driver = passwd
     }
-    mail_location = maildir:/var/mail/vhosts/%d/%n
+    mail_location = mbox:/var/mail/:INBOX=/var/mail/%u
     mail_uid = 5000
     mail_gid = 5000
     first_valid_uid = 5000
