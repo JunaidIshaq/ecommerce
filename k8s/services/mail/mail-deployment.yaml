@@ -23,12 +23,6 @@ spec:
         - name: mail-storage
           persistentVolumeClaim:
             claimName: mail-storage
-        - name: dovecot-config
-          configMap:
-            name: dovecot-config
-        - name: postfix-config
-          configMap:
-            name: postfix-config
         - name: postfix-tls
           secret:
             secretName: mail-tls
@@ -44,8 +38,6 @@ spec:
           volumeMounts:
             - name: mail-storage
               mountPath: /var/mail
-            - name: dovecot-config
-              mountPath: /etc/dovecot/conf.d/
           readinessProbe:
             tcpSocket:
               port: 143
@@ -74,8 +66,6 @@ spec:
           volumeMounts:
             - name: mail-storage
               mountPath: /var/mail
-            - name: postfix-config
-              mountPath: /etc/postfix/
             - name: postfix-tls
               mountPath: /etc/postfix/tls
           readinessProbe:
