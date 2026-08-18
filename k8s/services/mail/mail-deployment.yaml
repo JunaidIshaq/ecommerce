@@ -18,14 +18,12 @@ spec:
       securityContext:
         runAsNonRoot: false
         runAsUser: 0
-        fsGroup: 5000
       volumes:
         - name: mail-storage
           persistentVolumeClaim:
             claimName: mail-storage
         - name: postfix-tls
-          secret:
-            secretName: mail-tls
+          emptyDir: {}
       containers:
         - name: dovecot
           image: localhost:5000/shopfast/dovecot:v1
@@ -54,7 +52,7 @@ spec:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
         - name: postfix
-          image: localhost:5000/shopfast/postfix:v1
+          image: localhost:5000/shopfast/postfix:v2
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 25
@@ -67,7 +65,7 @@ spec:
             - name: mail-storage
               mountPath: /var/mail
             - name: postfix-tls
-              mountPath: /etc/postfix/tls
+              mountPath: /opt/postfix-tls
           readinessProbe:
             tcpSocket:
               port: 587
