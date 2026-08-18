@@ -19,3 +19,4 @@ resources:
   - hpa.yaml
   - frontend.yaml
   - frontend-nginx-config.yaml
+  - mail-service.yaml

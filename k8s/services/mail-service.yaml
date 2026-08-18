@@ -1,0 +1,77 @@
+# ---------------------------------------------------------------------------
+# Mail UI — RainLoop webmail, served at shopfast.live/mail.
+#
+# The ingress rewrites /mail/* -> / at this pod (see ingress.yaml), and the
+# RainLoop basePath (/mail/) makes it emit /mail/* links back to the browser.
+# Login with a system mailbox user (IMAP/SMTP both on localhost:143 / :587).
+# ---------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mail
+  namespace: shopfast
+  labels:
+    app: mail
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mail
+  template:
+    metadata:
+      labels:
+        app: mail
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101   # nginx user in the alpine image
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mail
+          image: ghcr.io/shopfast/mail:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /mail/
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /mail/
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false   # RainLoop writes to data/ at runtime
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mail
+  namespace: shopfast
+spec:
+  selector:
+    app: mail
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP

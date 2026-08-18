@@ -104,6 +104,15 @@ spec:
                 name: pgadmin
                 port:
                   number: 80
+          # Webmail UI (RainLoop). /mail/* is rewritten to / at the pod; the
+          # app's basePath (/mail/) makes it emit /mail/* links back.
+          - path: /mail(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: mail
+                port:
+                  number: 80
           - path: /
             pathType: Prefix
             backend:
