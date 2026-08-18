@@ -32,9 +32,10 @@ RUN chown -R nginx:nginx /var/www/rainloop/data
 
 # php-fpm over TCP (127.0.0.1:9000) to avoid socket chown issues under
 # dropped capabilities; drop the default pool so only ours runs.
+# NOTE: on the Alpine nginx image the include dir is /etc/nginx/conf.d/.
 COPY php-fpm.conf /etc/php83/php-fpm.d/zz-rainloop.conf
 RUN rm -f /etc/php83/php-fpm.d/www.conf
-COPY nginx.conf   /etc/nginx/http.d/default.conf
+COPY nginx.conf   /etc/nginx/conf.d/default.conf
 COPY supervisord.conf /etc/supervisord.conf
 
 EXPOSE 80
