@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postfix-config
+  namespace: shopfast
+data:
+  main.cf: |
+    myhostname = mail.shopfast.live
+    mydomain = shopfast.live
+    myorigin = $mydomain
+    mydestination = shopfast.live, localhost
+    relay_domains = shopfast.live
+    smtpd_banner = $myhostname ESMTP
+    smtpd_tls_cert_file = /etc/postfix/tls/cert.pem
+    smtpd_tls_key_file = /etc/postfix/tls/key.pem
+    smtpd_use_tls = yes
+    smtpd_tls_security_level = may
+    smtp_tls_security_level = may
+    smtpd_sasl_auth_enable = yes
+    smtpd_sasl_type = dovecot
+    smtpd_sasl_path = inet:localhost:2525
+    smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+    smtpd_client_restrictions = permit_sasl_authenticated, reject
+    inet_interfaces = all
+    mynetworks = 127.0.0.0/8, 10.42.0.0/16, 172.16.0.0/12
+  master.cf: |
+    smtp      inet  n       -       y       -       -       smtpd
+    submission inet n       -       y       -       -       smtpd
+      -o syslog_name=postfix/submission
+      -o smtpd_tls_security_level=encrypt
+      -o smtpd_sasl_auth_enable=yes
+      -o smtpd_sasl_type=dovecot
+      -o smtpd_sasl_path=inet:localhost:2525
+      -o smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated,reject_unauth_destination
+      -o smtpd_client_restrictions=permit_sasl_authenticated,reject

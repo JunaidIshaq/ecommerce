@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mail-server
+  namespace: shopfast
+  labels:
+    app: mail-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mail-server
+  template:
+    metadata:
+      labels:
+        app: mail-server
+    spec:
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        fsGroup: 5000
+      volumes:
+        - name: mail-storage
+          persistentVolumeClaim:
+            claimName: mail-storage
+        - name: dovecot-config
+          configMap:
+            name: dovecot-config
+        - name: postfix-config
+          configMap:
+            name: postfix-config
+        - name: postfix-tls
+          secret:
+            secretName: mail-tls
+      containers:
+        - name: dovecot
+          image: localhost:5000/shopfast/dovecot:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 143
+              name: imap
+            - containerPort: 2525
+              name: auth-tcp
+          volumeMounts:
+            - name: mail-storage
+              mountPath: /var/mail
+            - name: dovecot-config
+              mountPath: /etc/dovecot/conf.d/
+          readinessProbe:
+            tcpSocket:
+              port: 143
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+        - name: postfix
+          image: localhost:5000/shopfast/postfix:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 25
+              name: smtp
+            - containerPort: 587
+              name: submission
+            - containerPort: 465
+              name: submissions
+          volumeMounts:
+            - name: mail-storage
+              mountPath: /var/mail
+            - name: postfix-config
+              mountPath: /etc/postfix/
+            - name: postfix-tls
+              mountPath: /etc/postfix/tls
+          readinessProbe:
+            tcpSocket:
+              port: 587
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false

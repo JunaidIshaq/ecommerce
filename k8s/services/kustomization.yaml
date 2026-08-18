@@ -20,3 +20,8 @@ resources:
   - frontend.yaml
   - frontend-nginx-config.yaml
   - mail-service.yaml
+  - mail/mail-deployment.yaml
+  - mail/mail-services.yaml
+  - mail/mail-storage.yaml
+  - mail/configs/dovecot.conf.yaml
+  - mail/configs/postfix.yaml

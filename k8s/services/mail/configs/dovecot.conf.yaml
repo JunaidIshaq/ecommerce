@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dovecot-config
+  namespace: shopfast
+data:
+  dovecot.conf: |
+    protocols = imap
+    listen = *, ::
+    auth_mechanisms = plain login
+    auth_username_format = %Ln
+    passdb {
+      driver = pam
+    }
+    userdb {
+      driver = passwd
+    }
+    mail_location = maildir:/var/mail/vhosts/%d/%n
+    mail_uid = 5000
+    mail_gid = 5000
+    first_valid_uid = 5000
+    first_valid_gid = 5000
+    service auth {
+      inet_listener {
+        port = 2525
+      }
+    }
+    ssl = no
