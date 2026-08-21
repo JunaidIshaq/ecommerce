@@ -26,6 +26,11 @@ RUN printf '*@shopfast.live shopfast2026._domainkey.shopfast.live\n' > /etc/open
 
 COPY opendkim.conf /etc/opendkim/opendkim.conf
 
+# Enable submission (587) + submissions (465) with SASL via dovecot (auth-tcp 2525).
+# The alpine default master.cf ships these commented out, which broke the
+# mail-server readiness probe (tcpSocket 587) and dropped the service endpoints.
+COPY master.cf /etc/postfix/master.cf
+
 # postfix: pass mail through the opendkim milter (TCP loopback) for signing
 RUN postconf -M 2>/dev/null; \
     postconf 'smtpd_milters=inet:127.0.0.1:8891' \
