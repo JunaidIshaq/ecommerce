@@ -5,9 +5,9 @@ EXPOSE 25 587 465
 # --- DKIM -------------------------------------------------------------------
 # Signing key for shopfast.live (selector: shopfast2026).
 # Public key is published as a TXT record at shopfast2026._domainkey.shopfast.live
-RUN mkdir -p /etc/opendkim/keys \
-    && chown -R opendkim:opendkim /etc/opendkim \
-    && chmod 0755 /etc/opendkim
+RUN mkdir -p /etc/opendkim/keys /var/run/opendkim \
+    && chown -R opendkim:opendkim /etc/opendkim /var/run/opendkim \
+    && chmod 0755 /etc/opendkim /var/run/opendkim
 
 COPY shopfast2026.private /etc/opendkim/keys/shopfast2026.private
 RUN chmod 0600 /etc/opendkim/keys/shopfast2026.private \
