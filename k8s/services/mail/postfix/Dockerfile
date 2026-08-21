@@ -36,6 +36,9 @@ RUN postconf -M 2>/dev/null; \
     postconf 'smtpd_milters=inet:127.0.0.1:8891' \
              'non_smtpd_milters=inet:127.0.0.1:8891' \
              'milter_default_action=accept' \
-             'milter_protocol=6'
+             'milter_protocol=6' \
+             'smtpd_tls_cert_file=/opt/postfix-tls/cert.pem' \
+             'smtpd_tls_key_file=/opt/postfix-tls/key.pem' \
+             'smtpd_tls_security_level=may'
 
 CMD ["/bin/sh", "-c", "opendkim -x /etc/opendkim/opendkim.conf & sleep 2 && postfix start-fg"]

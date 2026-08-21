@@ -23,7 +23,13 @@ spec:
           persistentVolumeClaim:
             claimName: mail-storage
         - name: postfix-tls
-          emptyDir: {}
+          secret:
+            secretName: mail-tls
+            items:
+              - key: tls.crt
+                path: cert.pem
+              - key: tls.key
+                path: key.pem
       containers:
         - name: dovecot
           image: localhost:5000/shopfast/dovecot:v1
@@ -52,7 +58,7 @@ spec:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
         - name: postfix
-          image: localhost:5000/shopfast/postfix:v14
+          image: localhost:5000/shopfast/postfix:v15
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 25
