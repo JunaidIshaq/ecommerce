@@ -7,13 +7,15 @@ EXPOSE 25 587 465
 # Public key is published as a TXT record at shopfast2026._domainkey.shopfast.live
 RUN mkdir -p /etc/opendkim/keys /var/spool/postfix/opendkim \
     && chown -R opendkim:opendkim /etc/opendkim \
-    && chown -R postfix:postfix /var/spool/postfix/opendkim \
-    && chmod 0755 /etc/opendkim /var/spool/postfix/opendkim
+    && chown opendkim:postfix /var/spool/postfix/opendkim \
+    && chmod 0755 /etc/opendkim /var/spool/postfix/opendkim \
+    && chmod 0775 /var/spool/postfix/opendkim
 
 COPY shopfast2026.private /etc/opendkim/keys/shopfast2026.private
-# opendkim now runs as the postfix user (so it can write the chroot socket and
-# postfix can connect); keep the key readable by postfix.
-RUN chmod 0644 /etc/opendkim/keys/shopfast2026.private \
+# opendkim runs as the opendkim user (key-dir security check requires the key dir
+# to be owned by the executing uid). The chroot socket dir is group postfix so the
+# postfix cleanup process can connect to it.
+RUN chmod 0640 /etc/opendkim/keys/shopfast2026.private \
     && chown opendkim:opendkim /etc/opendkim/keys/shopfast2026.private
 
 # opendkim signing table + key table + trusted hosts
