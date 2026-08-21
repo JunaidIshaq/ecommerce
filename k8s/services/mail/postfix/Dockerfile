@@ -26,11 +26,10 @@ RUN printf '*@shopfast.live shopfast2026._domainkey.shopfast.live\n' > /etc/open
 
 COPY opendkim.conf /etc/opendkim/opendkim.conf
 
-# postfix: pass mail through the opendkim milter for signing
-# Socket lives inside postfix's chroot (/var/spool/postfix) so cleanup/qmgr can reach it.
+# postfix: pass mail through the opendkim milter (TCP loopback) for signing
 RUN postconf -M 2>/dev/null; \
-    postconf 'smtpd_milters=unix:/var/spool/postfix/opendkim/opendkim.sock' \
-             'non_smtpd_milters=unix:/var/spool/postfix/opendkim/opendkim.sock' \
+    postconf 'smtpd_milters=inet:127.0.0.1:8891' \
+             'non_smtpd_milters=inet:127.0.0.1:8891' \
              'milter_default_action=accept' \
              'milter_protocol=6'
 
