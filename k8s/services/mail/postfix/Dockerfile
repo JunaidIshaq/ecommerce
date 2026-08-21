@@ -14,7 +14,7 @@ RUN chmod 0600 /etc/opendkim/keys/shopfast2026.private \
     && chown opendkim:opendkim /etc/opendkim/keys/shopfast2026.private
 
 # opendkim signing table + key table + trusted hosts
-RUN printf 'shopfast.live shopfast2026._domainkey.shopfast.live\n' > /etc/opendkim/SigningTable \
+RUN printf '*@shopfast.live shopfast2026._domainkey.shopfast.live\n' > /etc/opendkim/SigningTable \
     && printf 'shopfast2026._domainkey.shopfast.live shopfast.live:shopfast2026:/etc/opendkim/keys/shopfast2026.private\n' > /etc/opendkim/KeyTable \
     && printf '127.0.0.1\n10.0.0.0/8\n172.16.0.0/12\n192.168.0.0/16\n::1\n' > /etc/opendkim/TrustedHosts \
     && chown -R opendkim:opendkim /etc/opendkim
