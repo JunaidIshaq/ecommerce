@@ -28,4 +28,4 @@ RUN postconf -M 2>/dev/null; \
              'milter_default_action=accept' \
              'milter_protocol=6'
 
-CMD ["/bin/sh", "-c", "opendkim -x /etc/opendkim/opendkim.conf && postfix start-fg"]
+CMD ["/bin/sh", "-c", "opendkim -x /etc/opendkim/opendkim.conf & sleep 2 && postfix start-fg"]
