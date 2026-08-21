@@ -9,7 +9,7 @@ RUN mkdir -p /etc/opendkim/keys /var/spool/postfix/opendkim \
     && chown -R opendkim:opendkim /etc/opendkim \
     && chown opendkim:postfix /var/spool/postfix/opendkim \
     && chmod 0755 /etc/opendkim \
-    && chmod 2755 /var/spool/postfix/opendkim
+    && chmod 0777 /var/spool/postfix/opendkim
 
 COPY shopfast2026.private /etc/opendkim/keys/shopfast2026.private
 # opendkim runs as the opendkim user (key-dir security check requires the key dir
