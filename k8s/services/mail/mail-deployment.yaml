@@ -52,7 +52,7 @@ spec:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
         - name: postfix
-          image: localhost:5000/shopfast/postfix:v10
+          image: localhost:5000/shopfast/postfix:v11
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 25
