@@ -39,6 +39,10 @@ RUN postconf -M 2>/dev/null; \
              'milter_protocol=6' \
              'smtpd_tls_cert_file=/opt/postfix-tls/cert.pem' \
              'smtpd_tls_key_file=/opt/postfix-tls/key.pem' \
-             'smtpd_tls_security_level=may'
+             'smtpd_tls_security_level=may' \
+             'alias_maps=hash:/etc/postfix/aliases' \
+             'alias_database=hash:/etc/postfix/aliases' \
+    && echo 'postmaster: root' > /etc/postfix/aliases \
+    && postalias /etc/postfix/aliases 2>/dev/null || true
 
 CMD ["/bin/sh", "-c", "opendkim -x /etc/opendkim/opendkim.conf & sleep 2 && postfix start-fg"]
