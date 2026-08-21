@@ -23,8 +23,8 @@ COPY opendkim.conf /etc/opendkim/opendkim.conf
 
 # postfix: pass mail through the opendkim milter for signing
 RUN postconf -M 2>/dev/null; \
-    postconf 'smtpd_milters=inet:127.0.0.1:8891' \
-             'non_smtpd_milters=inet:127.0.0.1:8891' \
+    postconf 'smtpd_milters=unix:/var/run/opendkim/opendkim.sock' \
+             'non_smtpd_milters=unix:/var/run/opendkim/opendkim.sock' \
              'milter_default_action=accept' \
              'milter_protocol=6'
 
