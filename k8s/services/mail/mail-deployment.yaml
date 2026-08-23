@@ -30,9 +30,25 @@ spec:
                 path: cert.pem
               - key: tls.key
                 path: key.pem
-        - name: postfix-config
+        - name: postfix-config-src
           configMap:
             name: postfix-config
+        - name: postfix-config
+          emptyDir: {}
+      initContainers:
+        - name: init-postfix-config
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              cp /config-src/main.cf /config/main.cf
+              cp /config-src/master.cf /config/master.cf
+          volumeMounts:
+            - name: postfix-config-src
+              mountPath: /config-src
+            - name: postfix-config
+              mountPath: /config
       containers:
         - name: dovecot
           image: localhost:5000/shopfast/dovecot:v1
