@@ -24,7 +24,6 @@ data:
     smtpd_client_restrictions = permit_sasl_authenticated, reject
     inet_interfaces = all
     mynetworks = 127.0.0.0/8, 10.42.0.0/16, 172.16.0.0/12
-    config_directory = /etc/postfix/conf.d
   master.cf: |
     # Postfix master.cf — enables submission (587) + submissions (465) with SASL
     # auth delegated to dovecot (auth-tcp on 2525). Base smtp/25 service is kept.
