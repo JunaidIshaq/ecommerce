@@ -11,8 +11,8 @@ data:
     mydestination = shopfast.live, localhost
     relay_domains = shopfast.live
     smtpd_banner = $myhostname ESMTP
-    smtpd_tls_cert_file = /etc/postfix/tls/cert.pem
-    smtpd_tls_key_file = /etc/postfix/tls/key.pem
+    smtpd_tls_cert_file = /opt/postfix-tls/cert.pem
+    smtpd_tls_key_file = /opt/postfix-tls/key.pem
     smtpd_use_tls = yes
     smtpd_tls_security_level = may
     smtp_tls_security_level = may
