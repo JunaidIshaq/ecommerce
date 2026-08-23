@@ -30,6 +30,9 @@ spec:
                 path: cert.pem
               - key: tls.key
                 path: key.pem
+        - name: postfix-config
+          configMap:
+            name: postfix-config
       containers:
         - name: dovecot
           image: localhost:5000/shopfast/dovecot:v1
@@ -72,6 +75,8 @@ spec:
               mountPath: /var/mail
             - name: postfix-tls
               mountPath: /opt/postfix-tls
+            - name: postfix-config
+              mountPath: /etc/postfix/conf.d
           readinessProbe:
             tcpSocket:
               port: 587
