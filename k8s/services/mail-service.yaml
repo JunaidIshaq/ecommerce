@@ -13,6 +13,10 @@ metadata:
 data:
   settings_local: |
     {"SentFolder":"Sent.admin","DraftFolder":"Drafts.admin","SpamFolder":"Junk.admin","TrashFolder":"Trash.admin","ArchiveFolder":"__UNUSE__","NullFolder":"NullFolder"}
+  application.ini: |
+    [application]
+    basePath = "/mail/"
+    domains = "shopfast.live"
 ---
 apiVersion: apps/v1
 kind: Deployment
