@@ -8,7 +8,7 @@ data:
     myhostname = mail.shopfast.live
     mydomain = shopfast.live
     myorigin = $mydomain
-    mydestination = localhost
+    mydestination = localhost, shopfast.live
     relay_domains = shopfast.live
     smtpd_banner = $myhostname ESMTP
     smtpd_tls_cert_file = /opt/postfix-tls/cert.pem
