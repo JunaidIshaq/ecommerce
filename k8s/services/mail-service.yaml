@@ -17,6 +17,8 @@ data:
     [application]
     basePath = "/mail/"
     domains = "shopfast.live"
+    [ssl]
+    verify_ssl_certificate = false
   shopfast.live.ini: |
     imap_host = mail-imap
     imap_port = 143
