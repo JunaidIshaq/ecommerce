@@ -90,11 +90,8 @@ spec:
             - name: postfix-tls
               mountPath: /opt/postfix-tls
             - name: postfix-config
-              mountPath: /etc/postfix/main.cf
-              subPath: main.cf
-            - name: postfix-config
-              mountPath: /etc/postfix/master.cf
-              subPath: master.cf
+              mountPath: /etc/postfix-config
+          command: ["sh", "-c", "cp /etc/postfix-config/main.cf /etc/postfix/main.cf && cp /etc/postfix-config/master.cf /etc/postfix/master.cf && echo 'admin@shopfast.live admin/' > /etc/postfix/vmbox && postmap lmdb:/etc/postfix/vmbox && exec /usr/libexec/postfix/master -c /etc/postfix"]
           readinessProbe:
             tcpSocket:
               port: 587

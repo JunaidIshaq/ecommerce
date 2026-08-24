@@ -8,7 +8,7 @@ data:
     myhostname = mail.shopfast.live
     mydomain = shopfast.live
     myorigin = $mydomain
-    mydestination = localhost
+    mydestination = localhost, shopfast.live
     relay_domains = shopfast.live
     smtpd_banner = $myhostname ESMTP
     smtpd_tls_cert_file = /opt/postfix-tls/cert.pem
@@ -27,10 +27,12 @@ data:
     virtual_mailbox_domains = shopfast.live
     virtual_mailbox_base = /var/mail
     virtual_mailbox_maps = lmdb:/etc/postfix/vmbox
-    virtual_uid_maps = static:5000
-    virtual_gid_maps = static:5000
+    virtual_uid_maps = static:1001
+    virtual_gid_maps = static:100
     virtual_transport = virtual
     local_transport = virtual
+    mailbox_size_limit = 0
+    message_size_limit = 52428800
   vmbox: |
     admin@shopfast.live admin/
   master.cf: |
