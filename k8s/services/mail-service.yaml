@@ -50,6 +50,8 @@ spec:
             - |
               mkdir -p /data/_data_/_default_/storage/cfg/ad/admin@shopfast.live
               cp /settings/settings_local /data/_data_/_default_/storage/cfg/ad/admin@shopfast.live/settings_local
+              mkdir -p /data/_data_/_default_/configs
+              cp /settings/application.ini /data/_data_/_default_/configs/application.ini
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
