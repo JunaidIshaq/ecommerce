@@ -84,7 +84,7 @@ spec:
               name: submission
             - containerPort: 465
               name: submissions
-          volumeMounts:
+           volumeMounts:
             - name: mail-storage
               mountPath: /var/mail
             - name: postfix-tls
@@ -95,6 +95,10 @@ spec:
             - name: postfix-config
               mountPath: /etc/postfix/master.cf
               subPath: master.cf
+            - name: postfix-config
+              mountPath: /etc/postfix/vmbox
+              subPath: vmbox
+          command: ["sh", "-c", "postmap /etc/postfix/vmbox && exec /usr/lib/postfix/sbin/master -c /etc/postfix"]
           readinessProbe:
             tcpSocket:
               port: 587
