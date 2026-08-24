@@ -1,5 +1,5 @@
 FROM alpine:3.20
-RUN apk add --no-cache postfix postfix-pcre cyrus-sasl cyrus-sasl-login opendkim procmail
+RUN apk add --no-cache postfix postfix-pcre cyrus-sasl cyrus-sasl-login opendkim
 EXPOSE 25 587 465
 
 # --- DKIM -------------------------------------------------------------------
@@ -48,5 +48,9 @@ RUN postconf -M 2>/dev/null; \
 # Virtual mailbox map for shopfast.live
 RUN printf 'admin@shopfast.live admin/\n' > /etc/postfix/vmbox \
     && postmap lmdb:/etc/postfix/vmbox
+
+# Simple MDA script that delivers to mbox format
+RUN printf '#!/bin/sh\nFROM="From $SENDER $(date)"\n{ echo "$FROM"; cat; } >> /var/mail/$1\n' > /usr/local/bin/mbox-deliver \
+    && chmod +x /usr/local/bin/mbox-deliver
 
 CMD ["/bin/sh", "-c", "opendkim -x /etc/opendkim/opendkim.conf & sleep 2 && postfix start-fg"]
