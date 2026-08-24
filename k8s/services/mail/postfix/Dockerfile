@@ -1,5 +1,5 @@
 FROM alpine:3.20
-RUN apk add --no-cache postfix postfix-pcre cyrus-sasl cyrus-sasl-login opendkim
+RUN apk add --no-cache postfix postfix-pcre cyrus-sasl cyrus-sasl-login opendkim procmail
 EXPOSE 25 587 465
 
 # --- DKIM -------------------------------------------------------------------
