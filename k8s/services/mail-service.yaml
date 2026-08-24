@@ -50,8 +50,6 @@ spec:
             - |
               mkdir -p /data/_data_/_default_/storage/cfg/ad/admin@shopfast.live
               cp /settings/settings_local /data/_data_/_default_/storage/cfg/ad/admin@shopfast.live/settings_local
-              mkdir -p /var/cache/nginx/client_temp
-              chown -R 101:101 /var/cache/nginx
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
