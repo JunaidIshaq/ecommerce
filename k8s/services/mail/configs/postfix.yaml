@@ -8,26 +8,7 @@ data:
     myhostname = mail.shopfast.live
     mydomain = shopfast.live
     myorigin = $mydomain
-    mydestination = localhost, shopfast.live
-    relay_domains = shopfast.live
-    smtpd_banner = $myhostname ESMTP
-    smtpd_tls_cert_file = /opt/postfix-tls/cert.pem
-    smtpd_tls_key_file = /opt/postfix-tls/key.pem
-    smtpd_use_tls = yes
-    smtpd_tls_security_level = may
-    smtp_tls_security_level = may
-    smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
-    smtpd_sasl_auth_enable = yes
-    smtpd_sasl_type = dovecot
-    smtpd_sasl_path = inet:localhost:2525
-    smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
-    smtpd_client_restrictions = permit
-    inet_interfaces = all
-    mynetworks = 127.0.0.0/8, 10.42.0.0/16, 172.16.0.0/12
-    home_mailbox = mbox:/var/mail/
-    mailbox_command = /usr/local/bin/mbox-deliver "$USER"
-    mailbox_size_limit = 0
-    message_size_limit = 52428800
+    mydestination = localhost
     relay_domains = shopfast.live
     smtpd_banner = $myhostname ESMTP
     smtpd_tls_cert_file = /opt/postfix-tls/cert.pem
@@ -47,7 +28,7 @@ data:
     virtual_mailbox_base = /var/mail
     virtual_mailbox_maps = lmdb:/etc/postfix/vmbox
     virtual_uid_maps = static:1001
-    virtual_gid_maps = static:100
+    virtual_gid_maps = static:1001
     virtual_transport = virtual
     local_transport = virtual
     mailbox_size_limit = 0
@@ -55,7 +36,7 @@ data:
   vmbox: |
     admin@shopfast.live admin/
   master.cf: |
-    # Postfix master.cf — enables submission (587) + submissions (465) with SASL
+    # Postfix master.cf - enables submission (587) + submissions (465) with SASL
     # auth delegated to dovecot (auth-tcp on 2525). Base smtp/25 service is kept.
     smtp      inet  n       -       n       -       -       smtpd
 
