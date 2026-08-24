@@ -18,18 +18,15 @@ data:
     basePath = "/mail/"
     domains = "shopfast.live"
   shopfast.live.ini: |
-    [imap]
-    host = mail-imap
-    port = 143
-    secure = 0
-    short_login = 0
-
-    [smtp]
-    host = mail-smtp
-    port = 587
-    secure = 0
-    auth = 1
-    short_login = 0
+    imap_host = mail-imap
+    imap_port = 143
+    imap_secure = 0
+    imap_short_login = 0
+    smtp_host = mail-smtp
+    smtp_port = 587
+    smtp_secure = 0
+    smtp_auth = 1
+    smtp_short_login = 0
 ---
 apiVersion: apps/v1
 kind: Deployment
