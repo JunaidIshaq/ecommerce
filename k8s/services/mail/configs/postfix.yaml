@@ -21,7 +21,7 @@ data:
     smtpd_sasl_type = dovecot
     smtpd_sasl_path = inet:localhost:2525
     smtpd_recipient_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
-    smtpd_client_restrictions = permit_sasl_authenticated, reject
+    smtpd_client_restrictions = permit
     inet_interfaces = all
     mynetworks = 127.0.0.0/8, 10.42.0.0/16, 172.16.0.0/12
   master.cf: |
