@@ -29,6 +29,8 @@ data:
     virtual_mailbox_maps = hash:/etc/postfix/vmailbox
     virtual_uid_maps = static:5000
     virtual_gid_maps = static:5000
+    virtual_transport = virtual
+    local_transport = virtual
   vmbox: |
     admin@shopfast.live admin/
   master.cf: |

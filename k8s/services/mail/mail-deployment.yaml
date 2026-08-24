@@ -95,7 +95,6 @@ spec:
             - name: postfix-config
               mountPath: /etc/postfix/master.cf
               subPath: master.cf
-          command: ["sh", "-c", "echo 'admin@shopfast.live admin/' > /etc/postfix/vmbox && postmap /etc/postfix/vmbox && exec /usr/libexec/postfix/master -c /etc/postfix"]
           readinessProbe:
             tcpSocket:
               port: 587

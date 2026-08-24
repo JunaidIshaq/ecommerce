@@ -45,4 +45,8 @@ RUN postconf -M 2>/dev/null; \
     && echo 'postmaster: root' > /etc/postfix/aliases \
     && postalias /etc/postfix/aliases 2>/dev/null || true
 
+# Virtual mailbox map for shopfast.live
+RUN printf 'admin@shopfast.live admin/\n' > /etc/postfix/vmbox \
+    && postmap /etc/postfix/vmbox
+
 CMD ["/bin/sh", "-c", "opendkim -x /etc/opendkim/opendkim.conf & sleep 2 && postfix start-fg"]
