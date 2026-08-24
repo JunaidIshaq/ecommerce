@@ -17,6 +17,19 @@ data:
     [application]
     basePath = "/mail/"
     domains = "shopfast.live"
+  shopfast.live.ini: |
+    [imap]
+    host = mail-imap
+    port = 143
+    secure = 0
+    short_login = 0
+
+    [smtp]
+    host = mail-smtp
+    port = 587
+    secure = 0
+    auth = 1
+    short_login = 0
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -56,6 +69,8 @@ spec:
               cp /settings/settings_local /data/_data_/_default_/storage/cfg/ad/admin@shopfast.live/settings_local
               mkdir -p /data/_data_/_default_/configs
               cp /settings/application.ini /data/_data_/_default_/configs/application.ini
+              mkdir -p /data/_data_/_default_/domains
+              cp /settings/shopfast.live.ini /data/_data_/_default_/domains/shopfast.live.ini
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
@@ -69,7 +84,7 @@ spec:
               mountPath: /data
       containers:
         - name: mail
-          image: localhost:5000/shopfast/mail:v13
+          image: localhost:5000/shopfast/mail:v14
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
