@@ -26,7 +26,7 @@ data:
     mynetworks = 127.0.0.0/8, 10.42.0.0/16, 172.16.0.0/12
     virtual_mailbox_domains = shopfast.live
     virtual_mailbox_base = /var/mail
-    virtual_mailbox_maps = hash:/etc/postfix/vmbox
+    virtual_mailbox_maps = lmdb:/etc/postfix/vmbox
     virtual_uid_maps = static:5000
     virtual_gid_maps = static:5000
     virtual_transport = virtual

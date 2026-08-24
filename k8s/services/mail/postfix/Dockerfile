@@ -47,6 +47,6 @@ RUN postconf -M 2>/dev/null; \
 
 # Virtual mailbox map for shopfast.live
 RUN printf 'admin@shopfast.live admin/\n' > /etc/postfix/vmbox \
-    && postmap /etc/postfix/vmbox
+    && postmap lmdb:/etc/postfix/vmbox
 
 CMD ["/bin/sh", "-c", "opendkim -x /etc/opendkim/opendkim.conf & sleep 2 && postfix start-fg"]
