@@ -76,7 +76,7 @@ spec:
               name: submission
             - containerPort: 465
               name: submissions
-           volumeMounts:
+          volumeMounts:
             - name: mail-storage
               mountPath: /var/mail
             - name: postfix-tls
