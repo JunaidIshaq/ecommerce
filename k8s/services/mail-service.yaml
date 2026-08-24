@@ -24,7 +24,7 @@ data:
     imap_short_login = 0
     smtp_host = mail-smtp
     smtp_port = 587
-    smtp_secure = 0
+    smtp_secure = 1
     smtp_auth = 1
     smtp_short_login = 0
 ---
