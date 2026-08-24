@@ -63,7 +63,7 @@ spec:
               mountPath: /data
       containers:
         - name: mail
-          image: localhost:5000/shopfast/mail:v12
+          image: localhost:5000/shopfast/mail:v13
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
