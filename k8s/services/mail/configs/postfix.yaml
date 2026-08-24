@@ -24,7 +24,13 @@ data:
     smtpd_client_restrictions = permit
     inet_interfaces = all
     mynetworks = 127.0.0.0/8, 10.42.0.0/16, 172.16.0.0/12
-    mailbox_command = /usr/local/bin/mbox-deliver "$USER"
+    virtual_mailbox_domains = shopfast.live
+    virtual_mailbox_base = /var/mail
+    virtual_mailbox_maps = lmdb:/etc/postfix/vmbox
+    virtual_uid_maps = static:1001
+    virtual_gid_maps = static:1001
+    virtual_transport = virtual
+    local_transport = virtual
     mailbox_size_limit = 0
     message_size_limit = 52428800
   vmbox: |
