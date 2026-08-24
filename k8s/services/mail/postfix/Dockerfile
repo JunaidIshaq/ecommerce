@@ -49,8 +49,7 @@ RUN postconf -M 2>/dev/null; \
 RUN printf 'admin@shopfast.live admin/\n' > /etc/postfix/vmbox \
     && postmap lmdb:/etc/postfix/vmbox
 
-# Simple MDA script that delivers to mbox format
-RUN printf '#!/bin/sh\nFROM="From $SENDER $(date)"\n{ echo "$FROM"; cat; } >> /var/mail/$1\n' > /usr/local/bin/mbox-deliver \
-    && chmod +x /usr/local/bin/mbox-deliver
+# Bake the working main.cf directly into the image
+COPY main.cf /etc/postfix/main.cf
 
 CMD ["/bin/sh", "-c", "opendkim -x /etc/opendkim/opendkim.conf & sleep 2 && postfix start-fg"]
