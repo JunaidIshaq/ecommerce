@@ -42,7 +42,7 @@ images:
     newTag: dev
   - name: ghcr.io/shopfast/auth-service
     newName: localhost:5000/shopfast/auth-service
-    newTag: dev
+    newTag: dev-v2
   - name: ghcr.io/shopfast/inventory-service
     newName: localhost:5000/shopfast/inventory-service
     newTag: dev
