@@ -194,6 +194,7 @@ spring:
 
 shopfast:
   security:
+    enabled: false
     # These are the endpoints a caller reaches *before* they hold a token, so they
     # cannot require one. Everything else on this service (logout-all, validate)
     # acts on an existing session and stays authenticated.

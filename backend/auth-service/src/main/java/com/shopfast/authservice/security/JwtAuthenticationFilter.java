@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;

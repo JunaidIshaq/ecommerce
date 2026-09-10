@@ -3,6 +3,7 @@ package com.shopfast.authservice.config;
 import org.springframework.security.config.Customizer;
 import com.shopfast.authservice.security.JwtAuthenticationFilter;
 import com.shopfast.authservice.security.JwtUtils;
+import com.shopfast.common.security.KeycloakRealmRoleConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -28,6 +30,14 @@ public class SecurityConfig {
     }
 
     @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(new KeycloakRealmRoleConverter(List.of("shopfast-services")));
+        converter.setPrincipalClaimName("sub");
+        return converter;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtUtils);
 
@@ -36,9 +46,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // "/api/v1/auth/**" used to be blanket-permitAll, which silently
-                        // exposed every endpoint added under it later. Only the endpoints
-                        // that genuinely precede authentication are public now.
                         .requestMatchers("/api/v1/auth/login",
                                          "/api/v1/auth/register",
                                          "/api/v1/auth/refresh",
@@ -49,11 +56,8 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**","/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                // Migration window: the legacy HS256 filter added below authenticates
-                // old tokens; requests it leaves anonymous fall through to here and
-                // are validated as Keycloak RS256 tokens against the realm JWKS.
-                // Once all clients use Keycloak, delete the filter and JwtUtils.
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
