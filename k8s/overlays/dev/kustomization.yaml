@@ -70,7 +70,7 @@ images:
     newTag: dev
   - name: ghcr.io/shopfast/frontend
     newName: localhost:5000/shopfast/frontend
-    newTag: dev
+    newTag: cloud-1
 
 # Single-node dev cluster: scale everything to 1 replica and trim CPU requests
 # so the 4-CPU node can schedule all 23 deployments + infra. Remove this block
