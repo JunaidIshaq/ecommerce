@@ -70,8 +70,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://localhost:4200",          // ✅ Local Angular
-                "https://shopfast.live",          // ✅ Production domain
-                "https://www.shopfast.live"       // ✅ WWW version
+                "https://shopfast.cloud",          // ✅ Production domain
+                "https://www.shopfast.cloud"       // ✅ WWW version
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));

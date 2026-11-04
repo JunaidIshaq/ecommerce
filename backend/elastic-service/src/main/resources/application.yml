@@ -76,7 +76,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:https://shopfast.live/realms/shopfast}
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:https://shopfast.cloud/realms/shopfast}
           jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:}
 
 shopfast:

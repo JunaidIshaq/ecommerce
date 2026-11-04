@@ -30,8 +30,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://localhost:4200",
-                "https://shopfast.live",
-                "https://www.shopfast.live"
+                "https://shopfast.cloud",
+                "https://www.shopfast.cloud"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // X-Anon-Id identifies a guest basket. It is a custom header, so the browser

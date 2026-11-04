@@ -651,8 +651,8 @@ docker run -d --name frontend -p 3000:80 ecommerce-frontend
 npm run build -- --configuration production
 
 # Copy to web server
-sudo rm -rf /var/www/shopfast.live/*
-sudo cp -r dist/frontend/browser/* /var/www/shopfast.live/
+sudo rm -rf /var/www/shopfast.cloud/*
+sudo cp -r dist/frontend/browser/* /var/www/shopfast.cloud/
 ```
 
 ---

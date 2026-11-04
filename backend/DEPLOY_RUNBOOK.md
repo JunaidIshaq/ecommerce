@@ -282,7 +282,7 @@ Hardening the compose file closes the exposure, but two things remain:
 1. **The old JWT secret is permanently compromised** — it is in the git history. Rotating it
    (which `generate-secrets.sh` does) invalidates all existing sessions, so users will need
    to log in again. That is the correct trade.
-2. **TLS is already handled** — nginx terminates HTTPS for `shopfast.live` and sends
+2. **TLS is already handled** — nginx terminates HTTPS for `shopfast.cloud` and sends
    `Strict-Transport-Security`, so traffic is encrypted. Port 8080 is still bound to
    `0.0.0.0` though, which means the API can also be reached over plain HTTP on the raw IP,
    bypassing nginx and HSTS. Binding it to `127.0.0.1` (nginx proxies from localhost) closes

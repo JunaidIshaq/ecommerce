@@ -3,8 +3,8 @@ RUN apk add --no-cache postfix postfix-pcre cyrus-sasl cyrus-sasl-login opendkim
 EXPOSE 25 587 465
 
 # --- DKIM -------------------------------------------------------------------
-# Signing key for shopfast.live (selector: shopfast2026).
-# Public key is published as a TXT record at shopfast2026._domainkey.shopfast.live
+# Signing key for shopfast.cloud (selector: shopfast2026).
+# Public key is published as a TXT record at shopfast2026._domainkey.shopfast.cloud
 RUN mkdir -p /etc/opendkim/keys /var/spool/postfix/opendkim \
     && chown -R opendkim:opendkim /etc/opendkim \
     && chown opendkim:postfix /var/spool/postfix/opendkim \
@@ -19,8 +19,8 @@ RUN chmod 0640 /etc/opendkim/keys/shopfast2026.private \
     && chown opendkim:opendkim /etc/opendkim/keys/shopfast2026.private
 
 # opendkim signing table + key table + trusted hosts
-RUN printf '*@shopfast.live shopfast2026._domainkey.shopfast.live\n' > /etc/opendkim/SigningTable \
-    && printf 'shopfast2026._domainkey.shopfast.live shopfast.live:shopfast2026:/etc/opendkim/keys/shopfast2026.private\n' > /etc/opendkim/KeyTable \
+RUN printf '*@shopfast.cloud shopfast2026._domainkey.shopfast.cloud\n' > /etc/opendkim/SigningTable \
+    && printf 'shopfast2026._domainkey.shopfast.cloud shopfast.cloud:shopfast2026:/etc/opendkim/keys/shopfast2026.private\n' > /etc/opendkim/KeyTable \
     && printf '127.0.0.1\n10.0.0.0/8\n172.16.0.0/12\n192.168.0.0/16\n::1\n' > /etc/opendkim/TrustedHosts \
     && chown -R opendkim:opendkim /etc/opendkim
 
@@ -45,8 +45,8 @@ RUN postconf -M 2>/dev/null; \
     && echo 'postmaster: root' > /etc/postfix/aliases \
     && postalias /etc/postfix/aliases 2>/dev/null || true
 
-# Virtual mailbox map for shopfast.live
-RUN printf 'admin@shopfast.live admin\n' > /etc/postfix/vmbox \
+# Virtual mailbox map for shopfast.cloud
+RUN printf 'admin@shopfast.cloud admin\n' > /etc/postfix/vmbox \
     && postmap lmdb:/etc/postfix/vmbox
 
 # Bake the working main.cf directly into the image
