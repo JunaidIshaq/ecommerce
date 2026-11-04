@@ -101,6 +101,8 @@ metadata:
     app: kafka
 spec:
   replicas: 1
+  strategy:
+    type: Recreate   # data dir is lock-protected; two brokers must never overlap
   selector:
     matchLabels:
       app: kafka
