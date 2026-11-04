@@ -5,7 +5,7 @@ window.elasticvue = {
   clusters: [
     {
       name: "ShopFast ES",
-      uri: "https://shopfast.live/elasticsearch/"
+      uri: "https://shopfast.cloud/elasticsearch/"
     }
   ]
 };

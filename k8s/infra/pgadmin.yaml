@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# pgAdmin 4 — web UI for browsing the PostgreSQL databases (shopfast.live/pgadmin).
+# pgAdmin 4 — web UI for browsing the PostgreSQL databases (shopfast.cloud/pgadmin).
 #
 # Login with the PGADMIN_DEFAULT_EMAIL / PGADMIN_DEFAULT_PASSWORD below, then
 # register a server: host=postgres, port=5432, user=postgres, db=postgres
@@ -29,7 +29,7 @@ spec:
             - containerPort: 80
           env:
             - name: PGADMIN_DEFAULT_EMAIL
-              value: "admin@shopfast.live"
+              value: "admin@shopfast.cloud"
             - name: PGADMIN_DEFAULT_PASSWORD
               valueFrom:
                 secretKeyRef:

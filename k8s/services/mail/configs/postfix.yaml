@@ -5,11 +5,11 @@ metadata:
   namespace: shopfast
 data:
   main.cf: |
-    myhostname = mail.shopfast.live
-    mydomain = shopfast.live
+    myhostname = mail.shopfast.cloud
+    mydomain = shopfast.cloud
     myorigin = $mydomain
-    mydestination = localhost, shopfast.live
-    relay_domains = shopfast.live
+    mydestination = localhost, shopfast.cloud
+    relay_domains = shopfast.cloud
     smtpd_banner = $myhostname ESMTP
     smtpd_tls_cert_file = /opt/postfix-tls/cert.pem
     smtpd_tls_key_file = /opt/postfix-tls/key.pem
@@ -29,7 +29,7 @@ data:
     mailbox_size_limit = 0
     message_size_limit = 52428800
   vmbox: |
-    admin@shopfast.live admin/
+    admin@shopfast.cloud admin/
   master.cf: |
     # Postfix master.cf - enables submission (587) + submissions (465) with SASL
     # auth delegated to dovecot (auth-tcp on 2525). Base smtp/25 service is kept.

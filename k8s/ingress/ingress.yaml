@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# Ingress + TLS for shopfast.live and shopfast_test.live.
+# Ingress + TLS for shopfast.cloud and shopfast_test.live.
 #
 # Requires the ingress-nginx controller AND cert-manager installed in the
 # cluster. Self-signed Issuer is used for dev; for production swap the
@@ -28,8 +28,8 @@ metadata:
 spec:
   secretName: shopfast-tls
   dnsNames:
-    - shopfast.live
-    - www.shopfast.live
+    - shopfast.cloud
+    - www.shopfast.cloud
   issuerRef:
     name: letsencrypt-prod
     kind: ClusterIssuer
@@ -50,11 +50,11 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - shopfast.live
-        - www.shopfast.live
+        - shopfast.cloud
+        - www.shopfast.cloud
       secretName: shopfast-tls
   rules:
-    - host: shopfast.live
+    - host: shopfast.cloud
       http:
         paths:
           - path: /api
@@ -122,7 +122,7 @@ spec:
                 name: frontend
                 port:
                   number: 80
-    - host: www.shopfast.live
+    - host: www.shopfast.cloud
       http:
         paths:
           - path: /realms

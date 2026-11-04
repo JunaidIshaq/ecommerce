@@ -1,8 +1,8 @@
-myhostname = mail.shopfast.live
-mydomain = shopfast.live
+myhostname = mail.shopfast.cloud
+mydomain = shopfast.cloud
 myorigin = $mydomain
-mydestination = localhost, shopfast.live
-relay_domains = shopfast.live
+mydestination = localhost, shopfast.cloud
+relay_domains = shopfast.cloud
 smtpd_banner = $myhostname ESMTP
 smtpd_tls_cert_file = /opt/postfix-tls/cert.pem
 smtpd_tls_key_file = /opt/postfix-tls/key.pem

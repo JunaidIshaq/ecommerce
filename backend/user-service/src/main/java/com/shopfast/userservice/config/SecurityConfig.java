@@ -49,8 +49,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://localhost:4200",
-                "https://shopfast.live",
-                "https://www.shopfast.live"
+                "https://shopfast.cloud",
+                "https://www.shopfast.cloud"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));

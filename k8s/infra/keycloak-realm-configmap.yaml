@@ -56,11 +56,11 @@ data:
           "standardFlowEnabled": true,
           "directAccessGrantsEnabled": false,
           "serviceAccountsEnabled": false,
-          "redirectUris": ["http://localhost:4200/*", "https://shopfast.live/*"],
-          "webOrigins": ["http://localhost:4200", "https://shopfast.live"],
+          "redirectUris": ["http://localhost:4200/*", "https://shopfast.cloud/*"],
+          "webOrigins": ["http://localhost:4200", "https://shopfast.cloud"],
           "attributes": {
             "pkce.code.challenge.method": "S256",
-            "post.logout.redirect.uris": "http://localhost:4200/*##https://shopfast.live/*"
+            "post.logout.redirect.uris": "http://localhost:4200/*##https://shopfast.cloud/*"
           }
         },
         {

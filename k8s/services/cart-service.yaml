@@ -62,9 +62,9 @@ spec:
                   name: shopfast-secrets
                   key: JWT_SECRET
             - name: KEYCLOAK_ISSUER_URI
-              value: "https://shopfast.live/realms/shopfast"
+              value: "https://shopfast.cloud/realms/shopfast"
             - name: KEYCLOAK_JWK_SET_URI
-              value: "https://shopfast.live/realms/shopfast/protocol/openid-connect/certs"
+              value: "https://shopfast.cloud/realms/shopfast/protocol/openid-connect/certs"
             - name: SERVER_PORT
               value: "8088"
           volumeMounts:

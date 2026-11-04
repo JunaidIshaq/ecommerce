@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# Mail UI — RainLoop webmail, served at shopfast.live/mail.
+# Mail UI — RainLoop webmail, served at shopfast.cloud/mail.
 #
 # The ingress rewrites /mail/* -> / at this pod (see ingress.yaml), and the
 # RainLoop basePath (/mail/) makes it emit /mail/* links back to the browser.
@@ -16,10 +16,10 @@ data:
   application.ini: |
     [application]
     basePath = "/mail/"
-    domains = "shopfast.live"
+    domains = "shopfast.cloud"
     [ssl]
     verify_ssl_certificate = false
-  shopfast.live.ini: |
+  shopfast.cloud.ini: |
     imap_host = mail-imap
     imap_port = 143
     imap_secure = 0
@@ -64,12 +64,12 @@ spec:
             - sh
             - -c
             - |
-              mkdir -p /data/_data_/_default_/storage/cfg/ad/admin@shopfast.live
-              cp /settings/settings_local /data/_data_/_default_/storage/cfg/ad/admin@shopfast.live/settings_local
+              mkdir -p /data/_data_/_default_/storage/cfg/ad/admin@shopfast.cloud
+              cp /settings/settings_local /data/_data_/_default_/storage/cfg/ad/admin@shopfast.cloud/settings_local
               mkdir -p /data/_data_/_default_/configs
               cp /settings/application.ini /data/_data_/_default_/configs/application.ini
               mkdir -p /data/_data_/_default_/domains
-              cp /settings/shopfast.live.ini /data/_data_/_default_/domains/shopfast.live.ini
+              cp /settings/shopfast.cloud.ini /data/_data_/_default_/domains/shopfast.cloud.ini
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true

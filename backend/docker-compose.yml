@@ -67,7 +67,7 @@ services:
       - KC_HEALTH_ENABLED=true
       - KC_METRICS_ENABLED=true
       - KC_HOSTNAME_STRICT=false
-      # Keycloak is served at https://shopfast.live/auth/ by the host's nginx rather
+      # Keycloak is served at https://shopfast.cloud/auth/ by the host's nginx rather
       # than on its own subdomain, so it must know two things it cannot infer:
       #   - the path it is mounted under, or every URL it generates (redirects, the
       #     JWKS location in its discovery document) would omit /auth and 404;

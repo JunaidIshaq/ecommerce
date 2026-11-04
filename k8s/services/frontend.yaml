@@ -1,6 +1,6 @@
 # Frontend — Angular SPA served by nginx. The container proxies /api/* to the
 # api-gateway internally (its own nginx.conf does that), so the Ingress only has
-# to route shopfast.live -> frontend and let it fan out to the gateway.
+# to route shopfast.cloud -> frontend and let it fan out to the gateway.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
