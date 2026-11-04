@@ -20,8 +20,6 @@ resources:
   # 3. discovery + gateway + business services + frontend
   - ../../services
 
-  # 4. ingress + TLS
-  - ../../ingress
 
 # Retag ghcr.io/shopfast/* -> localhost:5000/shopfast/*:dev (local registry).
 images:

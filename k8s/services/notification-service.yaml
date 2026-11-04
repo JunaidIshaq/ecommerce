@@ -102,7 +102,7 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 5
             timeoutSeconds: 5
-            failureThreshold: 30
+            failureThreshold: 90
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
