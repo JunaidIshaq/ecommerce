@@ -148,8 +148,10 @@ spec:
             - name: data
               mountPath: /var/lib/kafka/data
           readinessProbe:
-            exec:
-              command: ["kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+            # kafka-topics spawns a JVM, which exceeds the timeout on a
+            # CPU-starved node. A TCP check on the broker port is sufficient.
+            tcpSocket:
+              port: 9092
             initialDelaySeconds: 20
             periodSeconds: 15
             timeoutSeconds: 10
