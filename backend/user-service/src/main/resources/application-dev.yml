@@ -3,9 +3,9 @@ spring:
     name: user-service
 
   datasource:
-    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/user_db}
+    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5433/user_db}
     username: postgres
-    password: postgres
+    password: ${DB_PASSWORD:postgres}
   jpa:
     hibernate:
       ddl-auto: update
@@ -41,7 +41,7 @@ spring:
     type: redis
 
   elasticsearch:
-    uris: ${ELASTIC_URI:http://elasticsearch:9200}
+    uris: ${ELASTIC_URI:http://localhost:9200}
 
   jackson:
     serialization:
@@ -97,3 +97,13 @@ product:
 inventory:
   service:
     url: ${INVENTORY_SERVICE_URL:http://localhost:8083/api/v1/inventory}
+---
+# Local Keycloak from docker compose (published on localhost:8180).
+spring:
+  config:
+    import: optional:file:${user.dir}/../.env[.properties]
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/shopfast

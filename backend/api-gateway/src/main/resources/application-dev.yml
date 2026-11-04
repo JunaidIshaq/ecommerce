@@ -38,6 +38,10 @@ server:
 
   forward-headers-strategy: framework
 
+keycloak:
+  # Local Keycloak from docker compose (published on localhost:8180).
+  issuer-uri: http://localhost:8180/realms/shopfast
+
 jwt:
   secret: ${JWT_SECRET:supersecretkeythatshouldbereplacedandstoredsecurely}
   access-expiration: 3600          # seconds (1h)

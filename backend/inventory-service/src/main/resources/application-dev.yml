@@ -3,9 +3,9 @@ spring:
     name: inventory-service
 
   datasource:
-    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/inventory_db}
+    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5433/inventory_db}
     username: postgres
-    password: postgres
+    password: ${DB_PASSWORD:postgres}
 
     hikari:
       maximum-pool-size: 10        # Max connections per service
@@ -102,3 +102,13 @@ category:
 product:
   service:
     url: ${PRODUCT_SERVICE_URL:http://localhost:8081}
+---
+# Local Keycloak from docker compose (published on localhost:8180).
+spring:
+  config:
+    import: optional:file:${user.dir}/../.env[.properties]
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/shopfast

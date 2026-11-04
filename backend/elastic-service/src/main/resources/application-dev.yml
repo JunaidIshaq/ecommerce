@@ -60,3 +60,13 @@ management:
   metrics:
     tags:
       application: elastic-service
+---
+# Local Keycloak from docker compose (published on localhost:8180).
+spring:
+  config:
+    import: optional:file:${user.dir}/../.env[.properties]
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/shopfast

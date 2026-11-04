@@ -21,9 +21,9 @@ spring:
       type: redis
 
   datasource:
-    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/auth_db}
+    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5433/auth_db}
     username: postgres
-    password: postgres
+    password: ${DB_PASSWORD:postgres}
 
     hikari:
       maximum-pool-size: 10        # Max connections per service
@@ -40,7 +40,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   elasticsearch:
-    uris: ${ELASTIC_URI:http://elasticsearch:9200}
+    uris: ${ELASTIC_URI:http://localhost:9200}
 
   jackson:
     serialization:
@@ -100,3 +100,18 @@ product:
 inventory:
   service:
     url: ${INVENTORY_SERVICE_URL:http://localhost:8083}
+---
+# Local Keycloak from docker compose (published on localhost:8180).
+spring:
+  config:
+    import: optional:file:${user.dir}/../.env[.properties]
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/shopfast
+          # An empty jwk-set-uri still counts as "set" for Boot's conditions and yields a second
+          # JwtDecoder bean; "false" disables that bean so only the issuer-based decoder exists.
+          jwk-set-uri: "false"
+keycloak:
+  base-url: ${KEYCLOAK_BASE_URL:http://localhost:8180}

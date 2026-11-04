@@ -13,9 +13,9 @@ spring:
     name: admin-service
 
   datasource:
-    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5432/admin_db}
+    url: ${POSTGRES_URI:jdbc:postgresql://localhost:5433/admin_db}
     username: postgres
-    password: postgres
+    password: ${DB_PASSWORD:postgres}
 
     hikari:
       maximum-pool-size: 10        # Max connections per service
@@ -51,7 +51,7 @@ spring:
         max.in.flight.requests.per.connection: 1
 
   elasticsearch:
-    uris: ${ELASTIC_URI:http://elasticsearch:9200}
+    uris: ${ELASTIC_URI:http://localhost:9200}
 
   jackson:
     serialization:
@@ -113,3 +113,13 @@ inventory:
 coupon:
   service:
     url: ${COUPON_SERVICE_URL:http://localhost:8089}
+---
+# Local Keycloak from docker compose (published on localhost:8180).
+spring:
+  config:
+    import: optional:file:${user.dir}/../.env[.properties]
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/shopfast
