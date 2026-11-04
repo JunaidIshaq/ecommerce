@@ -38,6 +38,10 @@ spec:
             - secretRef:
                 name: shopfast-secrets
           env:
+            # payment-service's first call initialises a Kafka producer (~15s); the
+            # 5s default made checkout time out while the payment still went through.
+            - name: SPRING_CLOUD_OPENFEIGN_CLIENT_CONFIG_DEFAULT_READTIMEOUT
+              value: "30000"
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:postgresql://postgres:5432/order_db"
             - name: SPRING_DATASOURCE_USERNAME
